@@ -1,0 +1,20 @@
+﻿#
+# WARNING
+# HERE BE DRAGONS
+#
+# Do not modify this file. If will be overwritten on an update.
+# Update your preferences in the User.yaml file.
+#
+# The core configuration for Project Limitless. It is also the defaults.
+#
+
+Test = "What"
+
+[Owner]
+Name = "me"
+
+[Updates]
+    [Updates.Primary]
+        Host = "127.0.0.1"
+    [Updates.Secondary]
+        Host = "127.0.0.2"

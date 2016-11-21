@@ -200,3 +200,6 @@ Reports/
 # Coverity reports
 cov-int/
 cov-int/*
+
+# Limitless
+User.toml
