@@ -13,9 +13,3 @@
 # The name of the Limitless system. Also used as the trigger word.
 # See https://docs.projectlimitless.io/ProjectLimitless/Configuration#name
 Name = "Alice"
-Surname = "WhoAreYou"
-
-[Sec]
-Two = "Who"
-[Sec.More]
-Three = "Moooore"

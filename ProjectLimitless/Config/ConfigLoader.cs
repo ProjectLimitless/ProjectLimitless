@@ -97,49 +97,36 @@ namespace Limitless.Config
             
             TomlTable completeToml = Merge(combinedToml, userToml);
 
-
-            //TODO: Continue here
-            
-            MethodInfo getMethod = typeof(TomlTable).GetMethods()
-                .Where(x => x.Name == "Get")
-                .First(x => x.IsGenericMethod);
-
-            MethodInfo generic = getMethod.MakeGenericMethod(TM.GetConfigType());
-
-            dynamic dynamicConfig = generic.Invoke(combinedToml, new object[] { "TestModule" });
-
-            Console.WriteLine("Dynamic");
-            Console.WriteLine(dynamicConfig.Name);
-            Console.WriteLine(dynamicConfig.API.Host);
-
-            Console.WriteLine("Cast");
-            TestModule m = (TestModule)dynamicConfig;
-            Console.WriteLine(m.API.Host);
-
-
-            /*
-            TomlTable table = Toml.ReadFile("conf/Core.toml");
-
-            string obj = table.Get<string>("DemoName");
-            Console.WriteLine(obj);
-
-            obj = table.Get<TomlTable>("Sec").Get<string>("Two");
-            Console.WriteLine(obj);
-
-
-            obj = table.Get<SetDemo>("Sec").Two;
-            Console.WriteLine(obj);
-
-            Console.WriteLine(table.Get<SetDemo>("Sec").More.Three);
-
-            foreach (string key in table.Keys)
+            foreach (string key in completeToml.Keys)
             {
-                Console.WriteLine(key);
+
             }
-            */
+
+            TestModule m = ConfigLoader.Convert<TestModule>("TestModule", completeToml);
+            Console.WriteLine(m.Name);
 
 
             return settings;
+        }
+
+        /// <summary>
+        /// Converts the section with given key to type T extracted from data.
+        /// </summary>
+        /// <typeparam name="T">The type to convert to</typeparam>
+        /// <param name="key">The key in the config</param>
+        /// <param name="data">The configuration data</param>
+        /// <returns>The section with key as type T</returns>
+        public static T Convert<T>(string key, TomlTable data)
+        {
+            // I extract the Get<T> generic function from the TomlTable using reflection. 
+            MethodInfo getMethod = typeof(TomlTable).GetMethods()
+                .Where(x => x.Name == "Get")
+                .First(x => x.IsGenericMethod);
+            // Then I make it generic again
+            MethodInfo generic = getMethod.MakeGenericMethod(typeof(T));
+            // Invoke it. The Get<T> method requires the configuration key as param
+            dynamic dynamicConfig = generic.Invoke(data, new object[] { key });
+            return (T)dynamicConfig;
         }
 
         /// <summary>
