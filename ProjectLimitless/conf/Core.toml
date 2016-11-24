@@ -1,20 +1,21 @@
 ﻿#
-# WARNING
-# HERE BE DRAGONS
+# WARNING: HERE BE DRAGONS
 #
 # Do not modify this file. If will be overwritten on an update.
-# Update your preferences in the User.yaml file.
+# Update your preferences in the User.toml file.
 #
 # The core configuration for Project Limitless. It is also the defaults.
+# More about the configuration at
+# https://docs.projectlimitless.io/ProjectLimiless/Configuration
 #
 
-Test = "What"
+[Core]
+# The name of the Limitless system. Also used as the trigger word.
+# See https://docs.projectlimitless.io/ProjectLimitless/Configuration#name
+Name = "Alice"
+Surname = "WhoAreYou"
 
-[Owner]
-Name = "me"
-
-[Updates]
-    [Updates.Primary]
-        Host = "127.0.0.1"
-    [Updates.Secondary]
-        Host = "127.0.0.2"
+[Sec]
+Two = "Who"
+[Sec.More]
+Three = "Moooore"

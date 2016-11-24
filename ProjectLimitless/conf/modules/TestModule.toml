@@ -1,0 +1,5 @@
+﻿[TestModule]
+Name = "My First Module"
+
+[TestModule.API]
+Host = "127.0.0.1"
