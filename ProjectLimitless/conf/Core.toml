@@ -10,6 +10,11 @@
 #
 
 [Core]
-# The name of the Limitless system. Also used as the trigger word.
+# The default name of the Limitless system. Also used as the trigger word.
 # See https://docs.projectlimitless.io/ProjectLimitless/Configuration#name
 Name = "Alice"
+
+EnabledModules = [
+	"Voice",
+	"Speech"
+]

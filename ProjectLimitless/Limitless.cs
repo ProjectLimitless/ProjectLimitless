@@ -33,6 +33,8 @@ namespace Limitless
         public Limitless(LimitlessSettings settings, Logger log)
         {
             log.Debug("Configuring Project Limitless...");
+            log.Info($"Settings | Default system name set as {settings.Core.Name}");
+            log.Info($"Settings | {settings.Core.EnabledModules.Length} module(s) will be loaded");
         }
     }
 }

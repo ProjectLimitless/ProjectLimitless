@@ -13,33 +13,12 @@
 
 using System;
 using System.IO;
-using System.Linq;
 
 using Nett;
 using Nett.Coma;
-using System.Reflection;
 
 namespace Limitless.Config
 {
-    public class TestModule
-    {
-        public string Name { get; set; }
-        public APISet API { get; set; }
-        public class APISet
-        {
-            public string Host { get; set; }
-        }
-
-    }
-
-    public class TM
-    {
-        public static Type GetConfigType()
-        {
-            return typeof(TestModule);
-        }
-    }
-
     /// <summary>
     /// ConfigLoader implements the loading logic for the Core, User
     /// and module configurations.
@@ -97,38 +76,12 @@ namespace Limitless.Config
             
             TomlTable completeToml = Merge(combinedToml, userToml);
 
-            foreach (string key in completeToml.Keys)
-            {
-
-            }
-
-            TestModule m = ConfigLoader.Convert<TestModule>("TestModule", completeToml);
-            Console.WriteLine(m.Name);
-
+            settings.Core = LimitlessSettings.Convert<CoreSettings>("Core", completeToml);
+            settings.FullConfiguration = completeToml;
 
             return settings;
         }
-
-        /// <summary>
-        /// Converts the section with given key to type T extracted from data.
-        /// </summary>
-        /// <typeparam name="T">The type to convert to</typeparam>
-        /// <param name="key">The key in the config</param>
-        /// <param name="data">The configuration data</param>
-        /// <returns>The section with key as type T</returns>
-        public static T Convert<T>(string key, TomlTable data)
-        {
-            // I extract the Get<T> generic function from the TomlTable using reflection. 
-            MethodInfo getMethod = typeof(TomlTable).GetMethods()
-                .Where(x => x.Name == "Get")
-                .First(x => x.IsGenericMethod);
-            // Then I make it generic again
-            MethodInfo generic = getMethod.MakeGenericMethod(typeof(T));
-            // Invoke it. The Get<T> method requires the configuration key as param
-            dynamic dynamicConfig = generic.Invoke(data, new object[] { key });
-            return (T)dynamicConfig;
-        }
-
+        
         /// <summary>
         /// Merge two TomlTables together. Values from overrides will replace values in original where available.
         /// </summary>

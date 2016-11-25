@@ -16,16 +16,6 @@ using Limitless.Config;
 
 namespace Limitless
 {
-    public class SetDemo
-    {
-        public string Two { get; set; }
-        public MoreSet More { get; set; }
-        public class MoreSet
-        {
-            public string Three { get; set; }
-        }
-    }
-
     class Program
     {
        
@@ -38,31 +28,8 @@ namespace Limitless
             ConfigLoader configLoader = new ConfigLoader();
             LimitlessSettings settings = configLoader.Load();
 
-            //Limitless limitless = new Limitless(settings, log);
+            Limitless limitless = new Limitless(settings, log);
             
-            /*
-            
-            Nett TOML
-
-            ///TODO: Test file merging
-            var appSource =  ConfigSource.CreateFileSource("conf/Core.toml");
-            var userSource = ConfigSource.CreateFileSource("conf/User.toml");
-            var merged = ConfigSource.Merged(appSource, userSource); // order important here
-
-            // merge both TOML files into one settings object
-            Config<LimitlessSettings> settings = Nett.Coma.Config.Create(() => new LimitlessSettings(), merged);
-            
-
-            
-            Console.WriteLine("DemoName String: {0}", settings.Get(s => s.DemoName));
-            */
-            /*Console.WriteLine("test: {0}", settings.Get(s => settings));
-            Console.WriteLine("Owner.Name: {0}", settings.Get(s => s.Owner.Name));
-            Console.WriteLine("Updates.Primary.Host: {0}", settings.Get(s => s.Updates.Primary.Host));
-            Console.WriteLine("Updates.Secondary.Host: {0}", settings.Get(s => s.Updates.Secondary.Host));
-            */
-
-
             log.Info("Project Limitless has shut down.");
         }
     }
