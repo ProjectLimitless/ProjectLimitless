@@ -17,7 +17,9 @@ using System.IO;
 using Nett;
 using Nett.Coma;
 
-namespace Limitless.Config
+using Limitless.Config;
+
+namespace Limitless.Loaders
 {
     /// <summary>
     /// ConfigLoader implements the loading logic for the Core, User

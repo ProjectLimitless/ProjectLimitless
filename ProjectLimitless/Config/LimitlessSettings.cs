@@ -28,7 +28,7 @@ namespace Limitless.Config
         /// </summary>
         public CoreSettings Core { get; set; }
         /// <summary>
-        /// 
+        /// Gets the full configuration as parsed.
         /// </summary>
         public TomlTable FullConfiguration { get; set; }
 

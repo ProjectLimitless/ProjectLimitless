@@ -13,6 +13,7 @@
 
 using NLog;
 using Limitless.Config;
+using Limitless.Loaders;
 
 namespace Limitless
 {
@@ -24,7 +25,9 @@ namespace Limitless
         /// <summary>
         /// NLog logger.
         /// </summary>
-        private Logger log;
+        private Logger _log;
+
+        private ModuleLoader _moduleLoader;
 
         /// <summary>
         /// Constructor taking the configuration to be used.
@@ -32,9 +35,14 @@ namespace Limitless
         /// <param name="settings">The configuration to be used</param>
         public Limitless(LimitlessSettings settings, Logger log)
         {
+            _log = log;
             log.Debug("Configuring Project Limitless...");
-            log.Info($"Settings | Default system name set as {settings.Core.Name}");
-            log.Info($"Settings | {settings.Core.EnabledModules.Length} module(s) will be loaded");
+            log.Info($"Settings| Default system name set as {settings.Core.Name}");
+            log.Info($"Settings| {settings.Core.EnabledModules.Length} module(s) will be loaded");
+
+            _moduleLoader = new ModuleLoader(settings.FullConfiguration, _log);
+            _moduleLoader.Load("TestModule");
+            
         }
     }
 }
