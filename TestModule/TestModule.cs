@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Limitless.Runtime.Types;
 
 namespace TestModule
 {
@@ -21,7 +22,7 @@ namespace TestModule
         }
     }
 
-    public class TestModule : IModule
+    public class TestModule : IModule, IAPIModule
     {
         public void Configure(dynamic rawSettings)
         {
@@ -40,6 +41,31 @@ namespace TestModule
         public Type GetConfigurationType()
         {
             return typeof(TestSettings);
+        }
+
+        public dynamic PersonalPong(dynamic input)
+        {
+            return $"Pong {input.name}";
+        }
+
+        public List<APIRouteHandler> GetRoutes()
+        {
+            List<APIRouteHandler> routes = new List<APIRouteHandler>();
+
+            APIRouteHandler handler = new APIRouteHandler();
+            handler.Route = "/ping";
+            handler.Handler = (dynamic input) =>
+            {
+                return "Pong!";
+            };
+            routes.Add(handler);
+
+            handler = new APIRouteHandler();
+            handler.Route = "/ping/{name}";
+            handler.Handler = PersonalPong;
+            routes.Add(handler);
+            
+            return routes;
         }
     }
 }
