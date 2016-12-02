@@ -15,6 +15,5 @@
 Name = "Alice"
 
 EnabledModules = [
-	"Voice",
-	"Speech"
+	"TestModule",
 ]

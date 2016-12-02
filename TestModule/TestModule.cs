@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Limitless.Runtime.Types;
+using Limitless.Runtime.Attributes;
 
 namespace TestModule
 {
@@ -46,6 +47,12 @@ namespace TestModule
         public dynamic PersonalPong(dynamic input)
         {
             return $"Pong {input.name}";
+        }
+
+        [APIRoute(Path = "/ass")]
+        public dynamic Ass(dynamic input)
+        {
+            return "Yes my ass!";
         }
 
         public List<APIRouteHandler> GetRoutes()
