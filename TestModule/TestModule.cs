@@ -25,13 +25,15 @@ namespace TestModule
 
     public class TestModule : IModule, IAPIModule
     {
+        private string _instanceValue;
+
         public void Configure(dynamic rawSettings)
         {
             // Safe to cast it here, the loader specifically loads the configuration
             // of this TestSettings type. The 'dynamic' type is to simpify the IModule interface.
             // However, there is not need to cast it, you can use rawSettings directly is you wish.
             TestSettings settings = (TestSettings)rawSettings;
-
+            _instanceValue = "This is an instance value";
             Console.WriteLine("This is TestModule");
             Console.WriteLine($"Name: {settings.Name}");
             Console.WriteLine($"Name (dynamic): {rawSettings.Name}");
@@ -49,10 +51,10 @@ namespace TestModule
             return $"Pong {input.name}";
         }
 
-        [APIRoute(Path = "/ass")]
+        [APIRoute(Path = "/ass/{version}")]
         public dynamic Ass(dynamic input)
         {
-            return "Yes my ass!";
+            return "Yes my asses! " + input.version + " (" + _instanceValue + ")";
         }
 
         public List<APIRouteHandler> GetRoutes()

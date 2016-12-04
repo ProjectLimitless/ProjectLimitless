@@ -13,7 +13,7 @@
 
 using System;
 using System.Linq;
-using System.Collections.Generic;
+using System.Reflection;
 
 using NLog;
 using Nancy.Hosting.Self;
@@ -21,9 +21,8 @@ using Nancy.Hosting.Self;
 using Limitless.Config;
 using Limitless.Loaders;
 using Limitless.Runtime;
+using Limitless.Runtime.Types;
 using Limitless.Runtime.Attributes;
-using Nancy;
-using Nancy.TinyIoc;
 
 namespace Limitless
 {
@@ -57,13 +56,24 @@ namespace Limitless
             {
                 IModule mod = _moduleLoader.Load(moduleName);
                 // Get the methods marked as APIRoutes for extending the API
-                var methods = mod.GetType().GetMethods()
+                MethodInfo[] methods = mod.GetType().GetMethods()
                         .Where(m => m.GetCustomAttributes(typeof(APIRouteAttribute), false).Length > 0)
                         .ToArray();
 
-                APIRouteAttribute att = (APIRouteAttribute)Attribute.GetCustomAttribute(methods[0], typeof(APIRouteAttribute));
+                foreach (MethodInfo methodInfo in methods)
+                {
+                    APIRouteAttribute attribute = (APIRouteAttribute)Attribute.GetCustomAttribute(methodInfo, typeof(APIRouteAttribute));
+                    APIRouteHandler extendHandler = new APIRouteHandler();
+                    extendHandler.Route = attribute.Path;
+                    extendHandler.Handler = (dynamic input) =>
+                    {
+                        dynamic result = (dynamic)methodInfo.Invoke(mod, new object[] { input });
+                        return result;
+                    };
+                    RouteLoader.Instance.Routes.Add(extendHandler);
+                }
+            
 
-                
 
                 /*if (typeof(IAPIModule).IsAssignableFrom(mod.GetType()))
                 {
