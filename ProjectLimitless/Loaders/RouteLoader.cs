@@ -26,7 +26,7 @@ namespace Limitless.Loaders
         /// <summary>
         /// The collection of routes to load.
         /// </summary>
-        public List<APIRouteHandler> Routes { get; }
+        public List<APIRoute> Routes { get; }
         /// <summary>
         /// Holds the instance.
         /// </summary>
@@ -59,7 +59,7 @@ namespace Limitless.Loaders
         /// </summary>
         RouteLoader()
         {
-            Routes = new List<APIRouteHandler>();
+            Routes = new List<APIRoute>();
         }
     }
 }

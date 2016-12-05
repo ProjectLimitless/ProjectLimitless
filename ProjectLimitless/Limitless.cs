@@ -16,6 +16,7 @@ using System.Linq;
 using System.Reflection;
 
 using NLog;
+using Nancy.Security;
 using Nancy.Hosting.Self;
 
 using Limitless.Config;
@@ -62,15 +63,18 @@ namespace Limitless
 
                 foreach (MethodInfo methodInfo in methods)
                 {
-                    APIRouteAttribute attribute = (APIRouteAttribute)Attribute.GetCustomAttribute(methodInfo, typeof(APIRouteAttribute));
-                    APIRouteHandler extendHandler = new APIRouteHandler();
-                    extendHandler.Route = attribute.Path;
+                    APIRouteAttribute attributes = (APIRouteAttribute)Attribute.GetCustomAttribute(methodInfo, typeof(APIRouteAttribute));
+                    APIRoute extendHandler = new APIRoute();
+                    extendHandler.Path = attributes.Path;
+                    extendHandler.Method = attributes.Method;
+                    extendHandler.RequiresAuthentication = attributes.RequiresAuthentication;
                     extendHandler.Handler = (dynamic input) =>
                     {
                         dynamic result = (dynamic)methodInfo.Invoke(mod, new object[] { input });
                         return result;
                     };
                     RouteLoader.Instance.Routes.Add(extendHandler);
+                    log.Debug($"Added API route '{extendHandler.Path}'");
                 }
             
 
@@ -90,15 +94,7 @@ namespace Limitless
                 }*/
             }
 
-            Runtime.Types.APIRouteHandler handler = new Runtime.Types.APIRouteHandler();
-            handler.Route = "/where/{country}";
-            handler.Handler = (dynamic input) =>
-            {
-                return $"{input.country} is nowhere to be seen.";
-            };
-            RouteLoader.Instance.Routes.Add(handler);
-            
-
+            /// TODO: Using DI, setup the admin API
 
             HostConfiguration config = new HostConfiguration();
             config.UrlReservations.CreateAutomatically = true;

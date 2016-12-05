@@ -23,7 +23,7 @@ namespace TestModule
         }
     }
 
-    public class TestModule : IModule, IAPIModule
+    public class TestModule : IModule
     {
         private string _instanceValue;
 
@@ -51,30 +51,10 @@ namespace TestModule
             return $"Pong {input.name}";
         }
 
-        [APIRoute(Path = "/ass/{version}")]
+        [APIRoute(Path = "/demo/{version}", Method = HttpMethod.Get, Description = "Sample Route containing a version parameter")]
         public dynamic Ass(dynamic input)
         {
-            return "Yes my asses! " + input.version + " (" + _instanceValue + ")";
-        }
-
-        public List<APIRouteHandler> GetRoutes()
-        {
-            List<APIRouteHandler> routes = new List<APIRouteHandler>();
-
-            APIRouteHandler handler = new APIRouteHandler();
-            handler.Route = "/ping";
-            handler.Handler = (dynamic input) =>
-            {
-                return "Pong!";
-            };
-            routes.Add(handler);
-
-            handler = new APIRouteHandler();
-            handler.Route = "/ping/{name}";
-            handler.Handler = PersonalPong;
-            routes.Add(handler);
-            
-            return routes;
+            return "Yes my demo! " + input.version + " (" + _instanceValue + ")";
         }
     }
 }

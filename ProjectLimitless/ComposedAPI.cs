@@ -11,7 +11,10 @@
 * Project Limitless. If not, see http://www.apache.org/licenses/LICENSE-2.0.
 */
 
+using System;
+
 using Nancy;
+using Nancy.Security;
 
 using Limitless.Loaders;
 using Limitless.Runtime.Types;
@@ -29,11 +32,41 @@ namespace Limitless
         /// </summary>
         public ComposedAPI(RouteLoader loader)
         {
-            foreach (APIRouteHandler routeHandler in loader.Routes)
+            foreach (APIRoute route in loader.Routes)
             {
-                Get[routeHandler.Route] = routeHandler.Handler;
+                switch (route.Method)
+                {
+                    case HttpMethod.Get:
+                        Get[route.Path] = BuildComposedFunction(route);
+                        break;
+                    case HttpMethod.Post:
+                        Post[route.Path] = BuildComposedFunction(route);
+                        break;
+                    case HttpMethod.Put:
+                        Put[route.Path] = BuildComposedFunction(route);
+                        break;
+                    case HttpMethod.Delete:
+                        Delete[route.Path] = BuildComposedFunction(route);
+                        break;
+                }
             }
+        }
 
+        /// <summary>
+        /// Constructs the handler function including authentication.
+        /// </summary>
+        /// <param name="route">The route to build</param>
+        /// <returns>The constructed function</returns>
+        private Func<dynamic, dynamic> BuildComposedFunction(APIRoute route)
+        {
+            return (dynamic input) =>
+            {
+                if (route.RequiresAuthentication)
+                {
+                    this.RequiresAuthentication();
+                }
+                return route.Handler(input);
+            };
         }
     }
 }
