@@ -76,22 +76,6 @@ namespace Limitless
                     RouteLoader.Instance.Routes.Add(extendHandler);
                     log.Debug($"Added API route '{extendHandler.Path}'");
                 }
-            
-
-
-                /*if (typeof(IAPIModule).IsAssignableFrom(mod.GetType()))
-                {
-                    _log.Info("Module '{0}' implements API extensions", "TestModule");
-                    List<APIRouteHandler> handlers = ((IAPIModule)mod).GetRoutes();
-                    foreach (APIRouteHandler handler in handlers)
-                    {
-                        _log.Trace("Route available in Module: {0}", handler.Route);
-                    }
-                }
-                else
-                {
-                    _log.Debug("Module '{0}' does not implement API extensions", "TestModule");
-                }*/
             }
 
             /// TODO: Using DI, setup the admin API

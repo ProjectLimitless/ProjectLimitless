@@ -46,6 +46,7 @@ namespace TestModule
             return typeof(TestSettings);
         }
 
+        [APIRoute(Path = "/demo/ping/{name}", Method = HttpMethod.Get, RequiresAuthentication = true)]
         public dynamic PersonalPong(dynamic input)
         {
             return $"Pong {input.name}";

@@ -12,15 +12,48 @@
 */
 
 using System;
+using System.Collections.Generic;
 
 using Nancy;
 using Nancy.Security;
+using Nancy.Authentication.Stateless;
 
 using Limitless.Loaders;
 using Limitless.Runtime.Types;
 
 namespace Limitless
 {
+    /// <summary>
+    /// TODO: Move this
+    /// </summary>
+    public class JwtToken
+    {
+        public string sub;
+        public long exp;
+    }
+
+    /// <summary>
+    /// TODO: Move this
+    /// </summary>
+    public class TestUser : IUserIdentity
+    {
+        public IEnumerable<string> Claims
+        {
+            get
+            {
+                return new string[] { "one" };
+            }
+        }
+
+        public string UserName
+        {
+            get
+            {
+                return "TestUSer";
+            }
+        }
+    }
+
     /// <summary>
     /// The core API. Composed of the base and all the
     /// extended API modules.
@@ -32,6 +65,27 @@ namespace Limitless
         /// </summary>
         public ComposedAPI(RouteLoader loader)
         {
+            // Setup the JWT authentication for routes that require it.
+            var configuration = new StatelessAuthenticationConfiguration(ctx =>
+            {
+                var jwtToken = ctx.Request.Headers.Authorization;
+                try
+                {
+                    var payload = Jose.JWT.Decode<JwtToken>(jwtToken, "mysecretkey");
+                    var tokenExpires = DateTime.FromBinary(payload.exp);
+                    if (tokenExpires > DateTime.UtcNow)
+                    {
+                        return new TestUser();
+                    }
+                    return null;
+                }
+                catch (Exception)
+                {
+                    return null;
+                }
+            });
+            StatelessAuthentication.Enable(this, configuration);
+
             foreach (APIRoute route in loader.Routes)
             {
                 switch (route.Method)
@@ -64,6 +118,7 @@ namespace Limitless
                 if (route.RequiresAuthentication)
                 {
                     this.RequiresAuthentication();
+                    // TODO: Find a way to get this.Context.CurrentUser to the module route
                 }
                 return route.Handler(input);
             };
