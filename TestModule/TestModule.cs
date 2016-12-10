@@ -27,6 +27,21 @@ namespace TestModule
     {
         private string _instanceValue;
 
+        public TestModule()
+        {
+            Console.WriteLine($"TestModule");
+        }
+
+        public TestModule(string name)
+        {
+            Console.WriteLine($"TestModule: Name is set to {name}");
+        }
+
+        public TestModule(string name, string demo)
+        {
+            Console.WriteLine($"TestModule: Name is set to {name} and Demo {demo}");
+        }
+
         public void Configure(dynamic rawSettings)
         {
             // Safe to cast it here, the loader specifically loads the configuration

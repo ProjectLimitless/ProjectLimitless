@@ -78,14 +78,32 @@ namespace Limitless.Loaders
             List<Type> availableModules = dll.GetExportedTypes()
                 .Where(t => typeof(IModule).IsAssignableFrom(t))
                 .ToList();
-            
+
+            if (availableModules.Count > 1)
+            {
+                throw new NotSupportedException($"Module '{moduleName}' implements more than one IModule. Only one is allowed.");
+            }
             // Only one module is allowed in a DLL
             if (availableModules.Count != 1)
             {
-                throw new NotSupportedException($"Module '{moduleName}' does not implement IModule");
+                throw new NotSupportedException($"Module '{moduleName}' does not implement IModule.");
             }
 
             Type moduleType = availableModules.First();
+            ConstructorInfo[] constructors = moduleType.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
+            foreach (ConstructorInfo constructor in constructors)
+            {
+                ParameterInfo[] parameters = constructor.GetParameters();
+                List<string> parametersList = new List<string>();
+                foreach (ParameterInfo parameter in parameters)
+                {
+                    parametersList.Add($"{parameter.Name}({parameter.ParameterType.Name})");
+                }
+                _log.Trace($" Module '{moduleName}' constructor found with parameters: {string.Join(",", parametersList)}");
+            }
+            
+            // TODO: Attempt to inject as many 
+
             dynamic instance = Activator.CreateInstance(moduleType);
             IModule module = (IModule)instance;
             Type configurationType = module.GetConfigurationType();

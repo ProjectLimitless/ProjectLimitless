@@ -55,9 +55,9 @@ namespace Limitless
             _moduleLoader = new ModuleLoader(settings.FullConfiguration, _log);
             foreach (string moduleName in settings.Core.EnabledModules)
             {
-                IModule mod = _moduleLoader.Load(moduleName);
+                IModule module = _moduleLoader.Load(moduleName);
                 // Get the methods marked as APIRoutes for extending the API
-                MethodInfo[] methods = mod.GetType().GetMethods()
+                MethodInfo[] methods = module.GetType().GetMethods()
                         .Where(m => m.GetCustomAttributes(typeof(APIRouteAttribute), false).Length > 0)
                         .ToArray();
 
@@ -70,7 +70,7 @@ namespace Limitless
                     extendHandler.RequiresAuthentication = attributes.RequiresAuthentication;
                     extendHandler.Handler = (dynamic input) =>
                     {
-                        dynamic result = (dynamic)methodInfo.Invoke(mod, new object[] { input });
+                        dynamic result = (dynamic)methodInfo.Invoke(module, new object[] { input });
                         return result;
                     };
                     RouteLoader.Instance.Routes.Add(extendHandler);
@@ -78,7 +78,7 @@ namespace Limitless
                 }
             }
 
-            /// TODO: Using DI, setup the admin API
+
 
             HostConfiguration config = new HostConfiguration();
             config.UrlReservations.CreateAutomatically = true;
