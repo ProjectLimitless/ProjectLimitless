@@ -18,7 +18,7 @@ using Nancy;
 using Nancy.Security;
 using Nancy.Authentication.Stateless;
 
-using Limitless.Loaders;
+using Limitless.Managers;
 using Limitless.Runtime.Types;
 
 namespace Limitless
@@ -63,7 +63,7 @@ namespace Limitless
         /// <summary>
         /// Standard Constructor.
         /// </summary>
-        public ComposedAPI(RouteLoader loader)
+        public ComposedAPI(RouteManager loader)
         {
             // Setup the JWT authentication for routes that require it.
             var configuration = new StatelessAuthenticationConfiguration(ctx =>

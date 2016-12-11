@@ -15,6 +15,8 @@ using Nancy;
 using Nancy.TinyIoc;
 using Nancy.Conventions;
 
+using Limitless.Managers;
+
 namespace Limitless.Loaders
 {
     /// <summary>
@@ -29,7 +31,7 @@ namespace Limitless.Loaders
         protected override void ConfigureApplicationContainer(TinyIoCContainer container)
         {
             base.ConfigureApplicationContainer(container);
-            container.Register<RouteLoader>(RouteLoader.Instance);
+            container.Register<RouteManager>(RouteManager.Instance);
         }
 
 
@@ -37,10 +39,10 @@ namespace Limitless.Loaders
         {
             base.ConfigureConventions(conventions);
 
-            // TODO: Load all the IUIModule's folders
-            conventions.StaticContentsConventions.Add(
-                StaticContentConventionBuilder.AddDirectory("ui", @"ui")
-            );
+            foreach (string contentRoute in RouteManager.Instance.ContentRoutes)
+            {
+                conventions.StaticContentsConventions.Add(StaticContentConventionBuilder.AddDirectory(contentRoute, contentRoute));
+            }
         }
     }
 }

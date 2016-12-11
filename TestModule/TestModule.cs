@@ -23,7 +23,7 @@ namespace TestModule
         }
     }
 
-    public class TestModule : IModule
+    public class TestModule : IModule, IUIModule
     {
         private string _instanceValue;
 
@@ -71,6 +71,11 @@ namespace TestModule
         public dynamic Ass(dynamic input)
         {
             return "Yes my demo! " + input.version + " (" + _instanceValue + ")";
+        }
+
+        public string GetContentPath()
+        {
+            return "ui-demo";
         }
     }
 }

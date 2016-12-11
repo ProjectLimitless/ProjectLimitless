@@ -16,30 +16,35 @@ using System.Collections.Generic;
 
 using Limitless.Runtime.Types;
 
-namespace Limitless.Loaders
+namespace Limitless.Managers
 {
     /// <summary>
-    /// Provides a custom bootstrapper for Nancy.
+    /// Manages API routes. Defined as a Singleton to allow Nancy Bootstrapper
+    /// access to already defined routes.
     /// </summary>
-    public class RouteLoader
+    public class RouteManager
     {
         /// <summary>
         /// The collection of routes to load.
         /// </summary>
         public List<APIRoute> Routes { get; }
         /// <summary>
+        /// The collection of content routes to load.
+        /// </summary>
+        public List<string> ContentRoutes { get; }
+        /// <summary>
         /// Holds the instance.
         /// </summary>
-        private static RouteLoader instance = null;
+        private static RouteManager instance = null;
         /// <summary>
-        /// Lock for thread safety.
+        /// Lock for singleton.
         /// </summary>
         private static readonly object padlock = new object();
         
         /// <summary>
-        /// Gets the Singleton instance of the loader.
+        /// Gets the Singleton instance of the manager.
         /// </summary>
-        public static RouteLoader Instance
+        public static RouteManager Instance
         {
             get
             {
@@ -47,7 +52,7 @@ namespace Limitless.Loaders
                 {
                     if (instance == null)
                     {
-                        instance = new RouteLoader();
+                        instance = new RouteManager();
                     }
                     return instance;
                 }
@@ -57,9 +62,10 @@ namespace Limitless.Loaders
         /// <summary>
         /// Private constructor for Singleton pattern;
         /// </summary>
-        RouteLoader()
+        RouteManager()
         {
             Routes = new List<APIRoute>();
+            ContentRoutes = new List<string>();
         }
     }
 }

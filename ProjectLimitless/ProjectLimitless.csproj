@@ -72,7 +72,7 @@
     <Compile Include="Config\CoreSettings.cs" />
     <Compile Include="Config\LimitlessSettings.cs" />
     <Compile Include="ComposedAPI.cs" />
-    <Compile Include="Loaders\RouteLoader.cs" />
+    <Compile Include="Managers\RouteManager.cs" />
     <Compile Include="Loaders\IoCLoader.cs" />
     <Compile Include="Loaders\ModuleLoader.cs" />
     <Compile Include="Loaders\ConfigLoader.cs" />

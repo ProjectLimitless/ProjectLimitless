@@ -22,6 +22,7 @@ using Nancy.Hosting.Self;
 using Limitless.Config;
 using Limitless.Loaders;
 using Limitless.Runtime;
+using Limitless.Managers;
 using Limitless.Runtime.Types;
 using Limitless.Runtime.Attributes;
 
@@ -73,8 +74,16 @@ namespace Limitless
                         dynamic result = (dynamic)methodInfo.Invoke(module, new object[] { input });
                         return result;
                     };
-                    RouteLoader.Instance.Routes.Add(extendHandler);
+                    RouteManager.Instance.Routes.Add(extendHandler);
                     log.Debug($"Added API route '{extendHandler.Path}'");
+                }
+
+                // I need the content routes if this is an UI module
+                if (typeof(IUIModule).IsAssignableFrom(module.GetType()))
+                {
+                    IUIModule uiModule = (IUIModule)module;
+                    RouteManager.Instance.ContentRoutes.Add(uiModule.GetContentPath());
+                    log.Debug($"Added Content route '{uiModule.GetContentPath()}'");
                 }
             }
             
