@@ -77,9 +77,14 @@ namespace Limitless
                     log.Debug($"Added API route '{extendHandler.Path}'");
                 }
             }
+            
+        }
 
-
-
+        /// <summary>
+        /// Run executes the main loop.
+        /// </summary>
+        public void Run()
+        {
             HostConfiguration config = new HostConfiguration();
             config.UrlReservations.CreateAutomatically = true;
             using (var host = new NancyHost(config, new Uri("http://localhost:1234")))
@@ -88,7 +93,6 @@ namespace Limitless
                 _log.Info("Running on :1234");
                 Console.ReadLine();
             }
-
         }
     }
 }

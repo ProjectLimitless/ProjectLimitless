@@ -31,6 +31,7 @@ namespace Limitless
             LimitlessSettings settings = configLoader.Load();
 
             Limitless limitless = new Limitless(settings, log);
+            limitless.Run();
             
             log.Info("Project Limitless has shut down.");
         }
