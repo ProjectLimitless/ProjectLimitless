@@ -56,9 +56,9 @@ namespace Limitless
             _moduleManager = new ModuleManager(settings.FullConfiguration, _log);
             foreach (string moduleName in settings.Core.EnabledModules)
             {
-                IModule module = _moduleManager.Load(moduleName);
 
-                // TODO: move inject here
+                _moduleManager.Load(moduleName);
+                
 
 
                 // Get the methods marked as APIRoutes for extending the API

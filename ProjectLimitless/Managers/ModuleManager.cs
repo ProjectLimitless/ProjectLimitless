@@ -98,26 +98,73 @@ namespace Limitless.Managers
             }
 
             Type moduleType = availableModules.First();
+            IModule module = Construct(moduleType);
+            Configure(moduleName, module);            
             
-            ConstructorInfo[] constructors = moduleType.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
-            foreach (ConstructorInfo constructor in constructors)
+            _log.Info($"Module '{moduleName}' has been loaded and configured");
+        }
+
+        /// <summary>
+        /// Construct moduleType using the best matching constructor and 
+        /// injecting as many modules as possible.
+        /// </summary>
+        /// <param name="moduleType">The Type to construct</param>
+        /// <returns>The constructed module</returns>
+        private IModule Construct(Type moduleType)
+        {
+            ConstructorInfo selectedConstructor = null;
+            ConstructorInfo[] allConstructors = moduleType.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
+            foreach (ConstructorInfo constructor in allConstructors)
             {
+                // Check if we have enough loaded modules to satisfy this constructor
+                bool canSatisfy = true;
                 ParameterInfo[] parameters = constructor.GetParameters();
                 List<string> parametersList = new List<string>();
                 foreach (ParameterInfo parameter in parameters)
                 {
-                    parametersList.Add($"{parameter.Name}({parameter.ParameterType.Name})");
+                    if (Modules.ContainsKey(parameter.ParameterType) == false)
+                    {
+                        _log.Trace($" Constructor parameter {parameter.Name}({parameter.ParameterType.Name}) can not be satisfied");
+                        canSatisfy = false;
+                        break;
+                    }
                 }
-                _log.Trace($" Module '{moduleName}' constructor found with parameters: {string.Join(",", parametersList)}");
+                // Set the best constructor
+                if (canSatisfy)
+                {
+                    if (selectedConstructor == null)
+                    {
+                        selectedConstructor = constructor;
+                    }
+                    else if (parameters.Count() > selectedConstructor.GetParameters().Count())
+                    {
+                        selectedConstructor = constructor;
+                    }
+                }
             }
-            
-            // TODO: Attempt to inject as many as possible into constructor
 
+            // Execute the best matching constructor for the module
+            List<object> constructorParameters = new List<object>();
+            foreach (ParameterInfo parameter in selectedConstructor.GetParameters())
+            {
+                constructorParameters.Add(Modules[parameter.ParameterType]);
+            }
 
-            dynamic instance = Activator.CreateInstance(moduleType);
+            dynamic instance = Activator.CreateInstance(moduleType, constructorParameters.ToArray());
             IModule module = (IModule)instance;
+            return module;
+        }
+
+        /// <summary>
+        /// Configure the given module.
+        /// </summary>
+        /// <param name="moduleName">The name of module used to extract configuration</param>
+        /// <param name="module">The IModule to configure</param>
+        private void Configure(string moduleName, IModule module)
+        {
             Type configurationType = module.GetConfigurationType();
 
+            // Execute the configure method for IModule
             // I extract the Get<T> generic function from the TomlTable using reflection. 
             MethodInfo getMethod = typeof(TomlTable).GetMethods()
                 .Where(x => x.Name == "Get")
@@ -125,12 +172,10 @@ namespace Limitless.Managers
             // Then I make it generic again
             MethodInfo generic = getMethod.MakeGenericMethod(configurationType);
             // Invoke it. The Get<T> method requires the configuration key as param
-            dynamic dynamicConfig = generic.Invoke(_moduleConfigurations, new object[] { moduleName});
+            dynamic dynamicConfig = generic.Invoke(_moduleConfigurations, new object[] { moduleName });
 
             // Configure the module with the settings
             module.Configure(dynamicConfig);
-            _log.Info($"Module '{moduleName}' has been loaded and configured");
-            
         }
     }
 }
