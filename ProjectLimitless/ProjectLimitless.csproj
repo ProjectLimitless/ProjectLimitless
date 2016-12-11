@@ -73,8 +73,8 @@
     <Compile Include="Config\LimitlessSettings.cs" />
     <Compile Include="ComposedAPI.cs" />
     <Compile Include="Managers\RouteManager.cs" />
-    <Compile Include="Loaders\IoCLoader.cs" />
-    <Compile Include="Loaders\ModuleLoader.cs" />
+    <Compile Include="LimitlessNancyBootstrapper.cs" />
+    <Compile Include="Managers\ModuleManager.cs" />
     <Compile Include="Loaders\ConfigLoader.cs" />
     <Compile Include="Limitless.cs" />
     <Compile Include="Program.cs" />

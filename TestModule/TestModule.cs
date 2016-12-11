@@ -23,6 +23,9 @@ namespace TestModule
         }
     }
 
+    /// <summary>
+    /// Testing module
+    /// </summary>
     public class TestModule : IModule, IUIModule
     {
         private string _instanceValue;

@@ -23,13 +23,18 @@ using NLog;
 using Limitless.Runtime;
 
 
-namespace Limitless.Loaders
+namespace Limitless.Managers
 {
     /// <summary>
-    /// Loads modules for use by the Core.
+    /// Manages modules for use by the Core.
     /// </summary>
-    public class ModuleLoader
+    public class ModuleManager
     {
+        /// <summary>
+        /// Gets the collection of loaded modules.
+        /// </summary>
+        public Dictionary<Type, IModule> Modules { get; private set; }
+
         /// <summary>
         /// The logger.
         /// </summary>
@@ -38,16 +43,20 @@ namespace Limitless.Loaders
         /// The original parsed configurations for all the modules.
         /// </summary>
         private TomlTable _moduleConfigurations;
-
+        /// <summary>
+        /// Path the to modules directory.
+        /// </summary>
         private string _modulesPath;
             
         /// <summary>
-        /// Handles loading, verifying and constructing modules.
+        /// Handles loading, unloading and verifying.
         /// </summary>
         /// <param name="moduleConfigurations">The configuration of modules</param>
         /// <param name="log">The logger to use</param>
-        public ModuleLoader(TomlTable moduleConfigurations, Logger log)
+        public ModuleManager(TomlTable moduleConfigurations, Logger log)
         {
+            Modules = new Dictionary<Type, IModule>();
+
             _log = log;
             _moduleConfigurations = moduleConfigurations;
             // Hard-coding the path name to make life easier for Unattended upgrades.
@@ -58,10 +67,9 @@ namespace Limitless.Loaders
         /// Load the specified module.
         /// </summary>
         /// <param name="moduleName">The name of the module to load</param>
-        /// <returns>The loaded and constructed module</returns>
         /// <exception cref="DllNotFoundException">Thrown when the module could not be found</exception>
         /// <exception cref="NotSupportedException">Thrown when no exported type implements IModule</exception>
-        public IModule Load(string moduleName)
+        public void Load(string moduleName)
         {
             string moduleFilename = moduleName + ".dll";
             _log.Trace($"Checking if module {moduleFilename} is valid and loadable");
@@ -90,6 +98,7 @@ namespace Limitless.Loaders
             }
 
             Type moduleType = availableModules.First();
+            
             ConstructorInfo[] constructors = moduleType.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
             foreach (ConstructorInfo constructor in constructors)
             {
@@ -102,7 +111,8 @@ namespace Limitless.Loaders
                 _log.Trace($" Module '{moduleName}' constructor found with parameters: {string.Join(",", parametersList)}");
             }
             
-            // TODO: Attempt to inject as many 
+            // TODO: Attempt to inject as many as possible into constructor
+
 
             dynamic instance = Activator.CreateInstance(moduleType);
             IModule module = (IModule)instance;
@@ -121,7 +131,6 @@ namespace Limitless.Loaders
             module.Configure(dynamicConfig);
             _log.Info($"Module '{moduleName}' has been loaded and configured");
             
-            return module;
         }
     }
 }

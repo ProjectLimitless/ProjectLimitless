@@ -17,12 +17,12 @@ using Nancy.Conventions;
 
 using Limitless.Managers;
 
-namespace Limitless.Loaders
+namespace Limitless
 {
     /// <summary>
     /// Provides a custom bootstrapper for Nancy.
     /// </summary>
-    public class IoCLoader : DefaultNancyBootstrapper
+    public class LimitlessNancyBootstrapper : DefaultNancyBootstrapper
     {
         /// <summary>
         /// Overrides the default container init and provides a ComposedAPI instance.
@@ -34,11 +34,13 @@ namespace Limitless.Loaders
             container.Register<RouteManager>(RouteManager.Instance);
         }
 
-
+        /// <summary>
+        /// Overrides the default convention setup for static routes.
+        /// </summary>
+        /// <param name="conventions">The default Nancy conventions</param>
         protected override void ConfigureConventions(NancyConventions conventions)
         {
             base.ConfigureConventions(conventions);
-
             foreach (string contentRoute in RouteManager.Instance.ContentRoutes)
             {
                 conventions.StaticContentsConventions.Add(StaticContentConventionBuilder.AddDirectory(contentRoute, contentRoute));

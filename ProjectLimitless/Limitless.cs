@@ -38,9 +38,9 @@ namespace Limitless
         /// </summary>
         public Logger _log;
         /// <summary>
-        /// Loader of the modules.
+        /// Manager of the modules.
         /// </summary>
-        private ModuleLoader _moduleLoader;
+        private ModuleManager _moduleManager;
         
         /// <summary>
         /// Constructor taking the configuration to be used.
@@ -53,12 +53,16 @@ namespace Limitless
             log.Info($"Settings| Default system name set as {settings.Core.Name}");
             log.Info($"Settings| {settings.Core.EnabledModules.Length} module(s) will be loaded");
 
-            _moduleLoader = new ModuleLoader(settings.FullConfiguration, _log);
+            _moduleManager = new ModuleManager(settings.FullConfiguration, _log);
             foreach (string moduleName in settings.Core.EnabledModules)
             {
-                IModule module = _moduleLoader.Load(moduleName);
+                IModule module = _moduleManager.Load(moduleName);
+
+                // TODO: move inject here
+
+
                 // Get the methods marked as APIRoutes for extending the API
-                MethodInfo[] methods = module.GetType().GetMethods()
+                /*MethodInfo[] methods = module.GetType().GetMethods()
                         .Where(m => m.GetCustomAttributes(typeof(APIRouteAttribute), false).Length > 0)
                         .ToArray();
 
@@ -78,13 +82,14 @@ namespace Limitless
                     log.Debug($"Added API route '{extendHandler.Path}'");
                 }
 
-                // I need the content routes if this is an UI module
+                // I need the content routes if this is a UI module
                 if (typeof(IUIModule).IsAssignableFrom(module.GetType()))
                 {
                     IUIModule uiModule = (IUIModule)module;
                     RouteManager.Instance.ContentRoutes.Add(uiModule.GetContentPath());
                     log.Debug($"Added Content route '{uiModule.GetContentPath()}'");
                 }
+                */
             }
             
         }
