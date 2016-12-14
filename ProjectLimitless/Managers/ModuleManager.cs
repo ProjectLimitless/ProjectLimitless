@@ -100,7 +100,8 @@ namespace Limitless.Managers
 
             Type moduleType = availableModules.First();
             IModule module = Construct(moduleType);
-            Configure(moduleName, module);            
+            Configure(moduleName, module);
+            AddModule(module);
             
             _log.Info($"Module '{moduleName}' has been loaded and configured");
         }
@@ -172,11 +173,50 @@ namespace Limitless.Managers
                 .First(x => x.IsGenericMethod);
             // Then I make it generic again
             MethodInfo generic = getMethod.MakeGenericMethod(configurationType);
+            // Dots (.) have special meaning in TOML files, so remove them from the config lookup
+            moduleName = moduleName.Replace(".", "");
             // Invoke it. The Get<T> method requires the configuration key as param
             dynamic dynamicConfig = generic.Invoke(_moduleConfigurations, new object[] { moduleName });
 
             // Configure the module with the settings
             module.Configure(dynamicConfig);
+        }
+
+        /// <summary>
+        /// Limitless.Runtime can specify many interfaces, AddModule
+        /// picks the best matching one to use to mark the module as
+        /// for injection into other modules.
+        /// </summary>
+        /// <param name="module">The module to add</param>
+        /// <returns>true on success, false otherwise</returns>
+        private bool AddModule(IModule module)
+        {
+            var l = Assembly.GetExecutingAssembly().GetTypes();
+            //var interfaces = from item in Assembly.GetExecutingAssembly().GetTypes()
+            //    where item.IsInterface && item.Namespace == "Limitless.Runtime.Interfaces"
+            //    select item;
+            var interfaces = AppDomain.CurrentDomain.GetAssemblies()
+                       .SelectMany(t => t.GetTypes())
+                       .Where(t => t.IsInterface && t.Namespace == "Limitless.Runtime.Interfaces");
+            if (interfaces == null)
+            {
+                return false;
+            }
+            bool added = false;
+            foreach (Type type in interfaces.ToArray())
+            {
+                if (type.Name == "IModule")
+                {
+                    continue;
+                }
+                // A module can implement multiple interfaces
+                if (type.IsAssignableFrom(module.GetType()))
+                {
+                    Modules.Add(type, module);
+                    added = true;
+                }
+            }
+            return added;
         }
     }
 }

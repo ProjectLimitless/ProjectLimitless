@@ -31,20 +31,17 @@ namespace TestModule
     public class TestModule : IModule, IUIModule
     {
         private string _instanceValue;
+        private ILogger _log;
 
         public TestModule()
         {
-            Console.WriteLine($"TestModule");
+            throw new NotSupportedException("TestModule requires an ILogger");
         }
 
-        public TestModule(string name)
+        public TestModule(ILogger log)
         {
-            Console.WriteLine($"TestModule: Name is set to {name}");
-        }
-
-        public TestModule(string name, string demo)
-        {
-            Console.WriteLine($"TestModule: Name is set to {name} and Demo {demo}");
+            _log = log;
+            _log.Info("Constructor with log");
         }
 
         public void Configure(dynamic rawSettings)
@@ -54,11 +51,12 @@ namespace TestModule
             // However, there is not need to cast it, you can use rawSettings directly is you wish.
             TestSettings settings = (TestSettings)rawSettings;
             _instanceValue = "This is an instance value";
-            Console.WriteLine("This is TestModule");
-            Console.WriteLine($"Name: {settings.Name}");
-            Console.WriteLine($"Name (dynamic): {rawSettings.Name}");
-            Console.WriteLine($"API Host: {settings.API.Host}");
-            Console.WriteLine($"API Host (dynamic): {rawSettings.API.Host}");
+            _log.Trace("This is TestModule");
+            _log.Debug($"Name: {settings.Name}");
+            _log.Debug($"Name (dynamic): {rawSettings.Name}");
+            _log.Debug($"API Host: {settings.API.Host}");
+            _log.Debug($"API Host (dynamic): {rawSettings.API.Host}");
+            _log.Warning("Checking if format works: {0}!", "Yes it does");
         }
 
         public Type GetConfigurationType()

@@ -15,5 +15,6 @@
 Name = "Alice"
 
 EnabledModules = [
+	"Limitless.Logger",
 	"TestModule",
 ]

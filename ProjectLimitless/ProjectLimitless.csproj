@@ -85,6 +85,9 @@
     <None Include="conf\Core.toml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="conf\modules\LimitlessLogger.toml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="conf\modules\TestModule.toml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
