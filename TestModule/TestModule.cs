@@ -56,7 +56,7 @@ namespace TestModule
             _log.Debug($"Name (dynamic): {rawSettings.Name}");
             _log.Debug($"API Host: {settings.API.Host}");
             _log.Debug($"API Host (dynamic): {rawSettings.API.Host}");
-            _log.Warning("Checking if format works: {0}!", "Yes it does");
+            _log.Debug("Checking if format works: {0}!", "Yes it does");
         }
 
         public Type GetConfigurationType()

@@ -11,10 +11,9 @@
 * Project Limitless. If not, see http://www.apache.org/licenses/LICENSE-2.0.
 */
 
-using NLog;
-
 using Limitless.Config;
 using Limitless.Loaders;
+using Limitless.Runtime.Interfaces;
 
 namespace Limitless
 {
@@ -23,7 +22,7 @@ namespace Limitless
        
         static void Main(string[] args)
         {
-            Logger log = LogManager.GetCurrentClassLogger();
+            ILogger log = new BootstrapLogger();
             log.Info("Loading Project Limitless...");
 
             log.Debug("Loading configuration...");

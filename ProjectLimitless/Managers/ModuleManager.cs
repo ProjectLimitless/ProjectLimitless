@@ -18,9 +18,7 @@ using System.Reflection;
 using System.Collections.Generic;
 
 using Nett;
-using NLog;
 
-using Limitless.Runtime;
 using Limitless.Runtime.Interfaces;
 
 
@@ -39,7 +37,7 @@ namespace Limitless.Managers
         /// <summary>
         /// The logger.
         /// </summary>
-        private Logger _log;
+        private ILogger _log;
         /// <summary>
         /// The original parsed configurations for all the modules.
         /// </summary>
@@ -54,7 +52,7 @@ namespace Limitless.Managers
         /// </summary>
         /// <param name="moduleConfigurations">The configuration of modules</param>
         /// <param name="log">The logger to use</param>
-        public ModuleManager(TomlTable moduleConfigurations, Logger log)
+        public ModuleManager(TomlTable moduleConfigurations, ILogger log)
         {
             Modules = new Dictionary<Type, IModule>();
 
@@ -101,7 +99,14 @@ namespace Limitless.Managers
             Type moduleType = availableModules.First();
             IModule module = Construct(moduleType);
             Configure(moduleName, module);
-            AddModule(module);
+            Type addedType = AddModule(module);
+            if (addedType != null)
+            {
+                if (addedType == typeof(ILogger))
+                {
+                    _log = (ILogger)module;
+                }
+            }
             
             _log.Info($"Module '{moduleName}' has been loaded and configured");
         }
@@ -188,35 +193,31 @@ namespace Limitless.Managers
         /// for injection into other modules.
         /// </summary>
         /// <param name="module">The module to add</param>
-        /// <returns>true on success, false otherwise</returns>
-        private bool AddModule(IModule module)
+        /// <returns>The interface type added, null if the interface could not be determined</returns>
+        private Type AddModule(IModule module)
         {
-            var l = Assembly.GetExecutingAssembly().GetTypes();
-            //var interfaces = from item in Assembly.GetExecutingAssembly().GetTypes()
-            //    where item.IsInterface && item.Namespace == "Limitless.Runtime.Interfaces"
-            //    select item;
             var interfaces = AppDomain.CurrentDomain.GetAssemblies()
                        .SelectMany(t => t.GetTypes())
-                       .Where(t => t.IsInterface && t.Namespace == "Limitless.Runtime.Interfaces");
+                       .Where(
+                            t => t.IsInterface && 
+                            t.Namespace == "Limitless.Runtime.Interfaces" &&
+                            // Exclude the base module interface, we're not interested in it
+                            t.Name != "IModule");
             if (interfaces == null)
             {
-                return false;
+                return null;
             }
-            bool added = false;
+            Type addedType = null;
             foreach (Type type in interfaces.ToArray())
-            {
-                if (type.Name == "IModule")
-                {
-                    continue;
-                }
+            {       
                 // A module can implement multiple interfaces
                 if (type.IsAssignableFrom(module.GetType()))
                 {
                     Modules.Add(type, module);
-                    added = true;
+                    addedType = type;
                 }
             }
-            return added;
+            return addedType;
         }
     }
 }

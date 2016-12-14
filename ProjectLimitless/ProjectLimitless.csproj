@@ -72,6 +72,7 @@
     <Compile Include="Config\CoreSettings.cs" />
     <Compile Include="Config\LimitlessSettings.cs" />
     <Compile Include="ComposedAPI.cs" />
+    <Compile Include="BootstrapLogger.cs" />
     <Compile Include="Managers\RouteManager.cs" />
     <Compile Include="LimitlessNancyBootstrapper.cs" />
     <Compile Include="Managers\ModuleManager.cs" />
@@ -94,11 +95,8 @@
     <None Include="conf\User.toml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <Content Include="NLog.config">
+    <None Include="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <None Include="NLog.xsd">
-      <SubType>Designer</SubType>
     </None>
     <None Include="packages.config" />
   </ItemGroup>

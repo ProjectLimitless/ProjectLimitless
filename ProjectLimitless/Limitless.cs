@@ -12,19 +12,12 @@
 */
 
 using System;
-using System.Linq;
-using System.Reflection;
 
-using NLog;
-using Nancy.Security;
 using Nancy.Hosting.Self;
 
 using Limitless.Config;
-using Limitless.Loaders;
-using Limitless.Runtime;
 using Limitless.Managers;
-using Limitless.Runtime.Types;
-using Limitless.Runtime.Attributes;
+using Limitless.Runtime.Interfaces;
 
 namespace Limitless
 {
@@ -36,7 +29,7 @@ namespace Limitless
         /// <summary>
         /// NLog logger.
         /// </summary>
-        public Logger _log;
+        public ILogger _log;
         /// <summary>
         /// Manager of the modules.
         /// </summary>
@@ -46,7 +39,7 @@ namespace Limitless
         /// Constructor taking the configuration to be used.
         /// </summary>
         /// <param name="settings">The configuration to be used</param>
-        public Limitless(LimitlessSettings settings, Logger log)
+        public Limitless(LimitlessSettings settings, ILogger log)
         {
             _log = log;
             log.Debug("Configuring Project Limitless...");
@@ -91,6 +84,13 @@ namespace Limitless
                 }
                 */
             }
+
+            if (_moduleManager.Modules.ContainsKey(typeof(ILogger)) == false)
+            {
+                _log.Critical("Limitless requires a ILogger module to be loaded");
+                throw new NotSupportedException("Limitless requires a ILogger module to be loaded");
+            }
+            _log = (ILogger)_moduleManager.Modules[typeof(ILogger)];
             
         }
 
