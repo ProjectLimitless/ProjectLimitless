@@ -100,7 +100,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="E:\project-limitless\Limitless.Runtime\Limitless.Runtime.csproj">
+    <ProjectReference Include="..\..\Limitless.Runtime\Runtime\Limitless.Runtime.csproj">
       <Project>{43f79b71-9ae4-46f0-a236-fc7ef755109d}</Project>
       <Name>Limitless.Runtime</Name>
     </ProjectReference>
