@@ -21,7 +21,6 @@ using Nancy.Authentication.Stateless;
 using Limitless.Managers;
 using Limitless.Runtime.Enums;
 using Limitless.Runtime.Types;
-using Limitless.Runtime.Interfaces;
 
 namespace Limitless
 {

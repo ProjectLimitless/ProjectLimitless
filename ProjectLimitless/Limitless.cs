@@ -85,13 +85,11 @@ namespace Limitless
                 */
             }
 
-            if (_moduleManager.Modules.ContainsKey(typeof(ILogger)) == false)
+            // If a new logging module has been loaded, rather use it
+            if (_moduleManager.Modules.ContainsKey(typeof(ILogger)))
             {
-                _log.Critical("Limitless requires a ILogger module to be loaded");
-                throw new NotSupportedException("Limitless requires a ILogger module to be loaded");
-            }
-            _log = (ILogger)_moduleManager.Modules[typeof(ILogger)];
-            
+                _log = (ILogger)_moduleManager.Modules[typeof(ILogger)];
+            }           
         }
 
         /// <summary>

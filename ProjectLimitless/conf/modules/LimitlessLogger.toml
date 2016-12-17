@@ -1,2 +1,2 @@
 ﻿[LimitlessLogger]
-ModuleName = "Limitless.Logger"
+IncludeCallSite = true
