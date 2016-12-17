@@ -12,11 +12,15 @@
 */
 
 using System;
+using System.Linq;
+using System.Reflection;
 
 using Nancy.Hosting.Self;
 
 using Limitless.Config;
 using Limitless.Managers;
+using Limitless.Runtime.Types;
+using Limitless.Runtime.Attributes;
 using Limitless.Runtime.Interfaces;
 
 namespace Limitless
@@ -34,7 +38,7 @@ namespace Limitless
         /// Manager of the modules.
         /// </summary>
         private ModuleManager _moduleManager;
-        
+
         /// <summary>
         /// Constructor taking the configuration to be used.
         /// </summary>
@@ -50,42 +54,42 @@ namespace Limitless
             foreach (string moduleName in settings.Core.EnabledModules)
             {
                 IModule module = _moduleManager.Load(moduleName);
-                if (module != null)
+                if (module == null)
                 {
-                    _log.Info($"Loaded module '{moduleName}'. Checking interface types...");
-
-                    if (module is ILogger)
-                    {
-                        _log = (ILogger)module;
-                        _log.Info($"Loaded module '{moduleName}' implements ILogger, replaced Bootstrap logger");
-                    }
-                    else if (module is IUIModule)
-                    {
-                        // Multiple UI modules is allowed, we can add all their paths
-                        IUIModule ui = module as IUIModule;
-                        string contentPath = ui.GetContentPath();
-                        if (RouteManager.Instance.ContentRoutes.Contains(contentPath))
-                        {
-                            _log.Critical($"an IUIModule previously loaded already uses the content path {contentPath}");
-                            throw new NotSupportedException($"an IUIModule previously loaded already uses the content path {contentPath}");
-                        }
-                        RouteManager.Instance.ContentRoutes.Add(contentPath);
-                    }
-
+                    _log.Error($"Unable to load module '{moduleName}'");
+                    continue;
                 }
-                
 
-                // Check for APIRouteAttributes and add the routes
+                _log.Info($"Loaded module '{moduleName}'. Checking interface types...");
+
+                if (module is ILogger)
+                {
+                    _log = (ILogger)module;
+                    _log.Info($"Loaded module '{moduleName}' implements ILogger, replaced Bootstrap logger");
+                }
+                else if (module is IUIModule)
+                {
+                    // Multiple UI modules is allowed, we can add all their paths
+                    IUIModule ui = module as IUIModule;
+                    string contentPath = ui.GetContentPath();
+                    if (RouteManager.Instance.ContentRoutes.Contains(contentPath))
+                    {
+                        _log.Critical($"an IUIModule previously loaded already uses the content path {contentPath}");
+                        throw new NotSupportedException($"an IUIModule previously loaded already uses the content path {contentPath}");
+                    }
+                    RouteManager.Instance.ContentRoutes.Add(contentPath);
+                }
+                // TODO: Add decorating to interfaces with required paths
 
 
-                // Get the methods marked as APIRoutes for extending the API
-                /*MethodInfo[] methods = module.GetType().GetMethods()
+                // Check for APIRouteAttributes and add the routes that extend the API
+                MethodInfo[] methods = module.GetType().GetMethods()
                         .Where(m => m.GetCustomAttributes(typeof(APIRouteAttribute), false).Length > 0)
                         .ToArray();
 
                 foreach (MethodInfo methodInfo in methods)
                 {
-                    APIRouteAttribute attributes = (APIRouteAttribute)Attribute.GetCustomAttribute(methodInfo, typeof(APIRouteAttribute));
+                    APIRouteAttribute attributes = Attribute.GetCustomAttribute(methodInfo, typeof(APIRouteAttribute)) as APIRouteAttribute;
                     APIRoute extendHandler = new APIRoute();
                     extendHandler.Path = attributes.Path;
                     extendHandler.Method = attributes.Method;
@@ -96,18 +100,9 @@ namespace Limitless
                         return result;
                     };
                     RouteManager.Instance.Routes.Add(extendHandler);
-                    log.Debug($"Added API route '{extendHandler.Path}'");
+                    _log.Debug($"Added API route '{extendHandler.Path}' for module '{moduleName}'");
                 }
-
-                // I need the content routes if this is a UI module
-                if (typeof(IUIModule).IsAssignableFrom(module.GetType()))
-                {
-                    IUIModule uiModule = (IUIModule)module;
-                    RouteManager.Instance.ContentRoutes.Add(uiModule.GetContentPath());
-                    log.Debug($"Added Content route '{uiModule.GetContentPath()}'");
-                }
-                */
-            }           
+            }
         }
 
         /// <summary>
