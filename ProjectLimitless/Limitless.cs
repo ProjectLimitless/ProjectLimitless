@@ -74,8 +74,8 @@ namespace Limitless
                     string contentPath = ui.GetContentPath();
                     if (RouteManager.Instance.ContentRoutes.Contains(contentPath))
                     {
-                        _log.Critical($"an IUIModule previously loaded already uses the content path {contentPath}");
-                        throw new NotSupportedException($"an IUIModule previously loaded already uses the content path {contentPath}");
+                        _log.Critical($"Previously loaded IUIModule already uses the content path {contentPath}");
+                        throw new NotSupportedException($"Previously loaded IUIModule already uses the content path {contentPath}");
                     }
                     RouteManager.Instance.ContentRoutes.Add(contentPath);
                 }
@@ -99,8 +99,14 @@ namespace Limitless
                         dynamic result = (dynamic)methodInfo.Invoke(module, new object[] { input });
                         return result;
                     };
-                    RouteManager.Instance.Routes.Add(extendHandler);
-                    _log.Debug($"Added API route '{extendHandler.Path}' for module '{moduleName}'");
+                    if (RouteManager.Instance.AddRoute(extendHandler))
+                    {
+                        _log.Debug($"Added API route '{extendHandler.Path}' for module '{moduleName}'");
+                    }
+                    else
+                    {
+                        _log.Warning($"API route '{extendHandler.Path}' for module '{moduleName}' could not be added");
+                    }
                 }
             }
         }

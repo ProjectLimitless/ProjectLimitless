@@ -66,5 +66,23 @@ namespace Limitless.Managers
             Routes = new List<APIRoute>();
             ContentRoutes = new List<string>();
         }
+
+        /// <summary>
+        /// Adds a route to the API.
+        /// </summary>
+        /// <param name="route">The route to add</param>
+        /// <returns>true if added, false otherwise</returns>
+        public bool AddRoute(APIRoute route)
+        {
+            foreach (APIRoute loadedRoute in Routes)
+            {
+                if ((loadedRoute.Path == route.Path) && (loadedRoute.Method == route.Method))
+                {
+                    return false;
+                }
+            }
+            Routes.Add(route);
+            return true;
+        }
     }
 }
