@@ -49,9 +49,33 @@ namespace Limitless
             _moduleManager = new ModuleManager(settings.FullConfiguration, _log);
             foreach (string moduleName in settings.Core.EnabledModules)
             {
+                IModule module = _moduleManager.Load(moduleName);
+                if (module != null)
+                {
+                    _log.Info($"Loaded module '{moduleName}'. Checking interface types...");
 
-                _moduleManager.Load(moduleName);
+                    if (module is ILogger)
+                    {
+                        _log = (ILogger)module;
+                        _log.Info($"Loaded module '{moduleName}' implements ILogger, replaced Bootstrap logger");
+                    }
+                    else if (module is IUIModule)
+                    {
+                        // Multiple UI modules is allowed, we can add all their paths
+                        IUIModule ui = module as IUIModule;
+                        string contentPath = ui.GetContentPath();
+                        if (RouteManager.Instance.ContentRoutes.Contains(contentPath))
+                        {
+                            _log.Critical($"an IUIModule previously loaded already uses the content path {contentPath}");
+                            throw new NotSupportedException($"an IUIModule previously loaded already uses the content path {contentPath}");
+                        }
+                        RouteManager.Instance.ContentRoutes.Add(contentPath);
+                    }
+
+                }
                 
+
+                // Check for APIRouteAttributes and add the routes
 
 
                 // Get the methods marked as APIRoutes for extending the API
@@ -83,12 +107,6 @@ namespace Limitless
                     log.Debug($"Added Content route '{uiModule.GetContentPath()}'");
                 }
                 */
-            }
-
-            // If a new logging module has been loaded, rather use it
-            if (_moduleManager.Modules.ContainsKey(typeof(ILogger)))
-            {
-                _log = (ILogger)_moduleManager.Modules[typeof(ILogger)];
             }           
         }
 

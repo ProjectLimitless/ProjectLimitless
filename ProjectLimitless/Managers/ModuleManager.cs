@@ -30,9 +30,9 @@ namespace Limitless.Managers
     public class ModuleManager
     {
         /// <summary>
-        /// Gets the collection of loaded modules.
+        /// Gets the collection of loaded modules per interface type.
         /// </summary>
-        public Dictionary<Type, IModule> Modules { get; private set; }
+        public Dictionary<Type, List<IModule>> Modules { get; private set; }
 
         /// <summary>
         /// The logger.
@@ -46,6 +46,11 @@ namespace Limitless.Managers
         /// Path the to modules directory.
         /// </summary>
         private string _modulesPath;
+        /// <summary>
+        /// A list containing interfaces that may only have
+        /// one implementation module loaded.
+        /// </summary>
+        private List<Type> _singularModules;
             
         /// <summary>
         /// Handles loading, unloading and verifying.
@@ -54,12 +59,15 @@ namespace Limitless.Managers
         /// <param name="log">The logger to use</param>
         public ModuleManager(TomlTable moduleConfigurations, ILogger log)
         {
-            Modules = new Dictionary<Type, IModule>();
+            Modules = new Dictionary<Type, List<IModule>>();
 
             _log = log;
             _moduleConfigurations = moduleConfigurations;
             // Hard-coding the path name to make life easier for Unattended upgrades.
             _modulesPath = "modules";
+            _singularModules = new List<Type>{
+                typeof(ILogger)
+            };
         }
 
         /// <summary>
@@ -68,7 +76,8 @@ namespace Limitless.Managers
         /// <param name="moduleName">The name of the module to load</param>
         /// <exception cref="DllNotFoundException">Thrown when the module could not be found</exception>
         /// <exception cref="NotSupportedException">Thrown when no exported type implements IModule</exception>
-        public void Load(string moduleName)
+        /// <returns>The loaded module</returns>
+        public IModule Load(string moduleName)
         {
             string moduleFilename = moduleName + ".dll";
             _log.Trace($"Checking if module {moduleFilename} is valid and loadable");
@@ -99,16 +108,20 @@ namespace Limitless.Managers
             Type moduleType = availableModules.First();
             IModule module = Construct(moduleType);
             Configure(moduleName, module);
-            Type addedType = AddModule(module);
-            if (addedType != null)
+            bool loaded = AddModule(module);
+            if (loaded)
             {
-                if (addedType == typeof(ILogger))
+                _log.Info($"Module '{moduleName}' has been loaded and configured");
+                if (module is ILogger)
                 {
-                    _log = (ILogger)module;
+                    _log = module as ILogger;
                 }
             }
-            
-            _log.Info($"Module '{moduleName}' has been loaded and configured");
+            else
+            {
+                _log.Error($"The module '{moduleName}' was not registered by the ModuleLoader. Please check logs.");
+            }
+            return module;
         }
 
         /// <summary>
@@ -122,7 +135,7 @@ namespace Limitless.Managers
             ConstructorInfo selectedConstructor = null;
             ConstructorInfo[] allConstructors = moduleType.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
             foreach (ConstructorInfo constructor in allConstructors)
-            {
+            {                
                 // Check if we have enough loaded modules to satisfy this constructor
                 bool canSatisfy = true;
                 ParameterInfo[] parameters = constructor.GetParameters();
@@ -154,7 +167,14 @@ namespace Limitless.Managers
             List<object> constructorParameters = new List<object>();
             foreach (ParameterInfo parameter in selectedConstructor.GetParameters())
             {
-                constructorParameters.Add(Modules[parameter.ParameterType]);
+                if (Modules.ContainsKey(parameter.ParameterType))
+                {
+                    if (Modules[parameter.ParameterType].Count >= 1)
+                    {
+                        // Only the first loaded module will be injected
+                        constructorParameters.Add(Modules[parameter.ParameterType][0]);
+                    }
+                }
             }
 
             dynamic instance = Activator.CreateInstance(moduleType, constructorParameters.ToArray());
@@ -193,8 +213,8 @@ namespace Limitless.Managers
         /// for injection into other modules.
         /// </summary>
         /// <param name="module">The module to add</param>
-        /// <returns>The interface type added, null if the interface could not be determined</returns>
-        private Type AddModule(IModule module)
+        /// <returns>true if the module was loaded, false otherwise</returns>
+        private bool AddModule(IModule module)
         {
             var interfaces = AppDomain.CurrentDomain.GetAssemblies()
                        .SelectMany(t => t.GetTypes())
@@ -205,19 +225,31 @@ namespace Limitless.Managers
                             t.Name != "IModule");
             if (interfaces == null)
             {
-                return null;
+                return false;
             }
-            Type addedType = null;
+            bool added = false;
             foreach (Type type in interfaces.ToArray())
             {       
                 // A module can implement multiple interfaces
                 if (type.IsAssignableFrom(module.GetType()))
                 {
-                    Modules.Add(type, module);
-                    addedType = type;
+                    if (Modules.ContainsKey(type) == false)
+                    {
+                        Modules.Add(type, new List<IModule>());
+                    }
+                    if (_singularModules.Contains(type))
+                    {
+                        if (Modules[type].Count == 1)
+                        {
+                            _log.Warning($"Module type '{type.ToString()}' already has a module loaded. '{module.ToString()}' will not be loaded");
+                            continue;
+                        }
+                    }
+                    Modules[type].Add(module);
+                    added = true;
                 }
             }
-            return addedType;
+            return added;
         }
     }
 }

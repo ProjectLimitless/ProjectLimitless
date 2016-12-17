@@ -18,11 +18,11 @@ using Limitless.Runtime.Interfaces;
 namespace Limitless
 {
     class Program
-    {
-       
+    {  
         static void Main(string[] args)
         {
             ILogger log = new BootstrapLogger();
+            log.Warning("Bootstrap logger in use. This logger does not support hiding logging levels - everything is displayed");
             log.Info("Loading Project Limitless...");
 
             log.Debug("Loading configuration...");
