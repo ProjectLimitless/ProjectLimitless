@@ -69,10 +69,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Builtin\AdminModule.cs" />
     <Compile Include="Config\CoreSettings.cs" />
     <Compile Include="Config\LimitlessSettings.cs" />
     <Compile Include="ComposedAPI.cs" />
     <Compile Include="BootstrapLogger.cs" />
+    <Compile Include="Extensions\IModuleExtensions.cs" />
     <Compile Include="Managers\RouteManager.cs" />
     <Compile Include="LimitlessNancyBootstrapper.cs" />
     <Compile Include="Managers\ModuleManager.cs" />
@@ -106,6 +108,7 @@
       <Name>Limitless.Runtime</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

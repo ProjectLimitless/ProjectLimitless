@@ -12,15 +12,15 @@
 */
 
 using System;
-using System.Linq;
-using System.Reflection;
+using System.Collections.Generic;
 
 using Nancy.Hosting.Self;
 
 using Limitless.Config;
+using Limitless.Builtin;
 using Limitless.Managers;
+using Limitless.Extensions;
 using Limitless.Runtime.Types;
-using Limitless.Runtime.Attributes;
 using Limitless.Runtime.Interfaces;
 
 namespace Limitless
@@ -38,6 +38,11 @@ namespace Limitless
         /// Manager of the modules.
         /// </summary>
         private ModuleManager _moduleManager;
+        /// <summary>
+        /// Provides administration functions.
+        /// TODO: Mode to separate module?
+        /// </summary>
+        private AdminModule _adminModule;
 
         /// <summary>
         /// Constructor taking the configuration to be used.
@@ -84,34 +89,30 @@ namespace Limitless
                 }
                 // TODO: Add decorating to interfaces with required paths
 
-
-                // Check for APIRouteAttributes and add the routes that extend the API
-                MethodInfo[] methods = module.GetType().GetMethods()
-                        .Where(m => m.GetCustomAttributes(typeof(APIRouteAttribute), false).Length > 0)
-                        .ToArray();
-
-                foreach (MethodInfo methodInfo in methods)
+                List<APIRoute> moduleRoutes = module.GetAPIRoutes();
+                if (RouteManager.Instance.AddRoutes(moduleRoutes))
                 {
-                    APIRouteAttribute attributes = Attribute.GetCustomAttribute(methodInfo, typeof(APIRouteAttribute)) as APIRouteAttribute;
-                    APIRoute extendHandler = new APIRoute();
-                    extendHandler.Path = attributes.Path;
-                    extendHandler.Method = attributes.Method;
-                    extendHandler.RequiresAuthentication = attributes.RequiresAuthentication;
-                    extendHandler.Handler = (dynamic input) =>
-                    {
-                        dynamic result = (dynamic)methodInfo.Invoke(module, new object[] { input });
-                        return result;
-                    };
-                    if (RouteManager.Instance.AddRoute(extendHandler))
-                    {
-                        _log.Debug($"Added API route '{extendHandler.Path}' for module '{moduleName}'");
-                    }
-                    else
-                    {
-                        _log.Warning($"API route '{extendHandler.Path}' for module '{moduleName}' could not be added");
-                    }
+                    _log.Info($"Added {moduleRoutes.Count} new API routes for module '{moduleName}'");
+                }
+                else
+                {
+                    _log.Warning($"Unable to add all API routes for module '{moduleName}'. Possible duplicate route and method.");
                 }
             }
+
+            //TODO: Setup the admin API - move to own module
+            _adminModule = new AdminModule(_log);
+            List<APIRoute> routes = ((IModule)_adminModule).GetAPIRoutes();
+            if (RouteManager.Instance.AddRoutes(routes))
+            {
+                _log.Info($"Added {routes.Count} new API routes for module 'AdminModule'");
+            }
+            else
+            {
+                _log.Warning($"Unable to add all API routes for module 'AdminModule'. Possible duplicate route and method.");
+            }
+
+            //TODO: Setup the diagnostics
         }
 
         /// <summary>
@@ -121,7 +122,8 @@ namespace Limitless
         {
             HostConfiguration config = new HostConfiguration();
             config.UrlReservations.CreateAutomatically = true;
-            using (var host = new NancyHost(config, new Uri("http://localhost:1234")))
+            // TODO: Use API host from config
+            using (var host = new NancyHost(config, new Uri("http://192.168.1.3:1234")))
             {
                 host.Start();
                 _log.Info("Running on :1234");

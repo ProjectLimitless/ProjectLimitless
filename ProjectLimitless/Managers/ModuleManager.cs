@@ -123,7 +123,7 @@ namespace Limitless.Managers
             }
             return module;
         }
-
+        
         /// <summary>
         /// Construct moduleType using the best matching constructor and 
         /// injecting as many modules as possible.

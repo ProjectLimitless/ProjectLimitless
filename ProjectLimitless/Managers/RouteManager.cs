@@ -99,6 +99,24 @@ namespace Limitless.Managers
         }
 
         /// <summary>
+        /// Adds multiple routes to the API. Stops at the 
+        /// first error when loading a route.
+        /// </summary>
+        /// <param name="routes">The list of routes to add</param>
+        /// <returns>true if everything was added, false otherwise</returns>
+        public bool AddRoutes(List<APIRoute> routes)
+        {
+            foreach (APIRoute route in routes)
+            {
+                if (AddRoute(route) == false)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        /// <summary>
         /// Gets the list of registred content routes.
         /// </summary>
         /// <returns>The list of routes</returns>
