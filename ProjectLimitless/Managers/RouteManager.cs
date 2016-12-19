@@ -25,12 +25,16 @@ namespace Limitless.Managers
     {
         /// <summary>
         /// The collection of routes to load.
+        /// 
+        /// Private to add checks to adding routes.
         /// </summary>
-        public List<APIRoute> Routes { get; }
+        private List<APIRoute> _routes;
         /// <summary>
         /// The collection of content routes to load.
+        ///
+        /// Private to add checks to adding content routes.
         /// </summary>
-        public List<string> ContentRoutes { get; }
+        private List<string> _contentRoutes;
         /// <summary>
         /// Holds the instance.
         /// </summary>
@@ -63,8 +67,17 @@ namespace Limitless.Managers
         /// </summary>
         RouteManager()
         {
-            Routes = new List<APIRoute>();
-            ContentRoutes = new List<string>();
+            _routes = new List<APIRoute>();
+            _contentRoutes = new List<string>();
+        }
+
+        /// <summary>
+        /// Gets the list of registered API routes.
+        /// </summary>
+        /// <returns>The list of routes</returns>
+        public List<APIRoute> GetRoutes()
+        {
+            return _routes;
         }
 
         /// <summary>
@@ -74,14 +87,38 @@ namespace Limitless.Managers
         /// <returns>true if added, false otherwise</returns>
         public bool AddRoute(APIRoute route)
         {
-            foreach (APIRoute loadedRoute in Routes)
+            foreach (APIRoute loadedRoute in _routes)
             {
                 if ((loadedRoute.Path == route.Path) && (loadedRoute.Method == route.Method))
                 {
                     return false;
                 }
             }
-            Routes.Add(route);
+            _routes.Add(route);
+            return true;
+        }
+
+        /// <summary>
+        /// Gets the list of registred content routes.
+        /// </summary>
+        /// <returns>The list of routes</returns>
+        public List<string> GetContentRoutes()
+        {
+            return _contentRoutes;
+        }
+
+        /// <summary>
+        /// Adds a content path to the API.
+        /// </summary>
+        /// <param name="path">The path to add</param>
+        /// <returns>true if added, false otherwise</returns>
+        public bool AddContentRoute(string path)
+        {
+            if (_contentRoutes.Contains(path))
+            {
+                return false;
+            }
+            _contentRoutes.Add(path);
             return true;
         }
     }

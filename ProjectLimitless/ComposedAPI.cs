@@ -64,7 +64,7 @@ namespace Limitless
         /// <summary>
         /// Standard Constructor.
         /// </summary>
-        public ComposedAPI(RouteManager loader)
+        public ComposedAPI(RouteManager routeManager)
         {
             // Setup the JWT authentication for routes that require it.
             var configuration = new StatelessAuthenticationConfiguration(ctx =>
@@ -87,7 +87,7 @@ namespace Limitless
             });
             StatelessAuthentication.Enable(this, configuration);
 
-            foreach (APIRoute route in loader.Routes)
+            foreach (APIRoute route in routeManager.GetRoutes())
             {
                 switch (route.Method)
                 {

@@ -72,12 +72,15 @@ namespace Limitless
                     // Multiple UI modules is allowed, we can add all their paths
                     IUIModule ui = module as IUIModule;
                     string contentPath = ui.GetContentPath();
-                    if (RouteManager.Instance.ContentRoutes.Contains(contentPath))
+                    if (RouteManager.Instance.AddContentRoute(contentPath))
                     {
-                        _log.Critical($"Previously loaded IUIModule already uses the content path {contentPath}");
-                        throw new NotSupportedException($"Previously loaded IUIModule already uses the content path {contentPath}");
+                        _log.Debug($"Added content path '{contentPath}' for module '{moduleName}'");
                     }
-                    RouteManager.Instance.ContentRoutes.Add(contentPath);
+                    else
+                    {
+                        _log.Critical($"Previously loaded IUIModule already uses the content path '{contentPath}' specified in '{moduleName}'");
+                        throw new NotSupportedException($"Previously loaded IUIModule already uses the content path '{contentPath}' specified in '{moduleName}'");
+                    }
                 }
                 // TODO: Add decorating to interfaces with required paths
 

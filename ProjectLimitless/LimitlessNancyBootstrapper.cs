@@ -41,7 +41,7 @@ namespace Limitless
         protected override void ConfigureConventions(NancyConventions conventions)
         {
             base.ConfigureConventions(conventions);
-            foreach (string contentRoute in RouteManager.Instance.ContentRoutes)
+            foreach (string contentRoute in RouteManager.Instance.GetContentRoutes())
             {
                 conventions.StaticContentsConventions.Add(StaticContentConventionBuilder.AddDirectory(contentRoute, contentRoute));
             }
