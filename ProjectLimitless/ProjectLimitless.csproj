@@ -70,6 +70,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Builtin\AdminModule.cs" />
+    <Compile Include="Config\CoreAPISettings.cs" />
     <Compile Include="Config\CoreSettings.cs" />
     <Compile Include="Config\LimitlessSettings.cs" />
     <Compile Include="ComposedAPI.cs" />

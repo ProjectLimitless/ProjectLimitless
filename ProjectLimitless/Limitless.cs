@@ -22,6 +22,8 @@ using Limitless.Managers;
 using Limitless.Extensions;
 using Limitless.Runtime.Types;
 using Limitless.Runtime.Interfaces;
+using System.Net;
+using System.Net.Sockets;
 
 namespace Limitless
 {
@@ -43,6 +45,10 @@ namespace Limitless
         /// TODO: Mode to separate module?
         /// </summary>
         private AdminModule _adminModule;
+        /// <summary>
+        /// The loaded settings.
+        /// </summary>
+        private LimitlessSettings _settings;
 
         /// <summary>
         /// Constructor taking the configuration to be used.
@@ -50,6 +56,7 @@ namespace Limitless
         /// <param name="settings">The configuration to be used</param>
         public Limitless(LimitlessSettings settings, ILogger log)
         {
+            _settings = settings;
             _log = log;
             log.Debug("Configuring Project Limitless...");
             log.Info($"Settings| Default system name set as {settings.Core.Name}");
@@ -122,13 +129,60 @@ namespace Limitless
         {
             HostConfiguration config = new HostConfiguration();
             config.UrlReservations.CreateAutomatically = true;
-            // TODO: Use API host from config
-            using (var host = new NancyHost(config, new Uri("http://192.168.1.3:1234")))
+            config.RewriteLocalhost = false;
+
+            List<Uri> bindingAddresses = new List<Uri>();
+            // If the host is set to 0.0.0.0, we bind to all the available IP addresses
+            if (_settings.Core.API.Host == "0.0.0.0")
+            {
+                bindingAddresses = GetUriParams(_settings.Core.API.Port);
+            }
+            else
+            {
+                bindingAddresses.Add(new Uri($"http://{_settings.Core.API.Host}:{_settings.Core.API.Port}"));
+            }
+
+            using (var host = new NancyHost(config, bindingAddresses.ToArray()))
             {
                 host.Start();
-                _log.Info("Running on :1234");
+                _log.Info($"API is running on '{ String.Join(", ", bindingAddresses) }'");
                 Console.ReadLine();
             }
+        }
+
+        /// <summary>
+        /// Returns all the available IP addresses for the host.
+        /// 
+        /// Slightly modified from the original version available at
+        /// https://www.codeproject.com/articles/694907/embed-a-web-server-in-a-windows-service.
+        /// </summary>
+        /// <param name="port">The port to bind to</param>
+        /// <returns>An array of <see cref="Uri"/> with bindable addresses</returns>
+        private List<Uri> GetUriParams(int port)
+        {
+            var uriParams = new List<Uri>();
+            string hostName = Dns.GetHostName();
+
+            // Host name URI
+            string hostNameUri = string.Format("http://{0}:{1}", Dns.GetHostName(), port);
+            uriParams.Add(new Uri(hostNameUri));
+
+            // Host address URI(s)
+            var hostEntry = Dns.GetHostEntry(hostName);
+            foreach (var ipAddress in hostEntry.AddressList)
+            {
+                if (ipAddress.AddressFamily == AddressFamily.InterNetwork)  // IPv4 addresses only
+                {
+                    var addrBytes = ipAddress.GetAddressBytes();
+                    string hostAddressUri = string.Format("http://{0}.{1}.{2}.{3}:{4}",
+                    addrBytes[0], addrBytes[1], addrBytes[2], addrBytes[3], port);
+                    uriParams.Add(new Uri(hostAddressUri));
+                }
+            }
+
+            // Localhost URI
+            uriParams.Add(new Uri(string.Format("http://localhost:{0}", port)));
+            return uriParams;
         }
     }
 }

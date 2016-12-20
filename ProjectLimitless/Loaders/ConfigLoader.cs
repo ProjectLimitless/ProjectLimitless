@@ -58,7 +58,7 @@ namespace Limitless.Loaders
             {
                 throw new FileNotFoundException($"The User.toml configuration file could not be found at '{userFilePath}'.");
             }
-            userConfigString= File.ReadAllText(userFilePath);
+            userConfigString = File.ReadAllText(userFilePath);
 
             string moduleConfigsString = "";
             string[] moduleConfigFiles = Directory.GetFiles(ModuleConfigurationPath, "*.toml");
@@ -68,7 +68,8 @@ namespace Limitless.Loaders
             }
             foreach (string configPath in moduleConfigFiles)
             {
-                moduleConfigsString += File.ReadAllText(configPath);
+                // Add newlines between configs to parse successfully
+                moduleConfigsString += "\r\n" + File.ReadAllText(configPath);
             }
 
             string combinedConfigsString = coreConfigString + moduleConfigsString;

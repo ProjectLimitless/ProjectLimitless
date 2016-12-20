@@ -14,29 +14,26 @@
 namespace Limitless.Config
 {
     /// <summary>
-    /// Core settings.
+    /// Core API settings.
     /// </summary>
-    public class CoreSettings
+    public class CoreAPISettings
     {
         /// <summary>
-        /// The default name of the system. Also used as the trigger word.
+        /// The host IP to bind to.
         /// </summary>
-        public string Name { get; set; }
+        public string Host { get; set; }
         /// <summary>
-        /// List of modules to load.
+        /// The port to bind on.
         /// </summary>
-        public string[] EnabledModules { get; set; }
-        /// <summary>
-        /// API hosting settings.
-        /// </summary>
-        public CoreAPISettings API { get; set; }
+        public int Port { get; set; }
 
         /// <summary>
-        /// Standard constructor.
+        /// Default constructor.
         /// </summary>
-        public CoreSettings()
+        public CoreAPISettings()
         {
-            API = new CoreAPISettings();
+            Host = "0.0.0.0";
+            Port = 8080;
         }
     }
 }
