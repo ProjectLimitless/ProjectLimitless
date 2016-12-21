@@ -12,7 +12,8 @@
 */
 
 using System;
-using System.Collections.Generic;
+using System.Net;
+using System.Security.Claims;
 
 using Nancy;
 using Nancy.Security;
@@ -35,28 +36,7 @@ namespace Limitless
         public string sub;
         public long exp;
     }
-
-    /// <summary>
-    /// TODO: Move this
-    /// </summary>
-    public class TestUser : IUserIdentity
-    {
-        public IEnumerable<string> Claims
-        {
-            get
-            {
-                return new string[] { "one" };
-            }
-        }
-
-        public string UserName
-        {
-            get
-            {
-                return "TestUSer";
-            }
-        }
-    }
+    
 
     /// <summary>
     /// The core API. Composed of the base and all the
@@ -79,7 +59,7 @@ namespace Limitless
                     var tokenExpires = DateTime.FromBinary(payload.exp);
                     if (tokenExpires > DateTime.UtcNow)
                     {
-                        return new TestUser();
+                        return new ClaimsPrincipal(new HttpListenerBasicIdentity(payload.sub, null));
                     }
                     return null;
                 }
@@ -95,16 +75,16 @@ namespace Limitless
                 switch (route.Method)
                 {
                     case HttpMethod.Get:
-                        Get[route.Path] = BuildComposedFunction(route);
+                        Get(route.Path, BuildComposedFunction(route));
                         break;
                     case HttpMethod.Post:
-                        Post[route.Path] = BuildComposedFunction(route);
+                        Post(route.Path, BuildComposedFunction(route));
                         break;
                     case HttpMethod.Put:
-                        Put[route.Path] = BuildComposedFunction(route);
+                        Put(route.Path, BuildComposedFunction(route));
                         break;
                     case HttpMethod.Delete:
-                        Delete[route.Path] = BuildComposedFunction(route);
+                        Delete(route.Path, BuildComposedFunction(route));
                         break;
                 }
             }

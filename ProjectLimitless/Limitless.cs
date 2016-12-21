@@ -159,7 +159,6 @@ namespace Limitless
         {
             HostConfiguration config = new HostConfiguration();
             config.UrlReservations.CreateAutomatically = true;
-            config.RewriteLocalhost = false;
 
             List<Uri> bindingAddresses = new List<Uri>();
             // If the host is set to 0.0.0.0, we bind to all the available IP addresses

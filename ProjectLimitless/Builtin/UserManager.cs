@@ -51,6 +51,10 @@ namespace Limitless.Builtin
         /// </summary>
         public BaseUser Login(string username, string password)
         {
+            // TODO: UserManager should call IdentityProvider as implemented in a seperate module
+            // TODO: Continue here
+
+
             // TODO: Find a clean way to handle required parameters
             if (username == string.Empty || username == null)
             {
