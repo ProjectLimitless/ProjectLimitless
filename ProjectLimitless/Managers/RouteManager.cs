@@ -81,12 +81,15 @@ namespace Limitless.Managers
         }
 
         /// <summary>
-        /// Adds a route to the API.
+        /// Adds a route to the API. Prepends '/api' to the path.
         /// </summary>
         /// <param name="route">The route to add</param>
         /// <returns>true if added, false otherwise</returns>
         public bool AddRoute(APIRoute route)
         {
+            // Prepending '/api' to the path to ensure API routes
+            // don't clash with static routes
+            route.Path = $"/api{route.Path}";
             foreach (APIRoute loadedRoute in _routes)
             {
                 if ((loadedRoute.Path == route.Path) && (loadedRoute.Method == route.Method))
@@ -100,7 +103,7 @@ namespace Limitless.Managers
 
         /// <summary>
         /// Adds multiple routes to the API. Stops at the 
-        /// first error when loading a route.
+        /// first error when loading a route. Prepends '/api' to each path.
         /// </summary>
         /// <param name="routes">The list of routes to add</param>
         /// <returns>true if everything was added, false otherwise</returns>

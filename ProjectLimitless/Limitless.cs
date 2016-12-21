@@ -99,6 +99,11 @@ namespace Limitless
                 List<APIRoute> moduleRoutes = module.GetAPIRoutes();
                 if (RouteManager.Instance.AddRoutes(moduleRoutes))
                 {
+                    // TODO: Remove - only for testing
+                    foreach (APIRoute route in moduleRoutes)
+                    {
+                        _log.Debug($" Added route '{route.Path}' for module '{moduleName}'");
+                    }
                     _log.Info($"Added {moduleRoutes.Count} new API routes for module '{moduleName}'");
                 }
                 else
@@ -112,6 +117,11 @@ namespace Limitless
             List<APIRoute> routes = ((IModule)_adminModule).GetAPIRoutes();
             if (RouteManager.Instance.AddRoutes(routes))
             {
+                // TODO: Remove - only for testing
+                foreach (APIRoute route in routes)
+                {
+                    _log.Debug($" Added route '{route.Path}' for module 'AdminModule'");
+                }
                 _log.Info($"Added {routes.Count} new API routes for module 'AdminModule'");
             }
             else
