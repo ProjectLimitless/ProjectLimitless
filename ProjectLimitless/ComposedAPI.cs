@@ -16,7 +16,10 @@ using System.Collections.Generic;
 
 using Nancy;
 using Nancy.Security;
+using Nancy.Extensions;
 using Nancy.Authentication.Stateless;
+
+using Newtonsoft.Json;
 
 using Limitless.Managers;
 using Limitless.Runtime.Enums;
@@ -114,14 +117,15 @@ namespace Limitless
         /// <returns>The constructed function</returns>
         private Func<dynamic, dynamic> BuildComposedFunction(APIRoute route)
         {
-            return (dynamic input) =>
+            return (dynamic parameters) =>
             {
                 if (route.RequiresAuthentication)
                 {
                     this.RequiresAuthentication();
                     // TODO: Find a way to get this.Context.CurrentUser to the module route
                 }
-                return route.Handler(input);
+                dynamic postData = JsonConvert.DeserializeObject(Request.Body.AsString());
+                return route.Handler(parameters, postData);
             };
         }
     }

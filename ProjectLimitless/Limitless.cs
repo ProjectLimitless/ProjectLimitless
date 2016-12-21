@@ -24,6 +24,7 @@ using Limitless.Runtime.Types;
 using Limitless.Runtime.Interfaces;
 using System.Net;
 using System.Net.Sockets;
+using Limitless.Runtime.Enums;
 
 namespace Limitless
 {
@@ -41,14 +42,20 @@ namespace Limitless
         /// </summary>
         private ModuleManager _moduleManager;
         /// <summary>
+        /// The loaded settings.
+        /// </summary>
+        private LimitlessSettings _settings;
+
+        /// <summary>
         /// Provides administration functions.
         /// TODO: Mode to separate module?
         /// </summary>
         private AdminModule _adminModule;
         /// <summary>
-        /// The loaded settings.
+        /// Provides user management functions.
+        /// TODO: Mode to separate module?
         /// </summary>
-        private LimitlessSettings _settings;
+        private IUserManager _userManager;
 
         /// <summary>
         /// Constructor taking the configuration to be used.
@@ -102,7 +109,7 @@ namespace Limitless
                     // TODO: Remove - only for testing
                     foreach (APIRoute route in moduleRoutes)
                     {
-                        _log.Debug($" Added route '{route.Path}' for module '{moduleName}'");
+                        _log.Debug($"Added route '{route.Path}' for module '{moduleName}'");
                     }
                     _log.Info($"Added {moduleRoutes.Count} new API routes for module '{moduleName}'");
                 }
@@ -120,7 +127,7 @@ namespace Limitless
                 // TODO: Remove - only for testing
                 foreach (APIRoute route in routes)
                 {
-                    _log.Debug($" Added route '{route.Path}' for module 'AdminModule'");
+                    _log.Debug($"Added route '{route.Path}' for module 'AdminModule'");
                 }
                 _log.Info($"Added {routes.Count} new API routes for module 'AdminModule'");
             }
@@ -128,6 +135,19 @@ namespace Limitless
             {
                 _log.Warning($"Unable to add all API routes for module 'AdminModule'. Possible duplicate route and method.");
             }
+
+            //TODO: Setup the user manager API - move to own module
+            _userManager = new UserManager(_log);
+            // For the IUserManager interface we need to add routes to the API
+            APIRoute userRoute = new APIRoute();
+            userRoute.Path = "/login";
+            userRoute.Description = "Log a user in";
+            userRoute.Method = HttpMethod.Post;
+            userRoute.Handler = (dynamic parameters, dynamic postData) =>
+            {
+                return _userManager.Login((string)postData.username, (string)postData.password);
+            };
+            RouteManager.Instance.AddRoute(userRoute);
 
             //TODO: Setup the diagnostics
         }

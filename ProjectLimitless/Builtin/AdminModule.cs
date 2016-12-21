@@ -48,18 +48,19 @@ namespace Limitless.Builtin
         public dynamic RoutesList(dynamic input)
         {
             List<dynamic> routes = new List<dynamic>();
-            /*foreach (APIRoute route in RouteManager.Instance.GetRoutes())
+            foreach (APIRoute route in RouteManager.Instance.GetRoutes())
             {
                 dynamic routeInfo = new ExpandoObject();
                 routeInfo.Path = route.Path;
-                routeInfo.Method = route.Method.ToString();
+                routeInfo.Method = route.Method.ToString().ToUpper();
                 routeInfo.Description = route.Description;
+                routeInfo.RequiresAuthentication = route.RequiresAuthentication;
                 if (routeInfo.Description == "")
                 {
                     routeInfo.Description = "No description provided";
                 }
                 routes.Add(routeInfo);
-            }*/
+            }
             return routes;
         }
 

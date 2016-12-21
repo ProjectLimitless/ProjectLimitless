@@ -50,18 +50,19 @@ namespace Limitless.Extensions
                 APIRoute route = new APIRoute();
                 route.Path = attributes.Path;
                 route.Method = attributes.Method;
+                route.Description = attributes.Description;
                 route.RequiresAuthentication = attributes.RequiresAuthentication;
-                route.Handler = (dynamic input) =>
+                route.Handler = (dynamic parameters, dynamic postData) =>
                 {
                     dynamic result;
                     if (handler != null)
                     {
                         // TODO: Ensure we can chain multiple methods
-                        result = handler(methodInfo.Invoke(module, new object[] { input }));
+                        result = handler(methodInfo.Invoke(module, new object[] { parameters, postData }));
                     }
                     else
                     {
-                        result = (dynamic)methodInfo.Invoke(module, new object[] { input });
+                        result = (dynamic)methodInfo.Invoke(module, new object[] { parameters, postData });
                     }
                     return result;
                 };
