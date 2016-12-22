@@ -18,7 +18,7 @@ using Limitless.Runtime.Interfaces;
 
 namespace Limitless.Builtin
 {
-    internal class UserManager : IModule, IUserManager
+    internal class LocalIdentityProvider : IModule, IIdentityProvider
     {
         /// <summary>
         /// The logger.
@@ -29,7 +29,7 @@ namespace Limitless.Builtin
         /// Standard constructor with log.
         /// </summary>
         /// <param name="log">The logger to use</param>
-        public UserManager(ILogger log)
+        public LocalIdentityProvider(ILogger log)
         {
             _log = log;
         }
@@ -51,7 +51,6 @@ namespace Limitless.Builtin
         /// </summary>
         public BaseUser Login(string username, string password)
         {
-            // TODO: UserManager should call IdentityProvider as implemented in a seperate module
             // TODO: Continue here
 
 
@@ -71,8 +70,8 @@ namespace Limitless.Builtin
                 throw new UnauthorizedAccessException("Username or password is incorrect");
             }
 
-            BaseUser user = new BaseUser(username);
-            user.FirstName = "Ass";
+            BaseUser user = new BaseUser(username, true);
+            user.Name = "Ass";
             return user;
         }
     }

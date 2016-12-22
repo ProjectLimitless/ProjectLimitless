@@ -25,6 +25,7 @@ using Newtonsoft.Json;
 using Limitless.Managers;
 using Limitless.Runtime.Enums;
 using Limitless.Runtime.Types;
+using System.Security.Principal;
 
 namespace Limitless
 {
@@ -59,7 +60,10 @@ namespace Limitless
                     var tokenExpires = DateTime.FromBinary(payload.exp);
                     if (tokenExpires > DateTime.UtcNow)
                     {
-                        return new ClaimsPrincipal(new HttpListenerBasicIdentity(payload.sub, null));
+                        // TODO: This function must come from IIdentityProvider and return a wrappable user object
+                        // return new ClaimsPrincipal(new BaseUser("test", true));
+                        //return new ClaimsPrincipal(new HttpListenerBasicIdentity(payload.sub, null));
+                        return null;
                     }
                     return null;
                 }
@@ -75,16 +79,16 @@ namespace Limitless
                 switch (route.Method)
                 {
                     case HttpMethod.Get:
-                        Get(route.Path, BuildComposedFunction(route));
+                        Get[route.Path] = BuildComposedFunction(route);
                         break;
                     case HttpMethod.Post:
-                        Post(route.Path, BuildComposedFunction(route));
+                        Post[route.Path] = BuildComposedFunction(route);
                         break;
                     case HttpMethod.Put:
-                        Put(route.Path, BuildComposedFunction(route));
+                        Put[route.Path] = BuildComposedFunction(route);
                         break;
                     case HttpMethod.Delete:
-                        Delete(route.Path, BuildComposedFunction(route));
+                        Delete[route.Path] = BuildComposedFunction(route);
                         break;
                 }
             }

@@ -12,6 +12,8 @@
 */
 
 using System;
+using System.Net;
+using System.Net.Sockets;
 using System.Collections.Generic;
 
 using Nancy.Hosting.Self;
@@ -22,9 +24,6 @@ using Limitless.Managers;
 using Limitless.Extensions;
 using Limitless.Runtime.Types;
 using Limitless.Runtime.Interfaces;
-using System.Net;
-using System.Net.Sockets;
-using Limitless.Runtime.Enums;
 
 namespace Limitless
 {
@@ -52,10 +51,10 @@ namespace Limitless
         /// </summary>
         private AdminModule _adminModule;
         /// <summary>
-        /// Provides user management functions.
+        /// Provides user identity functions.
         /// TODO: Mode to separate module?
         /// </summary>
-        private IUserManager _userManager;
+        private IIdentityProvider _identityProvider;
 
         /// <summary>
         /// Constructor taking the configuration to be used.
@@ -118,7 +117,7 @@ namespace Limitless
                     _log.Warning($"Unable to add all API routes for module '{moduleName}'. Possible duplicate route and method.");
                 }
             }
-
+            /*
             //TODO: Setup the admin API - move to own module
             _adminModule = new AdminModule(_log);
             List<APIRoute> routes = ((IModule)_adminModule).GetAPIRoutes();
@@ -137,7 +136,7 @@ namespace Limitless
             }
 
             //TODO: Setup the user manager API - move to own module
-            _userManager = new UserManager(_log);
+            _identityProvider = new LocalIdentityProvider(_log);
             // For the IUserManager interface we need to add routes to the API
             APIRoute userRoute = new APIRoute();
             userRoute.Path = "/login";
@@ -145,10 +144,10 @@ namespace Limitless
             userRoute.Method = HttpMethod.Post;
             userRoute.Handler = (dynamic parameters, dynamic postData) =>
             {
-                return _userManager.Login((string)postData.username, (string)postData.password);
+                return _identityProvider.Login((string)postData.username, (string)postData.password);
             };
             RouteManager.Instance.AddRoute(userRoute);
-
+            */
             //TODO: Setup the diagnostics
         }
 
