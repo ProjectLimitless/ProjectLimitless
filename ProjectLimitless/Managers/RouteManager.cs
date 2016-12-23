@@ -18,8 +18,7 @@ using Limitless.Runtime.Types;
 namespace Limitless.Managers
 {
     /// <summary>
-    /// Manages API routes. Defined as a Singleton to allow Nancy Bootstrapper
-    /// access to already defined routes.
+    /// Manages API routes.
     /// </summary>
     public class RouteManager
     {
@@ -35,37 +34,11 @@ namespace Limitless.Managers
         /// Private to add checks to adding content routes.
         /// </summary>
         private List<string> _contentRoutes;
+       
         /// <summary>
-        /// Holds the instance.
+        /// Standard constructor
         /// </summary>
-        private static RouteManager instance = null;
-        /// <summary>
-        /// Lock for singleton.
-        /// </summary>
-        private static readonly object padlock = new object();
-        
-        /// <summary>
-        /// Gets the Singleton instance of the manager.
-        /// </summary>
-        public static RouteManager Instance
-        {
-            get
-            {
-                lock (padlock)
-                {
-                    if (instance == null)
-                    {
-                        instance = new RouteManager();
-                    }
-                    return instance;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Private constructor for Singleton pattern;
-        /// </summary>
-        RouteManager()
+        public RouteManager()
         {
             _routes = new List<APIRoute>();
             _contentRoutes = new List<string>();

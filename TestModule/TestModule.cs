@@ -65,13 +65,13 @@ namespace TestModule
         }
 
         [APIRoute(Path = "/demo/ping/{name}", Method = HttpMethod.Get, RequiresAuthentication = true)]
-        public dynamic PersonalPong(dynamic parameters, dynamic postData)
+        public dynamic PersonalPong(dynamic parameters)
         {
             return $"Pong {parameters.name}";
         }
 
         [APIRoute(Path = "/demo/{version}", Method = HttpMethod.Get, Description = "Sample Route containing a version parameter")]
-        public dynamic Ass(dynamic parameters, dynamic postData)
+        public dynamic Ass(dynamic parameters)
         {
             return "Yes my demo! " + parameters.version + " (" + _instanceValue + ")";
         }

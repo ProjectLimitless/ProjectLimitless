@@ -74,6 +74,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Builtin\UserWrapper.cs" />
     <Compile Include="Builtin\LocalIdentityProvider.cs" />
     <Compile Include="Builtin\AdminModule.cs" />
     <Compile Include="Config\CoreAPISettings.cs" />
@@ -82,6 +83,7 @@
     <Compile Include="ComposedAPI.cs" />
     <Compile Include="BootstrapLogger.cs" />
     <Compile Include="Extensions\IModuleExtensions.cs" />
+    <Compile Include="Containers\CoreContainer.cs" />
     <Compile Include="Managers\RouteManager.cs" />
     <Compile Include="LimitlessNancyBootstrapper.cs" />
     <Compile Include="Managers\ModuleManager.cs" />

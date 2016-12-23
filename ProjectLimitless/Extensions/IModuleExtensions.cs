@@ -20,6 +20,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 using System.Collections.Generic;
+using Limitless.Runtime.Enums;
 
 namespace Limitless.Extensions
 {
@@ -54,15 +55,25 @@ namespace Limitless.Extensions
                 route.RequiresAuthentication = attributes.RequiresAuthentication;
                 route.Handler = (dynamic parameters, dynamic postData) =>
                 {
+                    // For Get and Delete I'll only send the parameters
+                    // For Post and Put I'll send parameters and postData to the method
                     dynamic result;
+                    List<object> invokeParameters = new List<object>();
+                    invokeParameters.Add(parameters);
+
+                    if (route.Method == HttpMethod.Post || route.Method == HttpMethod.Put)
+                    {
+                        invokeParameters.Add(postData);
+                    }
+
                     if (handler != null)
                     {
                         // TODO: Ensure we can chain multiple methods
-                        result = handler(methodInfo.Invoke(module, new object[] { parameters, postData }));
+                        result = handler(methodInfo.Invoke(module, invokeParameters.ToArray()));
                     }
                     else
                     {
-                        result = (dynamic)methodInfo.Invoke(module, new object[] { parameters, postData });
+                        result = (dynamic)methodInfo.Invoke(module, invokeParameters.ToArray());
                     }
                     return result;
                 };

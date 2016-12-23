@@ -16,6 +16,8 @@ using Nancy.TinyIoc;
 using Nancy.Conventions;
 
 using Limitless.Managers;
+using Limitless.Containers;
+using Limitless.Runtime.Interfaces;
 
 namespace Limitless
 {
@@ -31,7 +33,8 @@ namespace Limitless
         protected override void ConfigureApplicationContainer(TinyIoCContainer container)
         {
             base.ConfigureApplicationContainer(container);
-            container.Register<RouteManager>(RouteManager.Instance);
+            container.Register<RouteManager>(CoreContainer.Instance.RouteManager);
+            container.Register<IIdentityProvider>(CoreContainer.Instance.IdentityProvider);
         }
 
         /// <summary>
@@ -41,7 +44,7 @@ namespace Limitless
         protected override void ConfigureConventions(NancyConventions conventions)
         {
             base.ConfigureConventions(conventions);
-            foreach (string contentRoute in RouteManager.Instance.GetContentRoutes())
+            foreach (string contentRoute in CoreContainer.Instance.RouteManager.GetContentRoutes())
             {
                 conventions.StaticContentsConventions.Add(StaticContentConventionBuilder.AddDirectory(contentRoute, contentRoute));
             }

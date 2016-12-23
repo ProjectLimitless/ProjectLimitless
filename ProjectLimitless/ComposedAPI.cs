@@ -12,8 +12,6 @@
 */
 
 using System;
-using System.Net;
-using System.Security.Claims;
 
 using Nancy;
 using Nancy.Security;
@@ -22,23 +20,14 @@ using Nancy.Authentication.Stateless;
 
 using Newtonsoft.Json;
 
+using Limitless.Builtin;
 using Limitless.Managers;
 using Limitless.Runtime.Enums;
 using Limitless.Runtime.Types;
-using System.Security.Principal;
+using Limitless.Runtime.Interfaces;
 
 namespace Limitless
 {
-    /// <summary>
-    /// TODO: Move this
-    /// </summary>
-    public class JwtToken
-    {
-        public string sub;
-        public long exp;
-    }
-    
-
     /// <summary>
     /// The core API. Composed of the base and all the
     /// extended API modules.
@@ -46,31 +35,19 @@ namespace Limitless
     public class ComposedAPI : NancyModule
     {
         /// <summary>
-        /// Standard Constructor.
+        /// Standard Constructor with injected parameters.
         /// </summary>
-        public ComposedAPI(RouteManager routeManager)
+        public ComposedAPI(RouteManager routeManager, IIdentityProvider identityProvider)
         {
             // Setup the JWT authentication for routes that require it.
             var configuration = new StatelessAuthenticationConfiguration(ctx =>
             {
                 var jwtToken = ctx.Request.Headers.Authorization;
-                try
-                {
-                    var payload = Jose.JWT.Decode<JwtToken>(jwtToken, "mysecretkey");
-                    var tokenExpires = DateTime.FromBinary(payload.exp);
-                    if (tokenExpires > DateTime.UtcNow)
-                    {
-                        // TODO: This function must come from IIdentityProvider and return a wrappable user object
-                        // return new ClaimsPrincipal(new BaseUser("test", true));
-                        //return new ClaimsPrincipal(new HttpListenerBasicIdentity(payload.sub, null));
-                        return null;
-                    }
+                BaseUser user = identityProvider.ValidateToken(jwtToken);
+                if (user == null)
                     return null;
-                }
-                catch (Exception)
-                {
-                    return null;
-                }
+
+                return UserWrapper.Wrap(user);
             });
             StatelessAuthentication.Enable(this, configuration);
 
@@ -107,6 +84,12 @@ namespace Limitless
                 {
                     this.RequiresAuthentication();
                     // TODO: Find a way to get this.Context.CurrentUser to the module route
+
+                    Console.WriteLine("User context");
+                    Console.WriteLine(Context.CurrentUser);
+                    UserWrapper wrappedUser = (UserWrapper)Context.CurrentUser;
+                    Console.WriteLine(wrappedUser.Meta);
+
                 }
                 dynamic postData = JsonConvert.DeserializeObject(Request.Body.AsString());
                 return route.Handler(parameters, postData);

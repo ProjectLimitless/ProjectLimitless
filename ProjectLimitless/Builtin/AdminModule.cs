@@ -15,7 +15,7 @@ using System;
 using System.Dynamic;
 using System.Collections.Generic;
 
-using Limitless.Managers;
+using Limitless.Containers;
 using Limitless.Runtime.Enums;
 using Limitless.Runtime.Types;
 using Limitless.Runtime.Interfaces;
@@ -44,11 +44,15 @@ namespace Limitless.Builtin
         /// </summary>
         /// <param name="input">API input, null in this case</param>
         /// <returns>The list of routes and their descriptions</returns>
-        [APIRoute(Path = "/admin/routes", Method = HttpMethod.Get, Description = "Shows all the available routes of the API")]
-        public dynamic RoutesList(dynamic input)
+        [APIRoute(
+            Path = "/admin/routes", 
+            Method = HttpMethod.Get, 
+            Description = "Shows all the available routes of the API"
+        )]
+        public dynamic RoutesList(dynamic parameters)
         {
             List<dynamic> routes = new List<dynamic>();
-            foreach (APIRoute route in RouteManager.Instance.GetRoutes())
+            foreach (APIRoute route in CoreContainer.Instance.RouteManager.GetRoutes())
             {
                 dynamic routeInfo = new ExpandoObject();
                 routeInfo.Path = route.Path;

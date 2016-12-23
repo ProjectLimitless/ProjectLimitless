@@ -21,7 +21,9 @@ using Nancy.Hosting.Self;
 using Limitless.Config;
 using Limitless.Builtin;
 using Limitless.Managers;
+using Limitless.Containers;
 using Limitless.Extensions;
+using Limitless.Runtime.Enums;
 using Limitless.Runtime.Types;
 using Limitless.Runtime.Interfaces;
 
@@ -64,6 +66,7 @@ namespace Limitless
         {
             _settings = settings;
             _log = log;
+            
             log.Debug("Configuring Project Limitless...");
             log.Info($"Settings| Default system name set as {settings.Core.Name}");
             log.Info($"Settings| {settings.Core.EnabledModules.Length} module(s) will be loaded");
@@ -90,7 +93,7 @@ namespace Limitless
                     // Multiple UI modules is allowed, we can add all their paths
                     IUIModule ui = module as IUIModule;
                     string contentPath = ui.GetContentPath();
-                    if (RouteManager.Instance.AddContentRoute(contentPath))
+                    if (CoreContainer.Instance.RouteManager.AddContentRoute(contentPath))
                     {
                         _log.Debug($"Added content path '{contentPath}' for module '{moduleName}'");
                     }
@@ -103,7 +106,7 @@ namespace Limitless
                 // TODO: Add decorating to interfaces with required paths
 
                 List<APIRoute> moduleRoutes = module.GetAPIRoutes();
-                if (RouteManager.Instance.AddRoutes(moduleRoutes))
+                if (CoreContainer.Instance.RouteManager.AddRoutes(moduleRoutes))
                 {
                     // TODO: Remove - only for testing
                     foreach (APIRoute route in moduleRoutes)
@@ -117,11 +120,11 @@ namespace Limitless
                     _log.Warning($"Unable to add all API routes for module '{moduleName}'. Possible duplicate route and method.");
                 }
             }
-            /*
+            
             //TODO: Setup the admin API - move to own module
             _adminModule = new AdminModule(_log);
             List<APIRoute> routes = ((IModule)_adminModule).GetAPIRoutes();
-            if (RouteManager.Instance.AddRoutes(routes))
+            if (CoreContainer.Instance.RouteManager.AddRoutes(routes))
             {
                 // TODO: Remove - only for testing
                 foreach (APIRoute route in routes)
@@ -135,6 +138,7 @@ namespace Limitless
                 _log.Warning($"Unable to add all API routes for module 'AdminModule'. Possible duplicate route and method.");
             }
 
+           
             //TODO: Setup the user manager API - move to own module
             _identityProvider = new LocalIdentityProvider(_log);
             // For the IUserManager interface we need to add routes to the API
@@ -146,8 +150,9 @@ namespace Limitless
             {
                 return _identityProvider.Login((string)postData.username, (string)postData.password);
             };
-            RouteManager.Instance.AddRoute(userRoute);
-            */
+            CoreContainer.Instance.RouteManager.AddRoute(userRoute);
+            CoreContainer.Instance.IdentityProvider = _identityProvider;
+
             //TODO: Setup the diagnostics
         }
 
