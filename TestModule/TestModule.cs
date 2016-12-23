@@ -65,9 +65,9 @@ namespace TestModule
         }
 
         [APIRoute(Path = "/demo/ping/{name}", Method = HttpMethod.Get, RequiresAuthentication = true)]
-        public dynamic PersonalPong(dynamic parameters)
+        public dynamic PersonalPong(dynamic parameters, dynamic user)
         {
-            return $"Pong {parameters.name}";
+            return $"Pong {parameters.name} for user {user.UserName}";
         }
 
         [APIRoute(Path = "/demo/{version}", Method = HttpMethod.Get, Description = "Sample Route containing a version parameter")]

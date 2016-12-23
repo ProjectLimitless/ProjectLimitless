@@ -32,10 +32,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="jose-jwt, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\jose-jwt.2.1.0\lib\net40\jose-jwt.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Nancy, Version=1.4.2.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Nancy.1.4.3\lib\net40\Nancy.dll</HintPath>
       <Private>True</Private>
@@ -75,7 +71,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Builtin\InternalUserIdentity.cs" />
-    <Compile Include="Builtin\LocalIdentityProvider.cs" />
     <Compile Include="Builtin\AdminModule.cs" />
     <Compile Include="Config\CoreAPISettings.cs" />
     <Compile Include="Config\CoreSettings.cs" />
@@ -95,6 +90,9 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="conf\Core.toml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="conf\modules\LimitlessLocalIdentityProvider.toml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="conf\modules\LimitlessLogger.toml">

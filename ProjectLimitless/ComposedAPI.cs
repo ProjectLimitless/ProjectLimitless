@@ -20,8 +20,8 @@ using Nancy.Authentication.Stateless;
 
 using Newtonsoft.Json;
 
+using Limitless.Builtin;
 using Limitless.Managers;
-using Limitless.Containers;
 using Limitless.Runtime.Enums;
 using Limitless.Runtime.Types;
 using Limitless.Runtime.Interfaces;
@@ -77,19 +77,14 @@ namespace Limitless
         {
             return (dynamic parameters) =>
             {
+                InternalUserIdentity internalUser = null;
                 if (route.RequiresAuthentication)
                 {
                     this.RequiresAuthentication();
-                    // TODO: Find a way to get this.Context.CurrentUser to the module route
-
-                    Console.WriteLine("User context");
-                    Console.WriteLine(Context.CurrentUser);
-                    InternalUserIdentity internalUser = (InternalUserIdentity)Context.CurrentUser;
-                    Console.WriteLine(internalUser.Meta);
-
+                    internalUser = (InternalUserIdentity)Context.CurrentUser;
                 }
                 dynamic postData = JsonConvert.DeserializeObject(Request.Body.AsString());
-                return route.Handler(parameters, postData);
+                return route.Handler(parameters, postData, internalUser);
             };
         }
     }

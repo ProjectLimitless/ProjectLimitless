@@ -1,11 +1,6 @@
-﻿
-
-using Limitless.Runtime.Attributes;
-using Limitless.Runtime.Interfaces;
-using Limitless.Runtime.Types;
 /** 
 * This file is part of Project Limitless.
-* Copyright © 2016 Donovan Solms.
+* Copyright � 2016 Donovan Solms.
 * Project Limitless
 * https://www.projectlimitless.io
 * 
@@ -20,7 +15,12 @@ using System;
 using System.Linq;
 using System.Reflection;
 using System.Collections.Generic;
+
+using Limitless.Builtin;
 using Limitless.Runtime.Enums;
+using Limitless.Runtime.Types;
+using Limitless.Runtime.Attributes;
+using Limitless.Runtime.Interfaces;
 
 namespace Limitless.Extensions
 {
@@ -53,17 +53,21 @@ namespace Limitless.Extensions
                 route.Method = attributes.Method;
                 route.Description = attributes.Description;
                 route.RequiresAuthentication = attributes.RequiresAuthentication;
-                route.Handler = (dynamic parameters, dynamic postData) =>
+                route.Handler = (dynamic parameters, dynamic postData, dynamic user) =>
                 {
                     // For Get and Delete I'll only send the parameters
                     // For Post and Put I'll send parameters and postData to the method
                     dynamic result;
                     List<object> invokeParameters = new List<object>();
                     invokeParameters.Add(parameters);
-
                     if (route.Method == HttpMethod.Post || route.Method == HttpMethod.Put)
                     {
                         invokeParameters.Add(postData);
+                    }
+                    if (user != null && route.RequiresAuthentication)
+                    {
+                        InternalUserIdentity internalUser = (InternalUserIdentity)user;
+                        invokeParameters.Add((dynamic)internalUser.Meta);
                     }
 
                     if (handler != null)

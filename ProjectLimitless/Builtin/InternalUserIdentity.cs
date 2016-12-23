@@ -18,7 +18,7 @@ using Nancy.Security;
 
 using Limitless.Runtime.Types;
 
-namespace Limitless.Containers
+namespace Limitless.Builtin
 {
     /// <summary>
     /// Wraps the IIdentityProvider's user class in a

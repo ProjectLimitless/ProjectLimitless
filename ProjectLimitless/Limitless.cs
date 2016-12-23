@@ -52,11 +52,6 @@ namespace Limitless
         /// TODO: Mode to separate module?
         /// </summary>
         private AdminModule _adminModule;
-        /// <summary>
-        /// Provides user identity functions.
-        /// TODO: Mode to separate module?
-        /// </summary>
-        private IIdentityProvider _identityProvider;
 
         /// <summary>
         /// Constructor taking the configuration to be used.
@@ -103,6 +98,22 @@ namespace Limitless
                         throw new NotSupportedException($"Previously loaded IUIModule already uses the content path '{contentPath}' specified in '{moduleName}'");
                     }
                 }
+                else if (module is IIdentityProvider)
+                {
+                    IIdentityProvider identityProvider = module as IIdentityProvider;
+                    // For the IIdentityProvider interface we need to add routes to the API
+                    APIRoute userRoute = new APIRoute();
+                    userRoute.Path = "/login";
+                    userRoute.Description = "Log a user in";
+                    userRoute.Method = HttpMethod.Post;
+                    userRoute.Handler = (dynamic parameters, dynamic postData, dynamic user) =>
+                    {
+                        return identityProvider.Login((string)postData.username, (string)postData.password);
+                    };
+                    CoreContainer.Instance.RouteManager.AddRoute(userRoute);
+                    CoreContainer.Instance.IdentityProvider = identityProvider;
+                }
+
                 // TODO: Add decorating to interfaces with required paths
 
                 List<APIRoute> moduleRoutes = module.GetAPIRoutes();
@@ -139,20 +150,6 @@ namespace Limitless
             }
 
            
-            //TODO: Setup the user manager API - move to own module
-            _identityProvider = new LocalIdentityProvider(_log);
-            // For the IUserManager interface we need to add routes to the API
-            APIRoute userRoute = new APIRoute();
-            userRoute.Path = "/login";
-            userRoute.Description = "Log a user in";
-            userRoute.Method = HttpMethod.Post;
-            userRoute.Handler = (dynamic parameters, dynamic postData) =>
-            {
-                return _identityProvider.Login((string)postData.username, (string)postData.password);
-            };
-            CoreContainer.Instance.RouteManager.AddRoute(userRoute);
-            CoreContainer.Instance.IdentityProvider = _identityProvider;
-
             //TODO: Setup the diagnostics
         }
 
