@@ -18,13 +18,13 @@ using Nancy.Security;
 
 using Limitless.Runtime.Types;
 
-namespace Limitless.Builtin
+namespace Limitless.Containers
 {
     /// <summary>
     /// Wraps the IIdentityProvider's user class in a
     /// Nancy IUserIdentity-compatible format for internal use.
     /// </summary>
-    internal class UserWrapper : IUserIdentity
+    internal class InternalUserIdentity : IUserIdentity
     {
         /// <summary>
         /// Implemented from interface
@@ -47,14 +47,19 @@ namespace Limitless.Builtin
         /// for internal use.
         /// </summary>
         /// <param name="baseUser">The original BaseUser</param>
-        /// <returns>The wrapped user</returns>
-        public static UserWrapper Wrap(BaseUser baseUser)
+        /// <returns>The wrapped internal user</returns>
+        public static InternalUserIdentity Wrap(BaseUser baseUser)
         {
-            UserWrapper wrapper = new UserWrapper();
-            wrapper.UserName = baseUser.UserName;
-            wrapper.Claims = baseUser.Claims;
-            wrapper.Meta = baseUser;
-            return wrapper;
+            InternalUserIdentity internalUser = new InternalUserIdentity();
+            if (baseUser == null)
+            {
+                return null;
+            }
+
+            internalUser.UserName = baseUser.UserName;
+            internalUser.Claims = baseUser.Claims;
+            internalUser.Meta = baseUser;
+            return internalUser;
         }
     }
 }

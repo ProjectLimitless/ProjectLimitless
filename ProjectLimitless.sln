@@ -20,6 +20,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestModule", "TestModule\Te
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Limitless.Logger", "..\Limitless.Logger\Logger\Limitless.Logger.csproj", "{2AE440B4-2D16-4941-8E8B-049AC897D986}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Limitless.LocalIdentityProvider", "..\Limitless.LocalIdentityProvider\LocalIdentityProvider\Limitless.LocalIdentityProvider.csproj", "{90976306-902F-4B0B-BFD8-970A77A88353}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -46,6 +48,10 @@ Global
 		{2AE440B4-2D16-4941-8E8B-049AC897D986}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2AE440B4-2D16-4941-8E8B-049AC897D986}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2AE440B4-2D16-4941-8E8B-049AC897D986}.Release|Any CPU.Build.0 = Release|Any CPU
+		{90976306-902F-4B0B-BFD8-970A77A88353}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{90976306-902F-4B0B-BFD8-970A77A88353}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{90976306-902F-4B0B-BFD8-970A77A88353}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{90976306-902F-4B0B-BFD8-970A77A88353}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

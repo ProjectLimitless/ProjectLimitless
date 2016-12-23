@@ -20,8 +20,8 @@ using Nancy.Authentication.Stateless;
 
 using Newtonsoft.Json;
 
-using Limitless.Builtin;
 using Limitless.Managers;
+using Limitless.Containers;
 using Limitless.Runtime.Enums;
 using Limitless.Runtime.Types;
 using Limitless.Runtime.Interfaces;
@@ -43,11 +43,8 @@ namespace Limitless
             var configuration = new StatelessAuthenticationConfiguration(ctx =>
             {
                 var jwtToken = ctx.Request.Headers.Authorization;
-                BaseUser user = identityProvider.ValidateToken(jwtToken);
-                if (user == null)
-                    return null;
-
-                return UserWrapper.Wrap(user);
+                BaseUser baseUser = identityProvider.ValidateToken(jwtToken);
+                return InternalUserIdentity.Wrap(baseUser);
             });
             StatelessAuthentication.Enable(this, configuration);
 
@@ -87,8 +84,8 @@ namespace Limitless
 
                     Console.WriteLine("User context");
                     Console.WriteLine(Context.CurrentUser);
-                    UserWrapper wrappedUser = (UserWrapper)Context.CurrentUser;
-                    Console.WriteLine(wrappedUser.Meta);
+                    InternalUserIdentity internalUser = (InternalUserIdentity)Context.CurrentUser;
+                    Console.WriteLine(internalUser.Meta);
 
                 }
                 dynamic postData = JsonConvert.DeserializeObject(Request.Body.AsString());

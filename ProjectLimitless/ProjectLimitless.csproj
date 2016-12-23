@@ -74,7 +74,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Builtin\UserWrapper.cs" />
+    <Compile Include="Builtin\InternalUserIdentity.cs" />
     <Compile Include="Builtin\LocalIdentityProvider.cs" />
     <Compile Include="Builtin\AdminModule.cs" />
     <Compile Include="Config\CoreAPISettings.cs" />
