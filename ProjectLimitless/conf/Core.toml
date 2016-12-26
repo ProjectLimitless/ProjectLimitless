@@ -16,6 +16,7 @@ Name = "Alice"
 
 EnabledModules = [
 	"Limitless.Logger",
+	"Limitless.MySQLDatabaseProvider",
 	"Limitless.LocalIdentityProvider",
 	"TestModule",
 ]

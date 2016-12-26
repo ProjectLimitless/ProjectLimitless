@@ -92,6 +92,9 @@
     <None Include="conf\Core.toml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="conf\modules\LimitlesMySQLDatabaseProvider.toml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="conf\modules\LimitlessLocalIdentityProvider.toml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
