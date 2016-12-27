@@ -83,7 +83,7 @@ namespace Limitless.Builtin.DatabaseProviders
         /// </summary>
         public int Delete(string sql, params object[] args)
         {
-            throw new NotImplementedException();
+            return _dbContext.Sql(sql, args).Execute();
         }
 
         /// <summary>
@@ -92,7 +92,7 @@ namespace Limitless.Builtin.DatabaseProviders
         /// </summary>
         public dynamic Insert(string sql, params object[] args)
         {
-            throw new NotImplementedException();
+            return _dbContext.Sql(sql, args).ExecuteReturnLastId<dynamic>();
         }
 
         /// <summary>
@@ -101,7 +101,7 @@ namespace Limitless.Builtin.DatabaseProviders
         /// </summary>
         public dynamic Insert<T>(string tableName, T value)
         {
-            throw new NotImplementedException();
+            throw new NotImplementedException("Implement with Automap function");
         }
 
         /// <summary>
@@ -110,7 +110,7 @@ namespace Limitless.Builtin.DatabaseProviders
         /// </summary>
         public List<T> QueryMany<T>(string sql)
         {
-            throw new NotImplementedException();
+            return _dbContext.Sql(sql).QueryMany<T>();
         }
 
         /// <summary>
@@ -119,7 +119,7 @@ namespace Limitless.Builtin.DatabaseProviders
         /// </summary>
         public List<T> QueryMany<T>(string sql, params object[] args)
         {
-            throw new NotImplementedException();
+            return _dbContext.Sql(sql, args).QueryMany<T>();
         }
 
         /// <summary>
@@ -128,7 +128,7 @@ namespace Limitless.Builtin.DatabaseProviders
         /// </summary>
         public T QuerySingle<T>(string sql)
         {
-            throw new NotImplementedException();
+            return _dbContext.Sql(sql).QuerySingle<T>();
         }
 
         /// <summary>
@@ -137,7 +137,7 @@ namespace Limitless.Builtin.DatabaseProviders
         /// </summary>
         public T QuerySingle<T>(string sql, params object[] args)
         {
-            throw new NotImplementedException();
+            return _dbContext.Sql(sql, args).QuerySingle<T>();
         }
 
         /// <summary>
@@ -146,7 +146,7 @@ namespace Limitless.Builtin.DatabaseProviders
         /// </summary>
         public int Update(string sql, params object[] args)
         {
-            throw new NotImplementedException();
+            return _dbContext.Sql(sql, args).Execute();
         }
     }
 }
