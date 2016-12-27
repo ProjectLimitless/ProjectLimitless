@@ -69,7 +69,20 @@ namespace Limitless
             _moduleManager = new ModuleManager(settings.FullConfiguration, _log);
             foreach (string moduleName in settings.Core.EnabledModules)
             {
-                IModule module = _moduleManager.Load(moduleName);
+                IModule module = null;
+                try
+                {
+                    module = _moduleManager.Load(moduleName);
+
+                }
+                catch (DllNotFoundException ex)
+                {
+                    _log.Warning($"Unable to load module '{ex.Message}', attempting to load as builtin module");
+                    // Create a type from the builtin module name
+                    Type builtinType = Type.GetType(moduleName, true, false);
+                    module = _moduleManager.LoadBuiltin(moduleName, builtinType);
+                }
+
                 if (module == null)
                 {
                     _log.Error($"Unable to load module '{moduleName}'");

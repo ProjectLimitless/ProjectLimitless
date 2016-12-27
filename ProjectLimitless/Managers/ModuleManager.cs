@@ -123,7 +123,40 @@ namespace Limitless.Managers
             }
             return module;
         }
-        
+
+        /// <summary>
+        /// Load the specified builtin module.
+        /// </summary>
+        /// <param name="moduleName">The name of the module to load</param>
+        /// <param name="builtinType">The builtin type of the module</param>
+        /// <exception cref="DllNotFoundException">Thrown when the module could not be found</exception>
+        /// <exception cref="NotSupportedException">Thrown when no exported type implements IModule</exception>
+        /// <returns>The loaded module</returns>
+        public IModule LoadBuiltin(string moduleName, Type builtinType)
+        {
+            if (typeof(IModule).IsAssignableFrom(builtinType) == false)
+            {
+                throw new NotSupportedException($"Module '{moduleName}' does not implement IModule.");
+            }
+            
+            IModule module = Construct(builtinType);
+            Configure(moduleName, module);
+            bool loaded = AddModule(module);
+            if (loaded)
+            {
+                _log.Info($"Module '{moduleName}' has been loaded and configured");
+                if (module is ILogger)
+                {
+                    _log = module as ILogger;
+                }
+            }
+            else
+            {
+                _log.Error($"The module '{moduleName}' was not registered by the ModuleLoader. Please check logs.");
+            }
+            return module;
+        }
+
         /// <summary>
         /// Construct moduleType using the best matching constructor and 
         /// injecting as many modules as possible.
