@@ -1,2 +1,2 @@
 ﻿[LimitlessBuiltinDatabaseProvidersMySQLDatabaseProvider]
-ConnectionString = "myconnectionstring"
+ConnectionString = "Server=10.0.2.2;Database=ll_local;Uid=root;Pwd=root;"
