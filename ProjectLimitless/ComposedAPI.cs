@@ -12,10 +12,12 @@
 */
 
 using System;
+using System.Dynamic;
 
 using Nancy;
 using Nancy.Security;
 using Nancy.Extensions;
+using Nancy.Responses.Negotiation;
 using Nancy.Authentication.Stateless;
 
 using Newtonsoft.Json;
@@ -84,18 +86,54 @@ namespace Limitless
                     internalUser = (InternalUserIdentity)Context.CurrentUser;
                 }
                 dynamic postData = JsonConvert.DeserializeObject(Request.Body.AsString());
+                Negotiator negotiator = Negotiate.WithStatusCode(200);
 
-                // TODO: Create response object for API
                 try
                 {
-                    return route.Handler(parameters, postData, internalUser);
+                    var handlerResponse = route.Handler(parameters, postData, internalUser);
+                    
+                    if (handlerResponse is APIResponse)
+                    {
+                        APIResponse apiResponse = handlerResponse as APIResponse;
+                        negotiator.WithStatusCode(apiResponse.StatusCode);
+
+                        if (apiResponse.Data != null)
+                        {
+                            negotiator.WithModel((object)apiResponse.Data);
+                        }
+                        if (apiResponse.StatusMessage != null)
+                        {
+                            negotiator.WithReasonPhrase(apiResponse.StatusMessage);
+                        }
+                        if (apiResponse.Headers.Count > 0)
+                        {
+                            negotiator.WithHeaders(apiResponse.Headers);
+                        }       
+                    }
+                    else
+                    {
+                        if (handlerResponse != null)
+                        {
+                            negotiator.WithModel((object)handlerResponse);
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("Caught ex: {0}", ex.Message);
+                    dynamic exceptionResponse = new ExpandoObject();
+                    exceptionResponse.Message = ex.Message;
+                    exceptionResponse.StackTrace = ex.StackTrace;
+                    exceptionResponse.Target = $"{ex.Source}.{ex.TargetSite.Name}";
+                    if (ex.InnerException != null)
+                    {
+                        exceptionResponse.InnerException = ex.InnerException.Message;
+                    }
+                    negotiator
+                        .WithModel((object)exceptionResponse)
+                        .WithStatusCode(500);
                 }
-                //return HttpStatusCode.BadRequest;
-                return internalUser;
+
+                return negotiator;
             };
         }
     }

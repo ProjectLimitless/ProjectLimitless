@@ -119,9 +119,21 @@ namespace Limitless
                     userRoute.Path = "/login";
                     userRoute.Description = "Log a user in";
                     userRoute.Method = HttpMethod.Post;
+                    // TODO: Relook where this handler should be defined
                     userRoute.Handler = (dynamic parameters, dynamic postData, dynamic user) =>
                     {
-                        return identityProvider.Login((string)postData.username, (string)postData.password);
+                        BaseUser baseUser = identityProvider.Login((string)postData.username, (string)postData.password);
+                        APIResponse apiResponse = new APIResponse();
+                        if (baseUser == null)
+                        {
+                            apiResponse.StatusCode = (int)HttpStatusCode.Unauthorized;
+                            apiResponse.StatusMessage = "Username of password is incorrect";
+                        }
+                        else
+                        {
+                            apiResponse.Data = baseUser;
+                        }
+                        return apiResponse;
                     };
                     CoreContainer.Instance.RouteManager.AddRoute(userRoute);
                     CoreContainer.Instance.IdentityProvider = identityProvider;
@@ -132,7 +144,7 @@ namespace Limitless
                 List<APIRoute> moduleRoutes = module.GetAPIRoutes();
                 if (CoreContainer.Instance.RouteManager.AddRoutes(moduleRoutes))
                 {
-                    // TODO: Remove - only for testing
+                    // TODO: Remove - only for testing - debug output
                     foreach (APIRoute route in moduleRoutes)
                     {
                         _log.Debug($"Added route '{route.Path}' for module '{moduleName}'");
