@@ -84,7 +84,18 @@ namespace Limitless
                     internalUser = (InternalUserIdentity)Context.CurrentUser;
                 }
                 dynamic postData = JsonConvert.DeserializeObject(Request.Body.AsString());
-                return route.Handler(parameters, postData, internalUser);
+
+                // TODO: Create response object for API
+                try
+                {
+                    return route.Handler(parameters, postData, internalUser);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Caught ex: {0}", ex.Message);
+                }
+                //return HttpStatusCode.BadRequest;
+                return internalUser;
             };
         }
     }

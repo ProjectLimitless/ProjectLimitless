@@ -1,1 +1,2 @@
 ﻿[LimitlessLocalIdentityProvider]
+BCryptCost = 12
