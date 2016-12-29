@@ -24,3 +24,10 @@ EnabledModules = [
 [Core.API]
 Host = "0.0.0.0"
 Port = 8080
+
+[Core.API.Nancy]
+# Nancy comes with a built in diagnostics dashboard
+# https://github.com/NancyFx/Nancy/wiki/Diagnostics
+DashboardEnabled = true
+DashboardPassword = "123456"
+

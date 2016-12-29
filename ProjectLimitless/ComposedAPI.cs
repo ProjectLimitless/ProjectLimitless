@@ -68,6 +68,16 @@ namespace Limitless
                         break;
                 }
             }
+            /*
+            TODO: Testing routes for error pages
+            Get["/"] = _ =>
+            {
+                return "Hello";
+            };
+            Get["/ex"] = _ =>
+            {
+                throw new NullReferenceException("Error is null");
+            };*/
         }
 
         /// <summary>
@@ -91,7 +101,6 @@ namespace Limitless
                 try
                 {
                     var handlerResponse = route.Handler(parameters, postData, internalUser);
-                    
                     if (handlerResponse is APIResponse)
                     {
                         APIResponse apiResponse = handlerResponse as APIResponse;
@@ -121,6 +130,7 @@ namespace Limitless
                 catch (Exception ex)
                 {
                     dynamic exceptionResponse = new ExpandoObject();
+                    exceptionResponse.Type = ex.GetType();
                     exceptionResponse.Message = ex.Message;
                     exceptionResponse.StackTrace = ex.StackTrace;
                     exceptionResponse.Target = $"{ex.Source}.{ex.TargetSite.Name}";

@@ -14,7 +14,10 @@
 using Nancy;
 using Nancy.TinyIoc;
 using Nancy.Conventions;
+using Nancy.Diagnostics;
+using Nancy.Bootstrapper;
 
+using Limitless.Loaders;
 using Limitless.Managers;
 using Limitless.Containers;
 using Limitless.Runtime.Interfaces;
@@ -27,6 +30,26 @@ namespace Limitless
     public class LimitlessNancyBootstrapper : DefaultNancyBootstrapper
     {
         /// <summary>
+        /// Overrides the default application startup to add custom error
+        /// handlers for Nancy.
+        /// </summary>
+        /// <param name="container"></param>
+        /// <param name="pipelines"></param>
+        protected override void ApplicationStartup(TinyIoCContainer container, IPipelines pipelines)
+        {
+            base.ApplicationStartup(container, pipelines);
+            CustomErrorsLoader.AddCode(404, "The resource could not be found");
+            CustomErrorsLoader.AddCode(500, "An application error occurred");
+
+            if (CoreContainer.Instance.Settings.Core.API.Nancy.DashboardEnabled == false)
+            {
+                DiagnosticsHook.Disable(pipelines);
+                // Workaround according to https://github.com/NancyFx/Nancy/issues/1518
+                container.Register<IDiagnostics, DisabledDiagnostics>();
+            }
+        }
+
+        /// <summary>
         /// Overrides the default container init and provides a ComposedAPI instance.
         /// </summary>
         /// <param name="container">The TinyIoC container</param>
@@ -36,7 +59,7 @@ namespace Limitless
             container.Register<RouteManager>(CoreContainer.Instance.RouteManager);
             container.Register<IIdentityProvider>(CoreContainer.Instance.IdentityProvider);
         }
-
+        
         /// <summary>
         /// Overrides the default convention setup for static routes.
         /// </summary>

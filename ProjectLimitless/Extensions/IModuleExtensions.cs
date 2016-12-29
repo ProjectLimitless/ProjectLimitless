@@ -21,6 +21,7 @@ using Limitless.Runtime.Enums;
 using Limitless.Runtime.Types;
 using Limitless.Runtime.Attributes;
 using Limitless.Runtime.Interfaces;
+using Newtonsoft.Json.Linq;
 
 namespace Limitless.Extensions
 {
@@ -57,11 +58,28 @@ namespace Limitless.Extensions
                 {
                     // For Get and Delete I'll only send the parameters
                     // For Post and Put I'll send parameters and postData to the method
-                    dynamic result;
+                    // For authenticated routes I'll add the user object to the method
                     List<object> invokeParameters = new List<object>();
                     invokeParameters.Add(parameters);
                     if (route.Method == HttpMethod.Post || route.Method == HttpMethod.Put)
                     {
+                        // Check if postData contains required fields
+                        if (attributes.RequiredFields.Length > 0)
+                        {
+                            // There are required fields, but postData is null
+                            if (postData == null)
+                            {
+                                throw new NullReferenceException("POST data is required for this route");
+                            }
+                            IDictionary<string, JToken> lookup = postData;
+                            foreach (string requiredField in attributes.RequiredFields)
+                            {
+                                if (lookup.ContainsKey(requiredField) == false)
+                                {
+                                    throw new MissingFieldException($"Required data field '{requiredField}' was not found in the POST data");
+                                }
+                            }
+                        }
                         invokeParameters.Add(postData);
                     }
                     if (user != null && route.RequiresAuthentication)
@@ -70,6 +88,7 @@ namespace Limitless.Extensions
                         invokeParameters.Add((dynamic)internalUser.Meta);
                     }
 
+                    dynamic result;
                     if (handler != null)
                     {
                         // TODO: Ensure we can chain multiple methods
@@ -83,7 +102,6 @@ namespace Limitless.Extensions
                 };
                 apiRoutes.Add(route);
             }
-
             return apiRoutes;
         }
     }

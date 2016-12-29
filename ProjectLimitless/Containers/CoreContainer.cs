@@ -11,6 +11,7 @@
 * Project Limitless. If not, see http://www.apache.org/licenses/LICENSE-2.0.
 */
 
+using Limitless.Config;
 using Limitless.Managers;
 using Limitless.Runtime.Interfaces;
 
@@ -30,6 +31,10 @@ namespace Limitless.Containers
         /// Provides identity management.
         /// </summary>
         public IIdentityProvider IdentityProvider { get; internal set; }
+        /// <summary>
+        /// The Limitless configuration.
+        /// </summary>
+        public LimitlessSettings Settings { get; internal set; }
 
         /// <summary>
         /// Holds the instance.
@@ -64,6 +69,7 @@ namespace Limitless.Containers
         CoreContainer()
         {
             RouteManager = new RouteManager();
+            Settings = new LimitlessSettings();
         }
     }
 }

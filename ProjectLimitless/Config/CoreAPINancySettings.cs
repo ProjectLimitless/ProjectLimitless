@@ -14,30 +14,26 @@
 namespace Limitless.Config
 {
     /// <summary>
-    /// Core settings.
+    /// Core API settings for Nancy.
     /// </summary>
-    public class CoreSettings
+    public class CoreAPINancySettings
     {
         /// <summary>
-        /// The default name of the system. Also used as the trigger word.
+        /// Sets and gets if the diagnostics dashboard should be enabled.
         /// </summary>
-        public string Name { get; set; }
+        public bool DashboardEnabled { get; set; }
         /// <summary>
-        /// List of modules to load.
+        /// The password for the dashboard if enabled is set to true.
         /// </summary>
-        public string[] EnabledModules { get; set; }
-        /// <summary>
-        /// API hosting settings.
-        /// </summary>
-        public CoreAPISettings API { get; set; }
+        public string DashboardPassword { get; set; }
 
         /// <summary>
-        /// Standard constructor.
+        /// Default constructor.
         /// </summary>
-        public CoreSettings()
+        public CoreAPINancySettings()
         {
-            API = new CoreAPISettings();
-            EnabledModules = new string[] { };
+            DashboardEnabled = false;
+            DashboardPassword = "";
         }
     }
 }

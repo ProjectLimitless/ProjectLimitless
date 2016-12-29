@@ -26,6 +26,10 @@ namespace Limitless.Config
         /// The port to bind on.
         /// </summary>
         public int Port { get; set; }
+        /// <summary>
+        /// Settings for the Nancy diagnostics dashboard.
+        /// </summary>
+        public CoreAPINancySettings Nancy { get; set; }
 
         /// <summary>
         /// Default constructor.
@@ -34,6 +38,7 @@ namespace Limitless.Config
         {
             Host = "0.0.0.0";
             Port = 8080;
+            Nancy = new CoreAPINancySettings();
         }
     }
 }

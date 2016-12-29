@@ -82,6 +82,7 @@
     <Compile Include="Builtin\DatabaseProviders\MySQLDatabaseProvider.cs" />
     <Compile Include="Builtin\InternalUserIdentity.cs" />
     <Compile Include="Builtin\AdminModule.cs" />
+    <Compile Include="Config\CoreAPINancySettings.cs" />
     <Compile Include="Config\CoreAPISettings.cs" />
     <Compile Include="Config\CoreSettings.cs" />
     <Compile Include="Config\LimitlessSettings.cs" />
@@ -89,6 +90,7 @@
     <Compile Include="BootstrapLogger.cs" />
     <Compile Include="Extensions\IModuleExtensions.cs" />
     <Compile Include="Containers\CoreContainer.cs" />
+    <Compile Include="Loaders\CustomErrorsLoader.cs" />
     <Compile Include="Managers\RouteManager.cs" />
     <Compile Include="LimitlessNancyBootstrapper.cs" />
     <Compile Include="Managers\ModuleManager.cs" />
@@ -98,6 +100,13 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="views\errors\500.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="views\errors\404.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="views\errors\errors.css" />
     <None Include="App.config" />
     <None Include="conf\Core.toml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

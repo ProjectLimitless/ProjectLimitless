@@ -122,6 +122,12 @@ namespace Limitless
                     // TODO: Relook where this handler should be defined
                     userRoute.Handler = (dynamic parameters, dynamic postData, dynamic user) =>
                     {
+                        // RequiredFields property is only implemented on the APIRouteAttribute
+                        // so I have to manually do the checks for required interface routes
+                        if (postData.username == null || postData.password == null)
+                        {
+                            throw new MissingFieldException("Username and password must not be null");
+                        }
                         BaseUser baseUser = identityProvider.Login((string)postData.username, (string)postData.password);
                         APIResponse apiResponse = new APIResponse();
                         if (baseUser == null)
@@ -173,8 +179,14 @@ namespace Limitless
             {
                 _log.Warning($"Unable to add all API routes for module 'AdminModule'. Possible duplicate route and method.");
             }
+            
+            if (_settings.Core.API.Nancy.DashboardEnabled)
+            {
+                _log.Warning("The Nancy diagnostics dashboard is enabled.");
+            }
 
-           
+            CoreContainer.Instance.Settings = _settings;
+
             //TODO: Setup the diagnostics
         }
 

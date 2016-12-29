@@ -67,7 +67,23 @@ namespace TestModule
         [APIRoute(Path = "/demo/ping/{name}", Method = HttpMethod.Get, RequiresAuthentication = true)]
         public dynamic PersonalPong(dynamic parameters, dynamic user)
         {
-            return $"Pong {parameters.name} for user {user.UserName}";
+            // With Expando type
+            dynamic obj = new System.Dynamic.ExpandoObject();
+            obj.Action = "Pong";
+            obj.Name = parameters.name;
+            obj.User = user.UserName;
+            return obj;
+        }
+
+        [APIRoute(Path = "/test/post", Method = HttpMethod.Post, RequiredFields = new string[] { "name" })]
+        public dynamic PersonalPost(dynamic parameters, dynamic postData)
+        {
+            // With anonymous types
+            return new
+            {
+                Action = "PostPong",
+                Name = (string)postData.name
+            };
         }
 
         [APIRoute(Path = "/demo/{version}", Method = HttpMethod.Get, Description = "Sample Route containing a version parameter")]
