@@ -66,6 +66,12 @@ namespace Limitless
                     case HttpMethod.Delete:
                         Delete[route.Path] = BuildComposedFunction(route);
                         break;
+                    case HttpMethod.Head:
+                        Head[route.Path] = BuildComposedFunction(route);
+                        break;
+                    case HttpMethod.Options:
+                        Options[route.Path] = BuildComposedFunction(route);
+                        break;
                 }
             }
             /*

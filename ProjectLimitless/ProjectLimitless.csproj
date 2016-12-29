@@ -88,7 +88,7 @@
     <Compile Include="Config\CoreSettings.cs" />
     <Compile Include="Config\LimitlessSettings.cs" />
     <Compile Include="ComposedAPI.cs" />
-    <Compile Include="BootstrapLogger.cs" />
+    <Compile Include="Builtin\BootstrapLogger.cs" />
     <Compile Include="Extensions\IModuleExtensions.cs" />
     <Compile Include="Containers\CoreContainer.cs" />
     <Compile Include="Loaders\CustomErrorsLoader.cs" />

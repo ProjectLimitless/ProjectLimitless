@@ -37,7 +37,8 @@ namespace Limitless.Loaders
         public string ModuleConfigurationPath { get; } = Path.GetFullPath(Path.Combine("conf", "modules"));
 
         /// <summary>
-        /// Loads the configurations from ConfigurationPath and ModuleConfigurationPath.
+        /// Loads the configurations from ConfigurationPath and ModuleConfigurationPath
+        /// and merges them into one.
         /// </summary>
         /// <returns>The merged configuration</returns>
         public LimitlessSettings Load()

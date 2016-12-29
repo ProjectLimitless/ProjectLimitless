@@ -106,7 +106,7 @@ namespace Limitless
                 }
                 else if (module is IUIModule)
                 {
-                    // Multiple UI modules is allowed, we can add all their paths
+                    // Multiple UI modules are allowed, we can add all their paths
                     IUIModule ui = module as IUIModule;
                     string contentPath = ui.GetContentPath();
                     if (CoreContainer.Instance.RouteManager.AddContentRoute(contentPath))

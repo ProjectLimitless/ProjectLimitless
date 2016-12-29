@@ -15,7 +15,7 @@ using System;
 
 using Limitless.Runtime.Interfaces;
 
-namespace Limitless
+namespace Limitless.Builtin
 {
     /// <summary>
     /// A simple Console logger to be used while bootstrapping Limitless.

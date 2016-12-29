@@ -33,7 +33,6 @@ namespace Limitless.Managers
         /// Gets the collection of loaded modules per interface type.
         /// </summary>
         public Dictionary<Type, List<IModule>> Modules { get; private set; }
-
         /// <summary>
         /// The logger.
         /// </summary>

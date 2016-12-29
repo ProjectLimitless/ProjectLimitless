@@ -25,7 +25,7 @@ using Limitless.Runtime.Interfaces;
 namespace Limitless
 {
     /// <summary>
-    /// Provides a custom bootstrapper for Nancy.
+    /// Provides a custom Nancy bootstrapper for Project Limitless.
     /// </summary>
     public class LimitlessNancyBootstrapper : DefaultNancyBootstrapper
     {

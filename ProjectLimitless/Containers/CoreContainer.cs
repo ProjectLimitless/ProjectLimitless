@@ -66,7 +66,7 @@ namespace Limitless.Containers
         /// <summary>
         /// Private constructor for Singleton pattern;
         /// </summary>
-        CoreContainer()
+        private CoreContainer()
         {
             RouteManager = new RouteManager();
             Settings = new LimitlessSettings();
