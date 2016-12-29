@@ -26,6 +26,14 @@ namespace Limitless.Config
         /// The password for the dashboard if enabled is set to true.
         /// </summary>
         public string DashboardPassword { get; set; }
+        /// <summary>
+        /// The URL path to serve the dashboard on.
+        /// </summary>
+        public string DashboardPath { get; set; }
+        /// <summary>
+        /// Sets and gets if request tracing should be enabled.
+        /// </summary>
+        public bool EnableRequestTracing { get; set; }
 
         /// <summary>
         /// Default constructor.
@@ -34,6 +42,8 @@ namespace Limitless.Config
         {
             DashboardEnabled = false;
             DashboardPassword = "";
+            DashboardPath = "_nancy";
+            EnableRequestTracing = false;
         }
     }
 }

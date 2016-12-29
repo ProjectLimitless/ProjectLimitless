@@ -182,7 +182,7 @@ namespace Limitless
             
             if (_settings.Core.API.Nancy.DashboardEnabled)
             {
-                _log.Warning("The Nancy diagnostics dashboard is enabled.");
+                _log.Warning($"The Nancy dashboard is enabled at '/{_settings.Core.API.Nancy.DashboardPath}'. It should only be enabled for debugging of the API.");
             }
 
             CoreContainer.Instance.Settings = _settings;

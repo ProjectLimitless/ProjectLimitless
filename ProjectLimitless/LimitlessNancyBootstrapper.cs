@@ -47,6 +47,8 @@ namespace Limitless
                 // Workaround according to https://github.com/NancyFx/Nancy/issues/1518
                 container.Register<IDiagnostics, DisabledDiagnostics>();
             }
+
+            StaticConfiguration.EnableRequestTracing = CoreContainer.Instance.Settings.Core.API.Nancy.EnableRequestTracing;
         }
 
         /// <summary>
@@ -70,6 +72,21 @@ namespace Limitless
             foreach (string contentRoute in CoreContainer.Instance.RouteManager.GetContentRoutes())
             {
                 conventions.StaticContentsConventions.Add(StaticContentConventionBuilder.AddDirectory(contentRoute, contentRoute));
+            }
+        }
+
+        /// <summary>
+        /// Overrides the diagnostics configuration to provide a password for access.
+        /// </summary>
+        protected override DiagnosticsConfiguration DiagnosticsConfiguration
+        {
+            get
+            {
+                return new DiagnosticsConfiguration
+                {
+                    Password = CoreContainer.Instance.Settings.Core.API.Nancy.DashboardPassword,
+                    Path = CoreContainer.Instance.Settings.Core.API.Nancy.DashboardPath
+                };
             }
         }
     }

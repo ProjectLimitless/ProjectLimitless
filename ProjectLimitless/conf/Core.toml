@@ -28,6 +28,9 @@ Port = 8080
 [Core.API.Nancy]
 # Nancy comes with a built in diagnostics dashboard
 # https://github.com/NancyFx/Nancy/wiki/Diagnostics
-DashboardEnabled = true
+DashboardEnabled = false
 DashboardPassword = "123456"
+DashboardPath = "_nancy"
+
+EnableRequestTracing = true
 
