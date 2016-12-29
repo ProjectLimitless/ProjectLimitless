@@ -61,13 +61,21 @@ namespace Limitless
         {
             _settings = settings;
             _log = log;
-            
-            log.Debug("Configuring Project Limitless...");
-            log.Info($"Settings| Default system name set as {settings.Core.Name}");
-            log.Info($"Settings| {settings.Core.EnabledModules.Length} module(s) will be loaded");
 
-            _moduleManager = new ModuleManager(settings.FullConfiguration, _log);
-            foreach (string moduleName in settings.Core.EnabledModules)
+            Configure();
+        }
+
+        /// <summary>
+        /// Configure Limitless for startup.
+        /// </summary>
+        private void Configure()
+        {
+            _log.Debug("Configuring Project Limitless...");
+            _log.Info($"Settings| Default system name set as {_settings.Core.Name}");
+            _log.Info($"Settings| {_settings.Core.EnabledModules.Length} module(s) will be loaded");
+
+            _moduleManager = new ModuleManager(_settings.FullConfiguration, _log);
+            foreach (string moduleName in _settings.Core.EnabledModules)
             {
                 IModule module = null;
                 try
@@ -133,7 +141,7 @@ namespace Limitless
                         if (baseUser == null)
                         {
                             apiResponse.StatusCode = (int)HttpStatusCode.Unauthorized;
-                            apiResponse.StatusMessage = "Username of password is incorrect";
+                            apiResponse.StatusMessage = "Username or password is incorrect";
                         }
                         else
                         {
@@ -162,7 +170,7 @@ namespace Limitless
                     _log.Warning($"Unable to add all API routes for module '{moduleName}'. Possible duplicate route and method.");
                 }
             }
-            
+
             //TODO: Setup the admin API - move to own module
             _adminModule = new AdminModule(_log);
             List<APIRoute> routes = ((IModule)_adminModule).GetAPIRoutes();
@@ -179,15 +187,15 @@ namespace Limitless
             {
                 _log.Warning($"Unable to add all API routes for module 'AdminModule'. Possible duplicate route and method.");
             }
-            
+
             if (_settings.Core.API.Nancy.DashboardEnabled)
             {
                 _log.Warning($"The Nancy dashboard is enabled at '/{_settings.Core.API.Nancy.DashboardPath}'. It should only be enabled for debugging of the API.");
             }
 
-            CoreContainer.Instance.Settings = _settings;
-
             //TODO: Setup the diagnostics
+
+            CoreContainer.Instance.Settings = _settings;
         }
 
         /// <summary>
@@ -202,7 +210,7 @@ namespace Limitless
             // If the host is set to 0.0.0.0, we bind to all the available IP addresses
             if (_settings.Core.API.Host == "0.0.0.0")
             {
-                bindingAddresses = GetUriParams(_settings.Core.API.Port);
+                bindingAddresses = GetAvailableIPs(_settings.Core.API.Port);
             }
             else
             {
@@ -225,14 +233,14 @@ namespace Limitless
         /// </summary>
         /// <param name="port">The port to bind to</param>
         /// <returns>An array of <see cref="Uri"/> with bindable addresses</returns>
-        private List<Uri> GetUriParams(int port)
+        private List<Uri> GetAvailableIPs(int port)
         {
-            var uriParams = new List<Uri>();
+            var availableIPs = new List<Uri>();
             string hostName = Dns.GetHostName();
 
             // Host name URI
             string hostNameUri = string.Format("http://{0}:{1}", Dns.GetHostName(), port);
-            uriParams.Add(new Uri(hostNameUri));
+            availableIPs.Add(new Uri(hostNameUri));
 
             // Host address URI(s)
             var hostEntry = Dns.GetHostEntry(hostName);
@@ -243,13 +251,13 @@ namespace Limitless
                     var addrBytes = ipAddress.GetAddressBytes();
                     string hostAddressUri = string.Format("http://{0}.{1}.{2}.{3}:{4}",
                     addrBytes[0], addrBytes[1], addrBytes[2], addrBytes[3], port);
-                    uriParams.Add(new Uri(hostAddressUri));
+                    availableIPs.Add(new Uri(hostAddressUri));
                 }
             }
 
             // Localhost URI
-            uriParams.Add(new Uri(string.Format("http://localhost:{0}", port)));
-            return uriParams;
+            availableIPs.Add(new Uri(string.Format("http://localhost:{0}", port)));
+            return availableIPs;
         }
     }
 }
