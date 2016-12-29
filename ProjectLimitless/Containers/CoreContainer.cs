@@ -21,7 +21,7 @@ namespace Limitless.Containers
     /// Holds and gives access to core parts via a Singleton
     /// to allow usage of already constructed objects in injected modules.
     /// </summary>
-    public class CoreContainer
+    internal class CoreContainer
     {
         /// <summary>
         /// Manages API routes.

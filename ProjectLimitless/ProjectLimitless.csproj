@@ -78,6 +78,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Builtin\APIRoute.cs" />
     <Compile Include="Builtin\DatabaseProviders\DatabaseProviderConfig.cs" />
     <Compile Include="Builtin\DatabaseProviders\MySQLDatabaseProvider.cs" />
     <Compile Include="Builtin\InternalUserIdentity.cs" />
