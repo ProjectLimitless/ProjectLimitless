@@ -45,7 +45,7 @@ namespace Limitless
             var configuration = new StatelessAuthenticationConfiguration(ctx =>
             {
                 var jwtToken = ctx.Request.Headers.Authorization;
-                BaseUser baseUser = identityProvider.ValidateToken(jwtToken);
+                BaseUser baseUser = identityProvider.TokenLogin(jwtToken);
                 return InternalUserIdentity.Wrap(baseUser);
             });
             StatelessAuthentication.Enable(this, configuration);
