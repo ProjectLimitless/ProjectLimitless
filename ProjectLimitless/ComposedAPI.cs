@@ -44,9 +44,29 @@ namespace Limitless
             // Setup the JWT authentication for routes that require it.
             var configuration = new StatelessAuthenticationConfiguration(ctx =>
             {
-                var jwtToken = ctx.Request.Headers.Authorization;
-                BaseUser baseUser = identityProvider.TokenLogin(jwtToken);
-                return InternalUserIdentity.Wrap(baseUser);
+                // Try..Catch as I am calling user code here
+                try
+                { 
+                    var jwtToken = ctx.Request.Headers.Authorization;
+                    if (string.IsNullOrEmpty(jwtToken))
+                    {
+                        return null;
+                    }
+
+                    LoginResult loginResult = identityProvider.TokenLogin(jwtToken);
+                    if (loginResult.IsAuthenticated)
+                    {
+                        return InternalUserIdentity.Wrap(loginResult.User);
+                    }
+                    ctx.Response = new Nancy.Response();
+                    ctx.Response.StatusCode = HttpStatusCode.Unauthorized;
+                    ctx.Response.ReasonPhrase = loginResult.ErrorResponse;
+                    return null;
+                }
+                catch (Exception)
+                {
+                    return null;
+                }
             });
             StatelessAuthentication.Enable(this, configuration);
 

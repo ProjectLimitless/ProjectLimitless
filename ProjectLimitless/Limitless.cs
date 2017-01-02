@@ -136,16 +136,17 @@ namespace Limitless
                         {
                             throw new MissingFieldException("Username and password must not be null");
                         }
-                        BaseUser baseUser = identityProvider.Login((string)postData.username, (string)postData.password);
+                        LoginResult loginResult = identityProvider.Login((string)postData.username, (string)postData.password);
                         APIResponse apiResponse = new APIResponse();
-                        if (baseUser == null)
+                        if (loginResult.IsAuthenticated == false)
                         {
                             apiResponse.StatusCode = (int)HttpStatusCode.Unauthorized;
-                            apiResponse.StatusMessage = "Username or password is incorrect";
+                            apiResponse.StatusMessage = "Authentication required";
+                            apiResponse.Data = loginResult.ErrorResponse;
                         }
                         else
                         {
-                            apiResponse.Data = baseUser;
+                            apiResponse.Data = loginResult.User;
                         }
                         return apiResponse;
                     };
