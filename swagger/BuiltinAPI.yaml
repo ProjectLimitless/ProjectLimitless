@@ -1,0 +1,45 @@
+swagger: '2.0'
+
+info:
+  version: "0.0.0.1"
+  title: Project Limitless API
+
+schemes:
+  - https
+
+paths:
+  /api/login:
+    post:
+      summary: "Logs a user in"
+      consumes:
+        - application/json
+      produces:
+        - application/json
+        - text/xml
+        - text/html
+      parameters:
+        - name: body
+          in: body
+          description: The login credentials to use.
+          required: true
+          schema:
+            $ref: "#/definitions/LoginCredentials" 
+      responses: 
+        200: 
+          description: "200 response"
+          examples: 
+            application/json: 
+             {
+               "accessToken": "access token"
+             }
+      
+definitions:
+  LoginCredentials:
+    properties:
+      username:
+       type: string
+      password:
+       type: string
+    required:
+      - username
+      - password
