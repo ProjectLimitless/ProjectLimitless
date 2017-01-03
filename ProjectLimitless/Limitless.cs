@@ -37,7 +37,7 @@ namespace Limitless
         /// <summary>
         /// NLog logger.
         /// </summary>
-        public ILogger _log;
+        private ILogger _log;
         /// <summary>
         /// Manager of the modules.
         /// </summary>
@@ -77,11 +77,13 @@ namespace Limitless
             _moduleManager = new ModuleManager(_settings.FullConfiguration, _log);
             foreach (string moduleName in _settings.Core.EnabledModules)
             {
+                // Load each module specified in the config. First try to load
+                // the module as DLL, if it can't be found, load it as a 
+                // builtin module that is part of this assembly.
                 IModule module = null;
                 try
                 {
                     module = _moduleManager.Load(moduleName);
-
                 }
                 catch (DllNotFoundException ex)
                 {
@@ -97,79 +99,8 @@ namespace Limitless
                     continue;
                 }
 
-                _log.Info($"Loaded module '{moduleName}'. Checking interface types...");
-
-                if (module is ILogger)
-                {
-                    _log = (ILogger)module;
-                    _log.Info($"Loaded module '{moduleName}' implements ILogger, replaced Bootstrap logger");
-                }
-                else if (module is IUIModule)
-                {
-                    // Multiple UI modules are allowed, we can add all their paths
-                    IUIModule ui = module as IUIModule;
-                    string contentPath = ui.GetContentPath();
-                    if (CoreContainer.Instance.RouteManager.AddContentRoute(contentPath))
-                    {
-                        _log.Debug($"Added content path '{contentPath}' for module '{moduleName}'");
-                    }
-                    else
-                    {
-                        _log.Critical($"Previously loaded IUIModule already uses the content path '{contentPath}' specified in '{moduleName}'");
-                        throw new NotSupportedException($"Previously loaded IUIModule already uses the content path '{contentPath}' specified in '{moduleName}'");
-                    }
-                }
-                else if (module is IIdentityProvider)
-                {
-                    IIdentityProvider identityProvider = module as IIdentityProvider;
-                    // For the IIdentityProvider interface we need to add routes to the API
-                    APIRoute userRoute = new APIRoute();
-                    userRoute.Path = "/login";
-                    userRoute.Description = "Log a user in";
-                    userRoute.Method = HttpMethod.Post;
-                    // TODO: Relook where this handler should be defined
-                    userRoute.Handler = (dynamic parameters, dynamic postData, dynamic user) =>
-                    {
-                        // RequiredFields property is only implemented on the APIRouteAttribute
-                        // so I have to manually do the checks for required interface routes
-                        if (postData.username == null || postData.password == null)
-                        {
-                            throw new MissingFieldException("Username and password must not be null");
-                        }
-                        LoginResult loginResult = identityProvider.Login((string)postData.username, (string)postData.password);
-                        APIResponse apiResponse = new APIResponse();
-                        if (loginResult.IsAuthenticated == false)
-                        {
-                            apiResponse.StatusCode = (int)HttpStatusCode.Unauthorized;
-                            apiResponse.StatusMessage = "Authentication required";
-                            apiResponse.Data = loginResult.ErrorResponse;
-                        }
-                        else
-                        {
-                            apiResponse.Data = loginResult.User;
-                        }
-                        return apiResponse;
-                    };
-                    CoreContainer.Instance.RouteManager.AddRoute(userRoute);
-                    CoreContainer.Instance.IdentityProvider = identityProvider;
-                }
-
-                // TODO: Add decorating to interfaces with required paths
-
-                List<APIRoute> moduleRoutes = module.GetAPIRoutes();
-                if (CoreContainer.Instance.RouteManager.AddRoutes(moduleRoutes))
-                {
-                    // TODO: Remove - only for testing - debug output
-                    foreach (APIRoute route in moduleRoutes)
-                    {
-                        _log.Debug($"Added route '{route.Path}' for module '{moduleName}'");
-                    }
-                    _log.Info($"Added {moduleRoutes.Count} new API routes for module '{moduleName}'");
-                }
-                else
-                {
-                    _log.Warning($"Unable to add all API routes for module '{moduleName}'. Possible duplicate route and method.");
-                }
+                _log.Info($"Loaded module '{moduleName}'");
+                Integrate(moduleName, module);
             }
 
             //TODO: Setup the admin API - move to own module
@@ -177,11 +108,6 @@ namespace Limitless
             List<APIRoute> routes = ((IModule)_adminModule).GetAPIRoutes();
             if (CoreContainer.Instance.RouteManager.AddRoutes(routes))
             {
-                // TODO: Remove - only for testing
-                foreach (APIRoute route in routes)
-                {
-                    _log.Debug($"Added route '{route.Path}' for module 'AdminModule'");
-                }
                 _log.Info($"Added {routes.Count} new API routes for module 'AdminModule'");
             }
             else
@@ -192,6 +118,12 @@ namespace Limitless
             if (_settings.Core.API.Nancy.DashboardEnabled)
             {
                 _log.Warning($"The Nancy dashboard is enabled at '/{_settings.Core.API.Nancy.DashboardPath}'. It should only be enabled for debugging of the API.");
+            }
+
+            // TODO: Remove this? Only debug output?
+            foreach (APIRoute route in CoreContainer.Instance.RouteManager.GetRoutes())
+            {
+                _log.Debug($"Added route '{route.Path}'");
             }
 
             //TODO: Setup the diagnostics
@@ -223,6 +155,99 @@ namespace Limitless
                 host.Start();
                 _log.Info($"API is running on '{ String.Join(", ", bindingAddresses) }'");
                 Console.ReadLine();
+            }
+        }
+
+        /// <summary>
+        /// Integrates the given module with the core by replacing other modules,
+        /// configuring routes and setting up wrappers.
+        /// </summary>
+        /// <param name="moduleName">The name of the loaded module as specified in the config</param>
+        /// <param name="module">The loaded module</param>
+        /// <exception cref="NotSupportedException">When duplicate content paths are found</exception>
+        private void Integrate(string moduleName, IModule module)
+        {
+            _log.Info($"Integrating module '{moduleName}'");
+            
+            if (module is ILogger)
+            {
+                _log = (ILogger)module;
+                _log.Info($"Loaded module '{moduleName}' implements ILogger, replaced Bootstrap logger");
+            }
+
+            if (module is IUIModule)
+            {
+                // Multiple UI modules are allowed, we can add all their paths
+                IUIModule ui = module as IUIModule;
+                string contentPath = ui.GetContentPath();
+                if (CoreContainer.Instance.RouteManager.AddContentRoute(contentPath))
+                {
+                    _log.Debug($"Added content path '{contentPath}' for module '{moduleName}'");
+                }
+                else
+                {
+                    _log.Critical($"Previously loaded IUIModule already uses the content path '{contentPath}' specified in '{moduleName}'");
+                    throw new NotSupportedException($"Previously loaded IUIModule already uses the content path '{contentPath}' specified in '{moduleName}'");
+                }
+            }
+
+            if (module is IIdentityProvider)
+            {
+                IIdentityProvider identityProvider = module as IIdentityProvider;
+                // For the IIdentityProvider interface we need to add routes to the API
+                APIRoute userRoute = new APIRoute();
+                userRoute.Path = "/login";
+                userRoute.Description = "Log a user in";
+                userRoute.Method = HttpMethod.Post;
+                // TODO: Relook where this handler should be defined, possibly IIdentityProvider.LoginHandler?
+                userRoute.Handler = (dynamic parameters, dynamic postData, dynamic user) =>
+                {
+                    // RequiredFields property is only implemented on the APIRouteAttribute
+                    // so I have to manually do the checks for required interface routes
+                    if (postData.username == null || postData.password == null)
+                    {
+                        throw new MissingFieldException("Username and password must not be null");
+                    }
+
+                    // Try..Catch as I'm calling user code here
+                    APIResponse apiResponse = new APIResponse();
+                    try
+                    {
+                        LoginResult loginResult = identityProvider.Login((string)postData.username, (string)postData.password);
+                        
+                        if (loginResult.IsAuthenticated == false)
+                        {
+                            apiResponse.StatusCode = (int)HttpStatusCode.Unauthorized;
+                            apiResponse.StatusMessage = "Authentication required";
+                            apiResponse.Data = loginResult.ErrorResponse;
+                        }
+                        else
+                        {
+                            apiResponse.Data = loginResult.User;
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        // Rethrow as we don't want to handle it
+                        throw;
+                    }
+                    
+                    return apiResponse;
+                };
+                CoreContainer.Instance.RouteManager.AddRoute(userRoute);
+                CoreContainer.Instance.IdentityProvider = identityProvider;
+            }
+
+            // TODO: Add decorating to interfaces with required paths
+
+            List<APIRoute> moduleRoutes = module.GetAPIRoutes();
+            if (CoreContainer.Instance.RouteManager.AddRoutes(moduleRoutes))
+            {
+                _log.Info($"Added {moduleRoutes.Count} new API routes for module '{moduleName}'");
+            }
+            else
+            {
+                _log.Warning($"Unable to add all API routes for module '{moduleName}'. Possible duplicate route and method.");
             }
         }
 

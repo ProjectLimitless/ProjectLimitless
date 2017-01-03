@@ -21,7 +21,6 @@ using Nett;
 
 using Limitless.Runtime.Interfaces;
 
-
 namespace Limitless.Managers
 {
     /// <summary>

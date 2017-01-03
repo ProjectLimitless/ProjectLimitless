@@ -13,6 +13,7 @@
 
 using System;
 using System.Dynamic;
+using System.Reflection;
 using System.Collections.Generic;
 
 using Limitless.Containers;
@@ -67,7 +68,9 @@ namespace Limitless.Builtin
             return routes;
         }
 
-        //TODO: Move this module to a separate assembly?
+        // TODO: Access module loader via corecontainer for ListModules
+
+        //TODO: Load as proper builtin modulel
         public void Configure(dynamic settings)
         {
             throw new NotImplementedException();
@@ -76,6 +79,61 @@ namespace Limitless.Builtin
         public Type GetConfigurationType()
         {
             throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Implemented from interface 
+        /// <see cref="Limitless.Runtime.Interface.IModule.GetTitle"/>
+        /// </summary>
+        public string GetTitle()
+        {
+            var assembly = typeof(AdminModule).Assembly;
+            var attribute = assembly.GetCustomAttribute<AssemblyTitleAttribute>();
+            if (attribute != null)
+            {
+                return attribute.Title;
+            }
+            return "Unknown";
+        }
+
+        /// <summary>
+        /// Implemented from interface 
+        /// <see cref="Limitless.Runtime.Interface.IModule.GetAuthor"/>
+        /// </summary>
+        public string GetAuthor()
+        {
+            var assembly = typeof(AdminModule).Assembly;
+            var attribute = assembly.GetCustomAttribute<AssemblyCompanyAttribute>();
+            if (attribute != null)
+            {
+                return attribute.Company;
+            }
+            return "Unknown";
+        }
+
+        /// <summary>
+        /// Implemented from interface 
+        /// <see cref="Limitless.Runtime.Interface.IModule.GetVersion"/>
+        /// </summary>
+        public string GetVersion()
+        {
+            var assembly = typeof(AdminModule).Assembly;
+            return assembly.GetName().Version.ToString();
+        }
+
+        /// <summary>
+        /// Implemented from interface 
+        /// <see cref="Limitless.Runtime.Interface.IModule.GetDescription"/>
+        /// </summary>
+        public string GetDescription()
+        {
+            var assembly = typeof(AdminModule).Assembly;
+            var attribute = assembly.GetCustomAttribute<AssemblyDescriptionAttribute>();
+            if (attribute != null)
+            {
+                return attribute.Description;
+            }
+            return "Unknown";
         }
     }
 }

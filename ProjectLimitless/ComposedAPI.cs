@@ -14,13 +14,13 @@
 using System;
 using System.Dynamic;
 
+using Newtonsoft.Json;
+
 using Nancy;
 using Nancy.Security;
 using Nancy.Extensions;
 using Nancy.Responses.Negotiation;
 using Nancy.Authentication.Stateless;
-
-using Newtonsoft.Json;
 
 using Limitless.Builtin;
 using Limitless.Managers;

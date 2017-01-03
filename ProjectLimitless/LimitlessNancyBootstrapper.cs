@@ -33,8 +33,8 @@ namespace Limitless
         /// Overrides the default application startup to add custom error
         /// handlers for Nancy.
         /// </summary>
-        /// <param name="container"></param>
-        /// <param name="pipelines"></param>
+        /// <param name="container">The TinyIoC container</param>
+        /// <param name="pipelines">The application pipelines</param>
         protected override void ApplicationStartup(TinyIoCContainer container, IPipelines pipelines)
         {
             base.ApplicationStartup(container, pipelines);

@@ -12,6 +12,7 @@
 */
 
 using System;
+using System.Reflection;
 using System.Collections.Generic;
 
 using FluentData;
@@ -75,6 +76,61 @@ namespace Limitless.Builtin.DatabaseProviders
         public Type GetConfigurationType()
         {
             return typeof(DatabaseProviderConfig);
+        }
+
+        /// <summary>
+        /// Implemented from interface 
+        /// <see cref="Limitless.Runtime.Interface.IModule.GetTitle"/>
+        /// </summary>
+        public string GetTitle()
+        {
+            var assembly = typeof(MySQLDatabaseProvider).Assembly;
+            var attribute = assembly.GetCustomAttribute<AssemblyTitleAttribute>();
+            if (attribute != null)
+            {
+                return attribute.Title;
+            }
+            return "Unknown";
+        }
+
+        /// <summary>
+        /// Implemented from interface 
+        /// <see cref="Limitless.Runtime.Interface.IModule.GetAuthor"/>
+        /// </summary>
+        public string GetAuthor()
+        {
+            var assembly = typeof(MySQLDatabaseProvider).Assembly;
+            var attribute = assembly.GetCustomAttribute<AssemblyCompanyAttribute>();
+            if (attribute != null)
+            {
+                return attribute.Company;
+            }
+            return "Unknown";
+        }
+
+        /// <summary>
+        /// Implemented from interface 
+        /// <see cref="Limitless.Runtime.Interface.IModule.GetVersion"/>
+        /// </summary>
+        public string GetVersion()
+        {
+            var assembly = typeof(MySQLDatabaseProvider).Assembly;
+            return assembly.GetName().Version.ToString();
+        }
+
+        /// <summary>
+        /// Implemented from interface 
+        /// <see cref="Limitless.Runtime.Interface.IModule.GetDescription"/>
+        /// </summary>
+        public string GetDescription()
+        {
+            var assembly = typeof(MySQLDatabaseProvider).Assembly;
+            var attribute = assembly.GetCustomAttribute<AssemblyDescriptionAttribute>();
+            if (attribute != null)
+            {
+                return attribute.Description;
+            }
+            return "Unknown";
         }
 
         /// <summary>

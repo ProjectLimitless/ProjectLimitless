@@ -145,6 +145,7 @@ namespace Limitless.Loaders
             {
                 // Move on to HTML view
             }
+            // Wrap the exception in an HTML <pre> tag
             result.StackTrace = string.Concat("<pre>", context.GetExceptionDetails().Replace("<", "&gt;").Replace(">", "&lt;"), "</pre>");
             result.StatusCode = (int)statusCode;
             var response = _viewRenderer.RenderView(context, "views/errors/" + (int)statusCode + ".html", result);

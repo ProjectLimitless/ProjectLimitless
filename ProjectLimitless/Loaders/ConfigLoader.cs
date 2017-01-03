@@ -89,9 +89,9 @@ namespace Limitless.Loaders
         /// <summary>
         /// Merge two TomlTables together. Values from overrides will replace values in original where available.
         /// </summary>
-        /// <param name="inputA">The </param>
-        /// <param name="inputB"></param>
-        /// <returns></returns>
+        /// <param name="original">The original values</param>
+        /// <param name="overrides">The values to replace originals</param>
+        /// <returns>The merged configuration</returns>
         private TomlTable Merge(TomlTable original, TomlTable overrides)
         {
             original.OverwriteWithValuesForLoadFrom(overrides);

@@ -2,6 +2,7 @@
 * This is a development module - Will be removed later.
 */
 using System;
+using System.Reflection;
 
 using Limitless.Runtime.Enums;
 using Limitless.Runtime.Attributes;
@@ -57,6 +58,61 @@ namespace TestModule
         public Type GetConfigurationType()
         {
             return typeof(TestSettings);
+        }
+
+        /// <summary>
+        /// Implemented from interface 
+        /// <see cref="Limitless.Runtime.Interface.IModule.GetTitle"/>
+        /// </summary>
+        public string GetTitle()
+        {
+            var assembly = typeof(TestModule).Assembly;
+            var attribute = assembly.GetCustomAttribute<AssemblyTitleAttribute>();
+            if (attribute != null)
+            {
+                return attribute.Title;
+            }
+            return "Unknown";
+        }
+
+        /// <summary>
+        /// Implemented from interface 
+        /// <see cref="Limitless.Runtime.Interface.IModule.GetAuthor"/>
+        /// </summary>
+        public string GetAuthor()
+        {
+            var assembly = typeof(TestModule).Assembly;
+            var attribute = assembly.GetCustomAttribute<AssemblyCompanyAttribute>();
+            if (attribute != null)
+            {
+                return attribute.Company;
+            }
+            return "Unknown";
+        }
+
+        /// <summary>
+        /// Implemented from interface 
+        /// <see cref="Limitless.Runtime.Interface.IModule.GetVersion"/>
+        /// </summary>
+        public string GetVersion()
+        {
+            var assembly = typeof(TestModule).Assembly;
+            return assembly.GetName().Version.ToString();
+        }
+
+        /// <summary>
+        /// Implemented from interface 
+        /// <see cref="Limitless.Runtime.Interface.IModule.GetDescription"/>
+        /// </summary>
+        public string GetDescription()
+        {
+            var assembly = typeof(TestModule).Assembly;
+            var attribute = assembly.GetCustomAttribute<AssemblyDescriptionAttribute>();
+            if (attribute != null)
+            {
+                return attribute.Description;
+            }
+            return "Unknown";
         }
 
         [APIRoute(Path = "/demo/ping/{name}", Method = HttpMethod.Get, RequiresAuthentication = true)]
