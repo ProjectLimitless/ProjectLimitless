@@ -170,7 +170,6 @@ namespace Limitless.Managers
                 // Check if we have enough loaded modules to satisfy this constructor
                 bool canSatisfy = true;
                 ParameterInfo[] parameters = constructor.GetParameters();
-                List<string> parametersList = new List<string>();
                 foreach (ParameterInfo parameter in parameters)
                 {
                     if (Modules.ContainsKey(parameter.ParameterType) == false)
