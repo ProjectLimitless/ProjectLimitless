@@ -101,6 +101,44 @@ paths:
                 "stackTrace": "  at Limitless.Limitless...",
                 "target": "ProjectLimitless..."
               }
+              
+  /admin/modules:
+    get:
+      summary: Returns a list of loaded modules.
+      security:
+        - Bearer: []
+      responses:
+        200:
+          description: The list of loaded modules
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/IModule"
+          examples:
+            application/json:
+              [
+                {
+                  "type": "ILogger",
+                  "title": "Limitless.Logger",
+                  "author": "Project Limitless",
+                  "version": "1.0.0.0",
+                  "description": "An NLog-based default logger for ProjectLimitless"
+                },
+              ]
+        401:
+          description: Invalid or expired access token
+        500:
+          description: Internal Server Error
+          schema:
+            $ref: "#/definitions/Exception"
+          examples:
+            application/json:
+              {
+                "type": "System.MissingFie...",
+                "message": "Username and password...",
+                "stackTrace": "  at Limitless.Limitless...",
+                "target": "ProjectLimitless..."
+              }
 
 
 definitions:
@@ -152,3 +190,17 @@ definitions:
         type: string
       requiresAuthentication:
         type: boolean
+        
+  IModule:
+    properties:
+      type:
+        type: string
+      title:
+        type: string 
+      author:
+        type: string
+      version:
+        type: string
+      description:
+        type: string
+        

@@ -71,6 +71,37 @@ namespace Limitless.Builtin
         }
 
         // TODO: Access module loader via corecontainer for ListModules
+        /// <summary>
+        /// Returns a list of loaded modules.
+        /// </summary>
+        /// <param name="parameters">API route parameters</param>
+        /// <param name="user">The authenticated user</param>
+        /// <returns>The list of loaded modules and their descriptions</returns>
+        [APIRoute(
+            Path = "/admin/modules",
+            Method = HttpMethod.Get,
+            Description = "Shows all the loaded modules for the installation",
+            RequiresAuthentication = true
+        )]
+        public dynamic ModulesList(dynamic parameters, dynamic user)
+        {
+            List<dynamic> modules = new List<dynamic>();
+            foreach (KeyValuePair<Type, List<IModule>> kvp in CoreContainer.Instance.ModuleManager.Modules)
+            {
+                foreach (IModule module in kvp.Value)
+                {
+                    dynamic moduleInfo = new ExpandoObject();
+                    
+                    moduleInfo.Type = kvp.Key.Name;
+                    moduleInfo.Title = module.GetTitle();
+                    moduleInfo.Author = module.GetAuthor();
+                    moduleInfo.Version = module.GetVersion();
+                    moduleInfo.Description = module.GetDescription();
+                    modules.Add(moduleInfo);
+                }
+            }
+            return modules;
+        }
 
         //TODO: Load as proper builtin modulel
         public void Configure(dynamic settings)

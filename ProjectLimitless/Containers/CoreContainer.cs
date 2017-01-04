@@ -28,6 +28,10 @@ namespace Limitless.Containers
         /// </summary>
         public RouteManager RouteManager { get; internal set; }
         /// <summary>
+        /// Manages loaded modules.
+        /// </summary>
+        public ModuleManager ModuleManager { get; internal set; }
+        /// <summary>
         /// Provides identity management.
         /// </summary>
         public IIdentityProvider IdentityProvider { get; internal set; }

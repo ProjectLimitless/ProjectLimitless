@@ -39,10 +39,6 @@ namespace Limitless
         /// </summary>
         private ILogger _log;
         /// <summary>
-        /// Manager of the modules.
-        /// </summary>
-        private ModuleManager _moduleManager;
-        /// <summary>
         /// The loaded settings.
         /// </summary>
         private LimitlessSettings _settings;
@@ -74,7 +70,7 @@ namespace Limitless
             _log.Info($"Settings| Default system name set as {_settings.Core.Name}");
             _log.Info($"Settings| {_settings.Core.EnabledModules.Length} module(s) will be loaded");
 
-            _moduleManager = new ModuleManager(_settings.FullConfiguration, _log);
+            CoreContainer.Instance.ModuleManager = new ModuleManager(_settings.FullConfiguration, _log);
             foreach (string moduleName in _settings.Core.EnabledModules)
             {
                 // Load each module specified in the config. First try to load
@@ -83,14 +79,14 @@ namespace Limitless
                 IModule module = null;
                 try
                 {
-                    module = _moduleManager.Load(moduleName);
+                    module = CoreContainer.Instance.ModuleManager.Load(moduleName);
                 }
                 catch (DllNotFoundException ex)
                 {
                     _log.Warning($"Unable to load module '{ex.Message}', attempting to load as builtin module");
                     // Create a type from the builtin module name
                     Type builtinType = Type.GetType(moduleName, true, false);
-                    module = _moduleManager.LoadBuiltin(moduleName, builtinType);
+                    module = CoreContainer.Instance.ModuleManager.LoadBuiltin(moduleName, builtinType);
                 }
 
                 if (module == null)
