@@ -1,45 +1,154 @@
 swagger: '2.0'
 
 info:
-  version: "0.0.0.1"
-  title: Project Limitless API
+  version: 0.0.0.1
+  title: Project Limitless Builtin API
+  license:
+    name: Apache 2.0
+    url: https://github.com/ProjectLimitless/ProjectLimitless/blob/master/LICENSE
+  description: This specification defines the builtin API available for Project Limitless installations.
 
 schemes:
+  - http
   - https
 
+consumes:
+  - application/json
+
+produces:
+  - application/json
+
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: Authorization
+    in: header
+
+basePath: /api
 paths:
-  /api/login:
+  /login:
     post:
-      summary: "Logs a user in"
-      consumes:
-        - application/json
-      produces:
-        - application/json
-        - text/xml
-        - text/html
+      summary: Logs a user in
       parameters:
-        - name: body
+        - name: credentials
           in: body
           description: The login credentials to use.
           required: true
           schema:
-            $ref: "#/definitions/LoginCredentials" 
-      responses: 
-        200: 
-          description: "200 response"
-          examples: 
-            application/json: 
-             {
-               "accessToken": "access token"
-             }
-      
+            $ref: "#/definitions/Login.Credentials"
+      responses:
+        200:
+          description: Login succeeded
+          schema:
+              $ref: "#/definitions/Login.Response"
+          examples:
+            application/json:
+              {
+                  "claims": [],
+                  "userName": "Username",
+                  "name": "Name",
+                  "surname": "Surname",
+                  "accessToken": "access token",
+                  "isAuthenticated": true
+              }
+        401:
+          description: Login failed
+        500:
+          description: Internal Server Error
+          schema:
+            $ref: "#/definitions/Exception"
+          examples:
+            application/json:
+              {
+                "type": "System.MissingFie...",
+                "message": "Username and password...",
+                "stackTrace": "  at Limitless.Limitless...",
+                "target": "ProjectLimitless..."
+              }
+  /admin/routes:
+    get:
+      summary: Returns a list of available API routes.
+      security:
+        - Bearer: []
+      responses:
+        200:
+          description: The list of API routes
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/APIRoute"
+          examples:
+            application/json:
+              [
+                {
+                  "path": "/api/login",
+                  "method": "POST",
+                  "description": "Log a user in",
+                  "requiresAuthentication": false
+                }
+              ]
+        401:
+          description: Invalid or expired access token
+        500:
+          description: Internal Server Error
+          schema:
+            $ref: "#/definitions/Exception"
+          examples:
+            application/json:
+              {
+                "type": "System.MissingFie...",
+                "message": "Username and password...",
+                "stackTrace": "  at Limitless.Limitless...",
+                "target": "ProjectLimitless..."
+              }
+
+
 definitions:
-  LoginCredentials:
+  Exception:
+    properties:
+      type:
+        type: string
+      message:
+        type: string
+      stackTrace:
+        type: string
+      target:
+        type: string
+
+  Login.Credentials:
     properties:
       username:
-       type: string
+        type: string
       password:
-       type: string
+        type: string
     required:
       - username
       - password
+
+  Login.Response:
+    properties:
+      claims:
+        type: array
+        items:
+          type: string
+      userName:
+        type: string
+      name:
+        type: string
+      surname:
+        type: string
+      accessToken:
+        type: string
+      isAuthenticated:
+        type: boolean
+        
+  APIRoute:
+    properties:
+      path:
+        type: string
+      method:
+        type: string
+      description:
+        type: string
+      requiresAuthentication:
+        type: boolean

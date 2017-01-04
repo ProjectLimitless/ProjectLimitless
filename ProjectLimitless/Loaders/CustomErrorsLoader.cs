@@ -117,11 +117,11 @@ namespace Limitless.Loaders
             {
                 return;
             }
-            
+
             dynamic result = new ExpandoObject();
             Exception ex;
             if (context.TryGetException(out ex))
-            { 
+            {
                 result.Type = context.GetException().GetType();
                 result.Message = _checks[(int)statusCode];
                 result.StackTrace = context.GetExceptionDetails();
@@ -134,7 +134,7 @@ namespace Limitless.Loaders
                 result.StackTrace = "";
                 result.Target = "";
             }
-            
+
             try
             {
                 context.Response = _responseNegotiator.NegotiateResponse(result, context);
