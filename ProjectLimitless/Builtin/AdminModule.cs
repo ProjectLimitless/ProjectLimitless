@@ -42,14 +42,16 @@ namespace Limitless.Builtin
         /// <summary>
         /// Returns a list of available API routes.
         /// </summary>
-        /// <param name="input">API input, null in this case</param>
+        /// <param name="parameters">API route parameters</param>
+        /// <param name="user">The authenticated user</param>
         /// <returns>The list of routes and their descriptions</returns>
         [APIRoute(
             Path = "/admin/routes", 
             Method = HttpMethod.Get, 
-            Description = "Shows all the available routes of the API"
+            Description = "Shows all the available routes of the API",
+            RequiresAuthentication = true
         )]
-        public dynamic RoutesList(dynamic parameters)
+        public dynamic RoutesList(dynamic parameters, dynamic user)
         {
             List<dynamic> routes = new List<dynamic>();
             foreach (APIRoute route in CoreContainer.Instance.RouteManager.GetRoutes())
