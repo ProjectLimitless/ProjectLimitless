@@ -48,7 +48,7 @@ namespace Limitless.Builtin
         [APIRoute(
             Path = "/admin/routes", 
             Method = HttpMethod.Get, 
-            Description = "Shows all the available routes of the API",
+            Description = "Returns a list of all the available routes of the API",
             RequiresAuthentication = true
         )]
         public dynamic RoutesList(dynamic parameters, dynamic user)
@@ -70,7 +70,6 @@ namespace Limitless.Builtin
             return routes;
         }
 
-        // TODO: Access module loader via corecontainer for ListModules
         /// <summary>
         /// Returns a list of loaded modules.
         /// </summary>
@@ -80,7 +79,7 @@ namespace Limitless.Builtin
         [APIRoute(
             Path = "/admin/modules",
             Method = HttpMethod.Get,
-            Description = "Shows all the loaded modules for the installation",
+            Description = "Returns a list of all the loaded modules for the installation",
             RequiresAuthentication = true
         )]
         public dynamic ModulesList(dynamic parameters, dynamic user)
@@ -101,6 +100,23 @@ namespace Limitless.Builtin
                 }
             }
             return modules;
+        }
+
+        /// <summary>
+        /// Returns a list of users.
+        /// </summary>
+        /// <param name="parameters">API route parameters</param>
+        /// <param name="user">The authenticated user</param>
+        /// <returns>The list of users</returns>
+        [APIRoute(
+            Path = "/admin/users",
+            Method = HttpMethod.Get,
+            Description = "Returns a list of users for the installation",
+            RequiresAuthentication = true
+        )]
+        public dynamic UsersList(dynamic parameters, dynamic user)
+        {
+            return CoreContainer.Instance.IdentityProvider.List();
         }
 
         //TODO: Load as proper builtin modulel
