@@ -49,6 +49,9 @@ namespace Limitless
         /// </summary>
         private AdminModule _adminModule;
 
+        // TODO: Load as proper module?
+        private AnalysisModule _analysis;
+
         /// <summary>
         /// Constructor taking the configuration to be used.
         /// </summary>
@@ -57,6 +60,7 @@ namespace Limitless
         {
             _settings = settings;
             _log = log;
+            _analysis = new AnalysisModule(_log);
 
             Configure();
         }
@@ -169,6 +173,9 @@ namespace Limitless
             {
                 _log = (ILogger)module;
                 _log.Info($"Loaded module '{moduleName}' implements ILogger, replaced Bootstrap logger");
+
+                // TODO: Find a better way to reload modules in other modules
+                _analysis.SetLog(_log);
             }
 
             if (module is IUIModule)
@@ -235,8 +242,8 @@ namespace Limitless
             }
 
             // TODO: Add decorating to interfaces with required paths
-
-            var moduleRoutes = module.GetAPIRoutes();
+            // TODO: Testing hook
+            var moduleRoutes = module.GetAPIRoutes(_analysis.Record);
             if (CoreContainer.Instance.RouteManager.AddRoutes(moduleRoutes))
             {
                 _log.Info($"Added {moduleRoutes.Count} new API routes for module '{moduleName}'");

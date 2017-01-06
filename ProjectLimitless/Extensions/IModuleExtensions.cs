@@ -35,9 +35,9 @@ namespace Limitless.Extensions
         /// and returns the usable API routes for the module.
         /// </summary>
         /// <param name="type">The module to get routes from</param>
-        /// <param name="handler">A handler to wrap around the module invoke</param>
+        /// <param name="handler">A handler to wrap around the module invoke. Takes the output and API input parameters as input.</param>
         /// <returns>The list of API routes</returns>
-        public static List<APIRoute> GetAPIRoutes(this IModule module, Func<dynamic, dynamic> handler = null)
+        public static List<APIRoute> GetAPIRoutes(this IModule module, Func<dynamic, object[], dynamic> handler = null)
         {
             var apiRoutes = new List<APIRoute>();
 
@@ -92,7 +92,7 @@ namespace Limitless.Extensions
                     if (handler != null)
                     {
                         // TODO: Ensure we can chain multiple methods
-                        result = handler(methodInfo.Invoke(module, invokeParameters.ToArray()));
+                        result = handler(methodInfo.Invoke(module, invokeParameters.ToArray()), invokeParameters.ToArray());
                     }
                     else
                     {

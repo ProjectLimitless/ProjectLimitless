@@ -126,8 +126,8 @@ namespace TestModule
             return obj;
         }
 
-        [APIRoute(Path = "/test/post", Method = HttpMethod.Post, RequiredFields = new string[] { "name" })]
-        public dynamic PersonalPost(dynamic parameters, dynamic postData)
+        [APIRoute(Path = "/test/post", Method = HttpMethod.Post, RequiredFields = new string[] { "name" }, RequiresAuthentication = true)]
+        public dynamic PersonalPost(dynamic parameters, dynamic postData, dynamic user)
         {
             // With anonymous types
             return new
