@@ -53,7 +53,7 @@ namespace Limitless
                         return null;
                     }
 
-                    LoginResult loginResult = identityProvider.TokenLogin(jwtToken);
+                    var loginResult = identityProvider.TokenLogin(jwtToken);
                     if (loginResult.IsAuthenticated)
                     {
                         return InternalUserIdentity.Wrap(loginResult.User);
@@ -70,7 +70,7 @@ namespace Limitless
             });
             StatelessAuthentication.Enable(this, configuration);
 
-            foreach (APIRoute route in routeManager.GetRoutes())
+            foreach (var route in routeManager.GetRoutes())
             {
                 switch (route.Method)
                 {
@@ -122,14 +122,14 @@ namespace Limitless
                     internalUser = (InternalUserIdentity)Context.CurrentUser;
                 }
                 dynamic postData = JsonConvert.DeserializeObject(Request.Body.AsString());
-                Negotiator negotiator = Negotiate.WithStatusCode(200);
+                var negotiator = Negotiate.WithStatusCode(200);
 
                 try
                 {
                     var handlerResponse = route.Handler(parameters, postData, internalUser);
                     if (handlerResponse is APIResponse)
                     {
-                        APIResponse apiResponse = handlerResponse as APIResponse;
+                        var apiResponse = handlerResponse as APIResponse;
                         negotiator.WithStatusCode(apiResponse.StatusCode);
 
                         if (apiResponse.Data != null)

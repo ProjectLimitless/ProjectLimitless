@@ -101,7 +101,7 @@ namespace Limitless
 
             //TODO: Setup the admin API - move to own module
             _adminModule = new AdminModule(_log);
-            List<APIRoute> routes = ((IModule)_adminModule).GetAPIRoutes();
+            var routes = ((IModule)_adminModule).GetAPIRoutes();
             if (CoreContainer.Instance.RouteManager.AddRoutes(routes))
             {
                 _log.Info($"Added {routes.Count} new API routes for module 'AdminModule'");
@@ -117,7 +117,7 @@ namespace Limitless
             }
 
             // TODO: Remove this? Only debug output?
-            foreach (APIRoute route in CoreContainer.Instance.RouteManager.GetRoutes())
+            foreach (var route in CoreContainer.Instance.RouteManager.GetRoutes())
             {
                 _log.Debug($"Added route '{route.Path}'");
             }
@@ -132,10 +132,10 @@ namespace Limitless
         /// </summary>
         public void Run()
         {
-            HostConfiguration config = new HostConfiguration();
+            var config = new HostConfiguration();
             config.UrlReservations.CreateAutomatically = true;
 
-            List<Uri> bindingAddresses = new List<Uri>();
+            var bindingAddresses = new List<Uri>();
             // If the host is set to 0.0.0.0, we bind to all the available IP addresses
             if (_settings.Core.API.Host == "0.0.0.0")
             {
@@ -174,7 +174,7 @@ namespace Limitless
             if (module is IUIModule)
             {
                 // Multiple UI modules are allowed, we can add all their paths
-                IUIModule ui = module as IUIModule;
+                var ui = module as IUIModule;
                 string contentPath = ui.GetContentPath();
                 if (CoreContainer.Instance.RouteManager.AddContentRoute(contentPath))
                 {
@@ -189,9 +189,9 @@ namespace Limitless
 
             if (module is IIdentityProvider)
             {
-                IIdentityProvider identityProvider = module as IIdentityProvider;
+                var identityProvider = module as IIdentityProvider;
                 // For the IIdentityProvider interface we need to add routes to the API
-                APIRoute userRoute = new APIRoute();
+                var userRoute = new APIRoute();
                 userRoute.Path = "/login";
                 userRoute.Description = "Log a user in";
                 userRoute.Method = HttpMethod.Post;
@@ -206,10 +206,10 @@ namespace Limitless
                     }
 
                     // Try..Catch as I'm calling user code here
-                    APIResponse apiResponse = new APIResponse();
+                    var apiResponse = new APIResponse();
                     try
                     {
-                        LoginResult loginResult = identityProvider.Login((string)postData.username, (string)postData.password);
+                        var loginResult = identityProvider.Login((string)postData.username, (string)postData.password);
                         
                         if (loginResult.IsAuthenticated == false)
                         {
@@ -236,7 +236,7 @@ namespace Limitless
 
             // TODO: Add decorating to interfaces with required paths
 
-            List<APIRoute> moduleRoutes = module.GetAPIRoutes();
+            var moduleRoutes = module.GetAPIRoutes();
             if (CoreContainer.Instance.RouteManager.AddRoutes(moduleRoutes))
             {
                 _log.Info($"Added {moduleRoutes.Count} new API routes for module '{moduleName}'");

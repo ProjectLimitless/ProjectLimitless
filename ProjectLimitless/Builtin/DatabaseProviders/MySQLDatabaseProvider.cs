@@ -59,7 +59,7 @@ namespace Limitless.Builtin.DatabaseProviders
                 throw new NullReferenceException("Settings can not be null");
             }
 
-            DatabaseProviderConfig config = (DatabaseProviderConfig)settings;
+            var config = (DatabaseProviderConfig)settings;
             if (config.ConnectionString == "")
             {
                 throw new MissingFieldException("ConnectionString can not be blank");

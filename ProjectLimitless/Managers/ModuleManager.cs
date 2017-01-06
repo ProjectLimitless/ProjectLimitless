@@ -89,7 +89,7 @@ namespace Limitless.Managers
 
             // Only check modules that implement the IModule interface
             var dll = Assembly.LoadFrom(dllPath);
-            List<Type> availableModules = dll.GetExportedTypes()
+            var availableModules = dll.GetExportedTypes()
                 .Where(t => typeof(IModule).IsAssignableFrom(t))
                 .ToList();
 
@@ -103,8 +103,8 @@ namespace Limitless.Managers
                 throw new NotSupportedException($"Module '{moduleName}' does not implement IModule.");
             }
 
-            Type moduleType = availableModules.First();
-            IModule module = Construct(moduleType);
+            var moduleType = availableModules.First();
+            var module = Construct(moduleType);
             Configure(moduleName, module);
             bool loaded = AddModule(module);
             if (loaded)
@@ -137,7 +137,7 @@ namespace Limitless.Managers
                 throw new NotSupportedException($"Module '{moduleName}' does not implement IModule.");
             }
             
-            IModule module = Construct(builtinType);
+            var module = Construct(builtinType);
             Configure(moduleName, module);
             bool loaded = AddModule(module);
             if (loaded)
@@ -164,12 +164,12 @@ namespace Limitless.Managers
         private IModule Construct(Type moduleType)
         {
             ConstructorInfo selectedConstructor = null;
-            ConstructorInfo[] allConstructors = moduleType.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
+            var allConstructors = moduleType.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
             foreach (ConstructorInfo constructor in allConstructors)
             {                
                 // Check if we have enough loaded modules to satisfy this constructor
                 bool canSatisfy = true;
-                ParameterInfo[] parameters = constructor.GetParameters();
+                var parameters = constructor.GetParameters();
                 foreach (ParameterInfo parameter in parameters)
                 {
                     if (Modules.ContainsKey(parameter.ParameterType) == false)
@@ -194,8 +194,8 @@ namespace Limitless.Managers
             }
 
             // Execute the best matching constructor for the module
-            List<object> constructorParameters = new List<object>();
-            foreach (ParameterInfo parameter in selectedConstructor.GetParameters())
+            var constructorParameters = new List<object>();
+            foreach (var parameter in selectedConstructor.GetParameters())
             {
                 if (Modules.ContainsKey(parameter.ParameterType))
                 {
@@ -208,7 +208,7 @@ namespace Limitless.Managers
             }
 
             dynamic instance = Activator.CreateInstance(moduleType, constructorParameters.ToArray());
-            IModule module = (IModule)instance;
+            var module = (IModule)instance;
             return module;
         }
 
@@ -219,15 +219,15 @@ namespace Limitless.Managers
         /// <param name="module">The IModule to configure</param>
         private void Configure(string moduleName, IModule module)
         {
-            Type configurationType = module.GetConfigurationType();
+            var configurationType = module.GetConfigurationType();
 
             // Execute the configure method for IModule
             // I extract the Get<T> generic function from the TomlTable using reflection. 
-            MethodInfo getMethod = typeof(TomlTable).GetMethods()
+            var getMethod = typeof(TomlTable).GetMethods()
                 .Where(x => x.Name == "Get")
                 .First(x => x.IsGenericMethod);
             // Then I make it generic again
-            MethodInfo generic = getMethod.MakeGenericMethod(configurationType);
+            var generic = getMethod.MakeGenericMethod(configurationType);
             // Dots (.) have special meaning in TOML files, so remove them from the config lookup
             moduleName = moduleName.Replace(".", "");
             // Invoke it. The Get<T> method requires the configuration key as param
@@ -258,7 +258,7 @@ namespace Limitless.Managers
                 return false;
             }
             bool added = false;
-            foreach (Type type in interfaces.ToArray())
+            foreach (var type in interfaces.ToArray())
             {       
                 // A module can implement multiple interfaces
                 if (type.IsAssignableFrom(module.GetType()))

@@ -39,17 +39,17 @@ namespace Limitless.Extensions
         /// <returns>The list of API routes</returns>
         public static List<APIRoute> GetAPIRoutes(this IModule module, Func<dynamic, dynamic> handler = null)
         {
-            List<APIRoute> apiRoutes = new List<APIRoute>();
+            var apiRoutes = new List<APIRoute>();
 
             // Check for APIRouteAttributes and add the routes that extend the API
-            MethodInfo[] methods = module.GetType().GetMethods()
+            var methods = module.GetType().GetMethods()
                     .Where(m => m.GetCustomAttributes(typeof(APIRouteAttribute), false).Length > 0)
                     .ToArray();
 
             foreach (MethodInfo methodInfo in methods)
             {
-                APIRouteAttribute attributes = Attribute.GetCustomAttribute(methodInfo, typeof(APIRouteAttribute)) as APIRouteAttribute;
-                APIRoute route = new APIRoute();
+                var attributes = Attribute.GetCustomAttribute(methodInfo, typeof(APIRouteAttribute)) as APIRouteAttribute;
+                var route = new APIRoute();
                 route.Path = attributes.Path;
                 route.Method = attributes.Method;
                 route.Description = attributes.Description;
@@ -59,7 +59,7 @@ namespace Limitless.Extensions
                     // For Get and Delete I'll only send the parameters
                     // For Post and Put I'll send parameters and postData to the method
                     // For authenticated routes I'll add the user object to the method
-                    List<object> invokeParameters = new List<object>();
+                    var invokeParameters = new List<object>();
                     invokeParameters.Add(parameters);
                     if (route.Method == HttpMethod.Post || route.Method == HttpMethod.Put)
                     {
@@ -84,7 +84,7 @@ namespace Limitless.Extensions
                     }
                     if (user != null && route.RequiresAuthentication)
                     {
-                        InternalUserIdentity internalUser = (InternalUserIdentity)user;
+                        var internalUser = (InternalUserIdentity)user;
                         invokeParameters.Add((dynamic)internalUser.Meta);
                     }
 

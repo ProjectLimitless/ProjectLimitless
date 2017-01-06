@@ -84,13 +84,12 @@ namespace Limitless.Builtin
         )]
         public dynamic ModulesList(dynamic parameters, dynamic user)
         {
-            List<dynamic> modules = new List<dynamic>();
-            foreach (KeyValuePair<Type, List<IModule>> kvp in CoreContainer.Instance.ModuleManager.Modules)
+            var modules = new List<dynamic>();
+            foreach (var kvp in CoreContainer.Instance.ModuleManager.Modules)
             {
                 foreach (IModule module in kvp.Value)
                 {
                     dynamic moduleInfo = new ExpandoObject();
-                    
                     moduleInfo.Type = kvp.Key.Name;
                     moduleInfo.Title = module.GetTitle();
                     moduleInfo.Author = module.GetAuthor();

@@ -43,7 +43,7 @@ namespace Limitless.Loaders
         /// <returns>The merged configuration</returns>
         public LimitlessSettings Load()
         {
-            LimitlessSettings settings = new LimitlessSettings();
+            var settings = new LimitlessSettings();
             
             string coreConfigString = "";
             string coreFilePath = Path.Combine(ConfigurationPath, "Core.toml");
@@ -75,10 +75,10 @@ namespace Limitless.Loaders
 
             string combinedConfigsString = coreConfigString + moduleConfigsString;
 
-            TomlTable combinedToml = Toml.ReadString(combinedConfigsString);
-            TomlTable userToml = Toml.ReadString(userConfigString);
+            var combinedToml = Toml.ReadString(combinedConfigsString);
+            var userToml = Toml.ReadString(userConfigString);
             
-            TomlTable completeToml = Merge(combinedToml, userToml);
+            var completeToml = Merge(combinedToml, userToml);
 
             settings.Core = LimitlessSettings.Convert<CoreSettings>("Core", completeToml);
             settings.FullConfiguration = completeToml;

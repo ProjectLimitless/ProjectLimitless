@@ -50,7 +50,7 @@ namespace Limitless.Builtin
         /// <returns>The wrapped internal user</returns>
         public static InternalUserIdentity Wrap(BaseUser baseUser)
         {
-            InternalUserIdentity internalUser = new InternalUserIdentity();
+            var internalUser = new InternalUserIdentity();
             if (baseUser == null)
             {
                 return null;

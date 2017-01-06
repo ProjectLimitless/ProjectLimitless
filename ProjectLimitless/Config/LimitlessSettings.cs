@@ -42,11 +42,11 @@ namespace Limitless.Config
         public static T Convert<T>(string key, TomlTable data)
         {
             // I extract the Get<T> generic function from the TomlTable using reflection. 
-            MethodInfo getMethod = typeof(TomlTable).GetMethods()
+            var getMethod = typeof(TomlTable).GetMethods()
                 .Where(x => x.Name == "Get")
                 .First(x => x.IsGenericMethod);
             // Then I make it generic again
-            MethodInfo generic = getMethod.MakeGenericMethod(typeof(T));
+            var generic = getMethod.MakeGenericMethod(typeof(T));
             // Invoke it. The Get<T> method requires the configuration key as param
             dynamic dynamicConfig = generic.Invoke(data, new object[] { key });
             return (T)dynamicConfig;

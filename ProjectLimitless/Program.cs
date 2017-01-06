@@ -11,10 +11,8 @@
 * Project Limitless. If not, see http://www.apache.org/licenses/LICENSE-2.0.
 */
 
-using Limitless.Config;
 using Limitless.Builtin;
 using Limitless.Loaders;
-using Limitless.Runtime.Interfaces;
 
 namespace Limitless
 {
@@ -22,15 +20,15 @@ namespace Limitless
     {  
         static void Main(string[] args)
         {
-            ILogger log = new BootstrapLogger();
+            var log = new BootstrapLogger();
             log.Warning("Bootstrap logger in use. This logger does not support hiding logging levels - everything is displayed");
             log.Info("Loading Project Limitless...");
 
             log.Debug("Loading configuration...");
-            ConfigLoader configLoader = new ConfigLoader();
-            LimitlessSettings settings = configLoader.Load();
+            var configLoader = new ConfigLoader();
+            var settings = configLoader.Load();
 
-            Limitless limitless = new Limitless(settings, log);
+            var limitless = new Limitless(settings, log);
             limitless.Run();
             
             log.Info("Project Limitless has shut down.");
