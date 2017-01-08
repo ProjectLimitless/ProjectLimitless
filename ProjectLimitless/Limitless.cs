@@ -241,6 +241,37 @@ namespace Limitless
                 CoreContainer.Instance.IdentityProvider = identityProvider;
             }
 
+            // TODO: Rethink inputs
+            // Might be audio, text, video, image, gesture, etc
+            // Will be from a client app, probably not a user directly
+            // Audio might output text but can output intent as well
+            // Intent needs to be executed and response needs to be
+            // negotiated based on the input
+            // maybe a ll-accept header / ll-content-type?
+            if (module is IInputProvider)
+            {
+                var inputProvider = module as IInputProvider;
+
+                // For the IInputProvider interface we need to add routes to the API
+                var inputRoute = new APIRoute();
+
+                var inputType = inputProvider.GetInputType();
+                switch (inputType)
+                {
+                    case InputType.Text:
+                        inputRoute.Path = "/input/text";
+                        inputRoute.Description = "Process text input";
+                        break;
+                }
+                inputRoute.Method = HttpMethod.Post;
+                inputRoute.Handler = (dynamic parameters, dynamic postData, dynamic user) =>
+                {
+                    _log.Trace("Handling input");
+                    return null;
+                };
+                CoreContainer.Instance.RouteManager.AddRoute(inputRoute);
+            }
+
             // TODO: Add decorating to interfaces with required paths
             // TODO: Testing hook
             var moduleRoutes = module.GetAPIRoutes(_analysis.Record);

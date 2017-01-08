@@ -255,6 +255,7 @@ namespace Limitless.Managers
                             t.Name != "IModule");
             if (interfaces == null)
             {
+                _log.Warning("No interfaces implemented from Runtime");
                 return false;
             }
             bool added = false;
