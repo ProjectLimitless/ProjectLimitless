@@ -84,13 +84,7 @@ namespace Limitless.Builtin.DatabaseProviders
         /// </summary>
         public string GetTitle()
         {
-            var assembly = typeof(MySQLDatabaseProvider).Assembly;
-            var attribute = assembly.GetCustomAttribute<AssemblyTitleAttribute>();
-            if (attribute != null)
-            {
-                return attribute.Title;
-            }
-            return "Unknown";
+            return "Limitless.MySQLDatabaseProvider";
         }
 
         /// <summary>
@@ -124,13 +118,7 @@ namespace Limitless.Builtin.DatabaseProviders
         /// </summary>
         public string GetDescription()
         {
-            var assembly = typeof(MySQLDatabaseProvider).Assembly;
-            var attribute = assembly.GetCustomAttribute<AssemblyDescriptionAttribute>();
-            if (attribute != null)
-            {
-                return attribute.Description;
-            }
-            return "Unknown";
+            return "A MySQL database provider for Project Limitless";
         }
 
         /// <summary>
