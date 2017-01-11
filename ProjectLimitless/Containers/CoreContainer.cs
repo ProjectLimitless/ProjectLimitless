@@ -32,6 +32,10 @@ namespace Limitless.Containers
         /// </summary>
         public ModuleManager ModuleManager { get; internal set; }
         /// <summary>
+        /// Manages inputs and outputs.
+        /// </summary>
+        public IOManager IOManager { get; internal set; }
+        /// <summary>
         /// Provides identity management.
         /// </summary>
         public IIdentityProvider IdentityProvider { get; internal set; }

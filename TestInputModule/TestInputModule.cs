@@ -42,9 +42,12 @@ namespace TestInputModule
             return "Testing input provider";
         }
 
-        public InputType GetInputType()
+        public IEnumerable<string> GetInputMimeTypes()
         {
-            return InputType.Text;
+            return new List<string>
+            {
+                MimeType.Text
+            };
         }
 
         public string GetTitle()

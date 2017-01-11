@@ -93,6 +93,7 @@
     <Compile Include="Extensions\IModuleExtensions.cs" />
     <Compile Include="Containers\CoreContainer.cs" />
     <Compile Include="Loaders\CustomErrorsLoader.cs" />
+    <Compile Include="Managers\IOManager.cs" />
     <Compile Include="Managers\RouteManager.cs" />
     <Compile Include="LimitlessNancyBootstrapper.cs" />
     <Compile Include="Managers\ModuleManager.cs" />

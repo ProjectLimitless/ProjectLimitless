@@ -71,12 +71,15 @@ namespace Limitless.Extensions
                             {
                                 throw new NullReferenceException("POST data is required for this route");
                             }
-                            IDictionary<string, JToken> lookup = postData;
-                            foreach (string requiredField in attributes.RequiredFields)
+                            if (parameters.contentType == "application/json")
                             {
-                                if (lookup.ContainsKey(requiredField) == false)
+                                IDictionary<string, JToken> lookup = postData;
+                                foreach (string requiredField in attributes.RequiredFields)
                                 {
-                                    throw new MissingFieldException($"Required data field '{requiredField}' was not found in the POST data");
+                                    if (lookup.ContainsKey(requiredField) == false)
+                                    {
+                                        throw new MissingFieldException($"Required data field '{requiredField}' was not found in the POST data");
+                                    }
                                 }
                             }
                         }

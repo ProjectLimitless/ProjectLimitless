@@ -121,7 +121,14 @@ namespace Limitless
                     this.RequiresAuthentication();
                     internalUser = (InternalUserIdentity)Context.CurrentUser;
                 }
-                dynamic postData = JsonConvert.DeserializeObject(Request.Body.AsString());
+                dynamic postData;
+                if (Request.Headers.ContentType == "application/json")
+                {
+                    postData = JsonConvert.DeserializeObject(Request.Body.AsString());
+                }
+                else postData = Request.Body.AsString();
+                parameters.contentType = Request.Headers.ContentType;
+                
                 var negotiator = Negotiate.WithStatusCode(200);
 
                 try
@@ -142,7 +149,7 @@ namespace Limitless
                         }
                         if (apiResponse.Headers.Count > 0)
                         {
-                            negotiator.WithHeaders(apiResponse.Headers);
+                            negotiator.WithHeaders(apiResponse.Headers.ToArray());
                         }       
                     }
                     else

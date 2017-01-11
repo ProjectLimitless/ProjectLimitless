@@ -62,6 +62,34 @@ namespace Limitless
             _log = log;
             _analysis = new AnalysisModule(_log);
 
+            // TODO: Maybe make IOManager just an instance variable?
+            CoreContainer.Instance.ModuleManager = new ModuleManager(_settings.FullConfiguration, _log);
+            
+            CoreContainer.Instance.IOManager = new IOManager(_log);
+
+            // TODO: Rethink inputs
+            // Might be audio, text, video, image, gesture, etc
+            // Will be from a client app, probably not a user directly
+            // Audio might output text but can output intent as well
+            // Intent needs to be executed and response needs to be
+            // negotiated based on the input
+            // maybe a ll-accept header / ll-content-type?
+
+            // Inputs can be sent as raw mime byte data or
+            // as part of JSON as base64 encoded fields. 
+            // Here I sent up the processing of the input
+            // API route that handles the data sent by the client
+            // application
+            
+            // Define the input route
+            var inputRoute = new APIRoute();
+            inputRoute.Path = "/input";
+            inputRoute.Description = "Process the input";
+            inputRoute.Method = HttpMethod.Post;
+            inputRoute.Handler = CoreContainer.Instance.IOManager.Handle;
+            inputRoute.RequiresAuthentication = true;
+            CoreContainer.Instance.RouteManager.AddRoute(inputRoute);
+            
             Configure();
         }
 
@@ -74,7 +102,6 @@ namespace Limitless
             _log.Info($"Settings| Default system name set as {_settings.Core.Name}");
             _log.Info($"Settings| {_settings.Core.EnabledModules.Length} module(s) will be loaded");
 
-            CoreContainer.Instance.ModuleManager = new ModuleManager(_settings.FullConfiguration, _log);
             foreach (string moduleName in _settings.Core.EnabledModules)
             {
                 // Load each module specified in the config. First try to load
@@ -114,7 +141,7 @@ namespace Limitless
             {
                 _log.Warning($"Unable to add all API routes for module 'AdminModule'. Possible duplicate route and method.");
             }
-
+            
             if (_settings.Core.API.Nancy.DashboardEnabled)
             {
                 _log.Warning($"The Nancy dashboard is enabled at '/{_settings.Core.API.Nancy.DashboardPath}'. It should only be enabled for debugging of the API.");
@@ -241,35 +268,18 @@ namespace Limitless
                 CoreContainer.Instance.IdentityProvider = identityProvider;
             }
 
-            // TODO: Rethink inputs
-            // Might be audio, text, video, image, gesture, etc
-            // Will be from a client app, probably not a user directly
-            // Audio might output text but can output intent as well
-            // Intent needs to be executed and response needs to be
-            // negotiated based on the input
-            // maybe a ll-accept header / ll-content-type?
+            // Add this provider to the inputs
             if (module is IInputProvider)
             {
                 var inputProvider = module as IInputProvider;
-
-                // For the IInputProvider interface we need to add routes to the API
-                var inputRoute = new APIRoute();
-
-                var inputType = inputProvider.GetInputType();
-                switch (inputType)
+                try
                 {
-                    case InputType.Text:
-                        inputRoute.Path = "/input/text";
-                        inputRoute.Description = "Process text input";
-                        break;
+                    CoreContainer.Instance.IOManager.RegisterProvider(inputProvider);
                 }
-                inputRoute.Method = HttpMethod.Post;
-                inputRoute.Handler = (dynamic parameters, dynamic postData, dynamic user) =>
+                catch (NotSupportedException ex)
                 {
-                    _log.Trace("Handling input");
-                    return null;
-                };
-                CoreContainer.Instance.RouteManager.AddRoute(inputRoute);
+                    _log.Error($"Unable to load input provider '{inputProvider.GetType().Name}': {ex.Message}");
+                }
             }
 
             // TODO: Add decorating to interfaces with required paths
