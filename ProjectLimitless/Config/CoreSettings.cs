@@ -27,6 +27,10 @@ namespace Limitless.Config
         /// </summary>
         public string[] EnabledModules { get; set; }
         /// <summary>
+        /// Maximum input extraction attempts.
+        /// </summary>
+        public uint MaxResolveAttempts { get; set; }
+        /// <summary>
         /// API hosting settings.
         /// </summary>
         public CoreAPISettings API { get; set; }
@@ -38,6 +42,7 @@ namespace Limitless.Config
         {
             API = new CoreAPISettings();
             EnabledModules = new string[] { };
+            MaxResolveAttempts = 5;
         }
     }
 }

@@ -22,6 +22,8 @@ EnabledModules = [
 	"TestInputModule"
 ]
 
+MaxResolveAttempts = 5
+
 [Core.API]
 Host = "0.0.0.0"
 Port = 8080

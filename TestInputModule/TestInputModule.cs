@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Limitless.Runtime.Enums;
+using System.Dynamic;
+using Limitless.Runtime.Types;
 
 namespace TestInputModule
 {
@@ -60,10 +62,11 @@ namespace TestInputModule
             return "0.0.0.1";
         }
 
-        public dynamic Process(dynamic input)
+        public IOData Process(IOData input)
         {
             _log.Debug("Processing Input...");
-            return input;
+            //return new IOData("application/vnd.limitless.intent+json", "asdsad");
+            return new IOData("text/plain", "Well hello");
         }
     }
 }

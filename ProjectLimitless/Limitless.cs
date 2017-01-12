@@ -203,6 +203,7 @@ namespace Limitless
 
                 // TODO: Find a better way to reload modules in other modules
                 _analysis.SetLog(_log);
+                CoreContainer.Instance.IOManager.SetLog(_log);
             }
 
             if (module is IUIModule)

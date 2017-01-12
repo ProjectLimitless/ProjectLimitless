@@ -122,11 +122,12 @@ namespace Limitless
                     internalUser = (InternalUserIdentity)Context.CurrentUser;
                 }
                 dynamic postData;
-                if (Request.Headers.ContentType == "application/json")
+                if (Request.Headers.ContentType == MimeType.Json)
                 {
                     postData = JsonConvert.DeserializeObject(Request.Body.AsString());
                 }
                 else postData = Request.Body.AsString();
+                // Add the content type to the parameters passed to handlers
                 parameters.contentType = Request.Headers.ContentType;
                 
                 var negotiator = Negotiate.WithStatusCode(200);

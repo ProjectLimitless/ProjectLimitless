@@ -21,6 +21,7 @@ using Limitless.Runtime.Interfaces;
 using Limitless.Runtime.Types;
 using System.Dynamic;
 using Limitless.Runtime.Enums;
+using Limitless.Containers;
 
 namespace Limitless.Managers
 {
@@ -70,14 +71,19 @@ namespace Limitless.Managers
             {
                 _log.Debug("Received JSON, parse into usable type");
             }
+
+            ResolveInput(new IOData(parameters.contentType, postData));
+
+            /*
             else if (_inputProviders.ContainsKey(parameters.contentType))
             {
                 _log.Debug($"Received content of type '{parameters.contentType}'. Provider available.");
+                ResolveToIntent(parameters.contentType, postData, 0);
             }
             else
             {
                 _log.Warning($"Content type '{parameters.contentType}' has no input provider available.");
-            }
+            }*/
             
             
 
@@ -105,7 +111,7 @@ namespace Limitless.Managers
             List<string> mimes = provider.GetInputMimeTypes().ToList<string>();
             foreach (string mime in mimes)
             {
-                if (_inputProviders.Keys.Contains(mime))
+                if (_inputProviders.ContainsKey(mime))
                 {
                     throw new NotSupportedException($"MIME Type '{mime}' already has an input provider registered '{_inputProviders[mime].GetType().Name}'");
                 }
@@ -114,6 +120,75 @@ namespace Limitless.Managers
                     _inputProviders.Add(mime, provider);
                 }
             }
+        }
+
+        /// <summary>
+        /// Deregisters an input provider for the MIME types as 
+        /// returned by the provider.
+        /// </summary>
+        /// <param name="provider">The input provider to deregister</param>
+        public void DeregisterProvider(IInputProvider provider)
+        {
+            List<string> mimes = provider.GetInputMimeTypes().ToList<string>();
+            foreach (string mime in mimes)
+            {
+                if (_inputProviders.ContainsKey(mime))
+                {
+                    _inputProviders.Remove(mime);
+                }
+            }
+        }
+
+        /// <summary>
+        /// TODO: Fix this - better module replacement, see Limitless.cs SetLog calls
+        /// </summary>
+        /// <param name="log"></param>
+        public void SetLog(ILogger log)
+        {
+            _log = log;
+        }
+
+        /// <summary>
+        /// Recursively processes the input until a usable data type is extracted
+        /// or LimitlessSettings
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="resolveAttempts"></param>
+        private void ResolveInput(IOData input, int resolveAttempts = 0)
+        {
+            if (resolveAttempts >= CoreContainer.Instance.Settings.Core.MaxResolveAttempts)
+            {
+                throw new NotSupportedException("Maximum attempts reached for extracting intent from input");
+            }
+            
+            if (_inputProviders.ContainsKey(input.Mime) == false)
+            {
+                throw new NotImplementedException($"MIME type '{input.Mime}' has no supported input providers loaded");
+            }
+            
+            // Try...Catch... I'm calling user code here
+            try
+            {
+                var output = _inputProviders[input.Mime].Process(input);
+                if (output == null)
+                {
+                    throw new NullReferenceException($"Input Provider '{_inputProviders[input.Mime].GetType().Name}' returned a null result for MIME type '{input.Mime}'");
+                }
+
+                if (output.Mime == "application/vnd.limitless.intent+json")
+                {
+                    _log.Debug("Resolved to intent!");
+                }
+                else
+                {
+                    resolveAttempts++;
+                    ResolveInput(output, resolveAttempts);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }    
         }
     }
 }
