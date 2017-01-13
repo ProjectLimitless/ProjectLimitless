@@ -72,21 +72,11 @@ namespace Limitless.Managers
                 _log.Debug("Received JSON, parse into usable type");
             }
 
-            ResolveInput(new IOData(parameters.contentType, postData));
-
-            /*
-            else if (_inputProviders.ContainsKey(parameters.contentType))
-            {
-                _log.Debug($"Received content of type '{parameters.contentType}'. Provider available.");
-                ResolveToIntent(parameters.contentType, postData, 0);
-            }
-            else
-            {
-                _log.Warning($"Content type '{parameters.contentType}' has no input provider available.");
-            }*/
+            // TODO: Resolve multi-request parallel - ie. speech recognition + voice recognition id
+            // Leave 
+            IOIntent ioIntent = ResolveInput(new IOData(parameters.contentType, postData));
+            _log.Debug($"Intent recognised as '{ioIntent.Name}'");
             
-            
-
 
             response.Data = "thisisbase64data";
 
@@ -154,7 +144,8 @@ namespace Limitless.Managers
         /// </summary>
         /// <param name="input"></param>
         /// <param name="resolveAttempts"></param>
-        private void ResolveInput(IOData input, int resolveAttempts = 0)
+        /// <returns>The recognised intent</returns>
+        private IOIntent ResolveInput(IOData input, int resolveAttempts = 0)
         {
             if (resolveAttempts >= CoreContainer.Instance.Settings.Core.MaxResolveAttempts)
             {
@@ -165,30 +156,36 @@ namespace Limitless.Managers
             {
                 throw new NotImplementedException($"MIME type '{input.Mime}' has no supported input providers loaded");
             }
-            
+
             // Try...Catch... I'm calling user code here
+            object output;
             try
             {
-                var output = _inputProviders[input.Mime].Process(input);
-                if (output == null)
-                {
-                    throw new NullReferenceException($"Input Provider '{_inputProviders[input.Mime].GetType().Name}' returned a null result for MIME type '{input.Mime}'");
-                }
-
-                if (output.Mime == "application/vnd.limitless.intent+json")
-                {
-                    _log.Debug("Resolved to intent!");
-                }
-                else
-                {
-                    resolveAttempts++;
-                    ResolveInput(output, resolveAttempts);
-                }
+                output = _inputProviders[input.Mime].Process(input);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
-            }    
+            }
+
+            if (output == null)
+            {
+                throw new NullReferenceException($"Input Provider '{_inputProviders[input.Mime].GetType().Name}' returned a null result for MIME type '{input.Mime}'");
+            }
+            if (output is IOData)
+            {
+                // If the input provider returns output used as input
+                // then I can send this for another attempt at resolving
+                resolveAttempts++;
+                ResolveInput((IOData)output, resolveAttempts);
+            }
+            
+            IOIntent result = output as IOIntent;
+            if (result == null)
+            {
+                throw new NotSupportedException($"Output type '{output.GetType().Name}' is not supported");
+            }
+            return result;
         }
     }
 }
