@@ -22,6 +22,16 @@ namespace Limitless.Builtin
     /// </summary>
     public class BootstrapLogger : ILogger
     {
+
+        /// <summary>
+        /// Implemented from interface
+        /// <see cref="Limitless.Runtime.Interfaces.ILogger.UpdateLevel(string)"/>
+        /// </summary>
+        public void UpdateLevel(string level)
+        {
+            // Not supported
+        }
+
         /// <summary>
         /// Implemented from interface 
         /// <see cref="Limitless.Runtime.Interfaces.ILogger.Trace(string, object[])"/>
