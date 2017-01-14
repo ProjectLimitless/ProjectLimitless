@@ -26,6 +26,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestInputModule", "TestInpu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestInteractionEngine", "TestInteractionEngine\TestInteractionEngine.csproj", "{B9718509-E165-43EF-B1C9-278E04E4D0AF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Limitless.LocalInteractionEngine", "..\Limitless.LocalInteractionEngine\LocalInteractionEngine\Limitless.LocalInteractionEngine.csproj", "{1F8D8D30-284D-4045-9B42-2185C2DD44EF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -64,6 +66,10 @@ Global
 		{B9718509-E165-43EF-B1C9-278E04E4D0AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B9718509-E165-43EF-B1C9-278E04E4D0AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B9718509-E165-43EF-B1C9-278E04E4D0AF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1F8D8D30-284D-4045-9B42-2185C2DD44EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F8D8D30-284D-4045-9B42-2185C2DD44EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F8D8D30-284D-4045-9B42-2185C2DD44EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F8D8D30-284D-4045-9B42-2185C2DD44EF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

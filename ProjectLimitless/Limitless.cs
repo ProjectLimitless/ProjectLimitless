@@ -202,6 +202,8 @@ namespace Limitless
                 _log.Info($"Loaded module '{moduleName}' implements ILogger, replaced Bootstrap logger");
 
                 // TODO: Find a better way to reload modules in other modules
+                /// See Issue #3 
+                /// https://github.com/ProjectLimitless/ProjectLimitless/issues/3
                 _analysis.SetLog(_log);
                 CoreContainer.Instance.IOManager.SetLog(_log);
             }
@@ -269,7 +271,7 @@ namespace Limitless
                 CoreContainer.Instance.IdentityProvider = identityProvider;
             }
 
-            // Add this provider to the inputs
+            // Add this provider to the input pipeline
             if (module is IInputProvider)
             {
                 var inputProvider = module as IInputProvider;
@@ -282,6 +284,15 @@ namespace Limitless
                     _log.Error($"Unable to load input provider '{inputProvider.GetType().Name}': {ex.Message}");
                 }
             }
+            
+            if (module is IInteractionEngine)
+            {
+                var engine = module as IInteractionEngine;
+                // TODO: Better replacement. See Issue #3
+                // https://github.com/ProjectLimitless/ProjectLimitless/issues/3
+                CoreContainer.Instance.IOManager.SetEngine(engine);
+            }
+
 
             // TODO: Add decorating to interfaces with required paths
             // TODO: Testing hook

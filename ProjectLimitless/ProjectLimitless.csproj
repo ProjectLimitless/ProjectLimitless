@@ -126,6 +126,9 @@
     <None Include="conf\modules\TestInputModule.toml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="conf\modules\TestInteractionEngine.toml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="conf\modules\TestModule.toml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

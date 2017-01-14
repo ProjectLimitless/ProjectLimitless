@@ -48,7 +48,7 @@ namespace TestInputModule
         {
             return new List<string>
             {
-                MimeType.Text
+                MimeType.Wav
             };
         }
 
@@ -62,15 +62,11 @@ namespace TestInputModule
             return "0.0.0.1";
         }
 
-        public object Process(IOData input)
+        public IOData Process(IOData input)
         {
             _log.Debug("Processing Input...");
             //return new IOData("application/vnd.limitless.intent+json", "asdsad");
-            //return new IOData("text/plain", "Well hello");
-            return new IOIntent()
-            {
-                Name = "Tester"
-            };
+            return new IOData("text/plain", "Well hello");
         }
     }
 }

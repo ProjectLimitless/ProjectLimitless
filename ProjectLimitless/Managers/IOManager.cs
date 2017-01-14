@@ -1,6 +1,6 @@
-﻿/** 
+/** 
 * This file is part of Project Limitless.
-* Copyright © 2016 Donovan Solms.
+* Copyright � 2016 Donovan Solms.
 * Project Limitless
 * https://www.projectlimitless.io
 * 
@@ -35,6 +35,10 @@ namespace Limitless.Managers
         /// </summary>
         private ILogger _log;
         /// <summary>
+        /// The loaded interaction engine.
+        /// </summary>
+        private IInteractionEngine _engine;
+        /// <summary>
         /// The collection of available input providers arranged by Content-Type.
         /// </summary>
         private Dictionary<string, IInputProvider> _inputProviders;
@@ -47,6 +51,17 @@ namespace Limitless.Managers
         {
             _log = log;
             _inputProviders = new Dictionary<string, IInputProvider>();
+        }
+
+        /// <summary>
+        /// TODO: Find a better way to reload modules in other modules
+        /// See Issue #3 
+        /// https://github.com/ProjectLimitless/ProjectLimitless/issues/3
+        /// </summary>
+        /// <param name="engine"></param>
+        public void SetEngine(IInteractionEngine engine)
+        {
+            _engine = engine;
         }
 
         /// <summary>
@@ -73,23 +88,20 @@ namespace Limitless.Managers
             }
 
             // TODO: Resolve multi-request parallel - ie. speech recognition + voice recognition id
-            // Leave 
-            IOIntent ioIntent = ResolveInput(new IOData(parameters.contentType, postData));
-            _log.Debug($"Intent recognised as '{ioIntent.Name}'");
+            IOData processedData = ResolveInput(new IOData(parameters.contentType, postData));
+            processedData = _engine.ProcessInput(processedData);
             
-
-            response.Data = "thisisbase64data";
-
+            response.Data = processedData.Data;
             var header = new
             {
                 Header = "Content-Type",
-                Value = "text/base64"
+                Value = processedData.Mime
             };
             response.Headers.Add(header);
-            
+
             return response;
         }
-        
+
         /// <summary>
         /// Registers an input provider for the MIME types as 
         /// returned by the provider.
@@ -145,50 +157,43 @@ namespace Limitless.Managers
         /// <param name="input"></param>
         /// <param name="resolveAttempts"></param>
         /// <returns>The recognised intent</returns>
-        private IOIntent ResolveInput(IOData input, int resolveAttempts = 0)
+        private IOData ResolveInput(IOData input, int resolveAttempts = 0)
         {
             if (resolveAttempts >= CoreContainer.Instance.Settings.Core.MaxResolveAttempts)
             {
                 throw new NotSupportedException("Maximum attempts reached for extracting intent from input");
             }
-            
+
             if (_inputProviders.ContainsKey(input.Mime) == false)
             {
-                throw new NotImplementedException($"MIME type '{input.Mime}' has no supported input providers loaded");
+                _log.Trace($"MIME type '{input.Mime}' has no supported input providers loaded - continue to InteractionEngine");
+                return input;
             }
 
             // Try...Catch... I'm calling user code here
-            object output;
             try
             {
-                output = _inputProviders[input.Mime].Process(input);
+                var output = _inputProviders[input.Mime].Process(input);
+                if (output == null)
+                {
+                    throw new NullReferenceException($"Input Provider '{_inputProviders[input.Mime].GetType().Name}' returned a null result for MIME type '{input.Mime}'");
+                }
+
+                resolveAttempts++;
+                ResolveInput((IOData)output, resolveAttempts);
             }
             catch (Exception)
             {
                 throw;
             }
-
-            if (output == null)
-            {
-                throw new NullReferenceException($"Input Provider '{_inputProviders[input.Mime].GetType().Name}' returned a null result for MIME type '{input.Mime}'");
-            }
-            if (output is IOData)
-            {
-                // If the input provider returns output used as input
-                // then I can send this for another attempt at resolving
-                resolveAttempts++;
-                ResolveInput((IOData)output, resolveAttempts);
-            }
             
-            // TODO: When there are no handlers left, pass into
-            // interaction engine
-
-            IOIntent result = output as IOIntent;
-            if (result == null)
-            {
-                throw new NotSupportedException($"Output type '{output.GetType().Name}' is not supported");
-            }
-            return result;
+            // In theory this will never be reached, it is only added here
+            // to avoid compile issues of 'not all code paths return a value.
+            // Why? 
+            //  If the mime type is not supported, we return
+            //  If the output is null, we return
+            // TODO: Refactor this method
+            return null;
         }
     }
 }

@@ -19,7 +19,8 @@ EnabledModules = [
 	"Limitless.Builtin.DatabaseProviders.MySQLDatabaseProvider",
 	"Limitless.LocalIdentityProvider",
 	"TestModule",
-	"TestInputModule"
+	"TestInputModule",
+	"TestInteractionEngine"
 ]
 
 MaxResolveAttempts = 5
