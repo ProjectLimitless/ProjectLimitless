@@ -180,6 +180,9 @@ namespace Limitless.Managers
                 ResolveInput((IOData)output, resolveAttempts);
             }
             
+            // TODO: When there are no handlers left, pass into
+            // interaction engine
+
             IOIntent result = output as IOIntent;
             if (result == null)
             {
