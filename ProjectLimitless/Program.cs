@@ -13,6 +13,7 @@
 
 using Limitless.Builtin;
 using Limitless.Loaders;
+using Limitless.Runtime.Enums;
 
 namespace Limitless
 {
@@ -21,7 +22,7 @@ namespace Limitless
         static void Main(string[] args)
         {
             var log = new BootstrapLogger();
-            log.Warning("Bootstrap logger in use. This logger does not support hiding logging levels - everything is displayed");
+            log.UpdateLevel(LogLevel.Trace);
             log.Info("Loading Project Limitless...");
 
             log.Debug("Loading configuration...");

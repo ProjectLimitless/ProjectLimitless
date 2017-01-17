@@ -71,7 +71,7 @@ namespace Limitless.Extensions
                             {
                                 throw new NullReferenceException("POST data is required for this route");
                             }
-                            if (parameters.contentType == "application/json")
+                            if (parameters.contentType == MimeType.Json)
                             {
                                 IDictionary<string, JToken> lookup = postData;
                                 foreach (string requiredField in attributes.RequiredFields)

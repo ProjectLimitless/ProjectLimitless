@@ -118,8 +118,9 @@ namespace Limitless.Loaders
                 return;
             }
 
-            dynamic result = new ExpandoObject();
             Exception ex;
+            dynamic result = new ExpandoObject();
+
             if (context.TryGetException(out ex))
             {
                 result.Type = context.GetException().GetType();

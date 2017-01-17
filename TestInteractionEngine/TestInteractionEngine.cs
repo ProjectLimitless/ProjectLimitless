@@ -59,9 +59,19 @@ namespace TestInteractionEngine
             return "0.0.0.1";
         }
 
-        public void ListSkills()
+        public List<dynamic> ListSkills()
         {
-            throw new NotImplementedException();
+            var skills = new List<dynamic>();
+            skills.Add(new
+            {
+                Name = "Manage Google Schedule",
+                Intent = new
+                {
+                    Action = "Book",
+                    Target = "Meeting"
+                }
+            });
+            return skills;
         }
 
         public IOData ProcessInput(IOData ioData)

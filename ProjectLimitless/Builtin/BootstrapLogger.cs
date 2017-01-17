@@ -13,6 +13,7 @@
 
 using System;
 
+using Limitless.Runtime.Enums;
 using Limitless.Runtime.Interfaces;
 
 namespace Limitless.Builtin
@@ -22,14 +23,26 @@ namespace Limitless.Builtin
     /// </summary>
     public class BootstrapLogger : ILogger
     {
+        /// <summary>
+        /// The required log level.
+        /// </summary>
+        private LogLevel _logLevel;
+
+        /// <summary>
+        /// Standard constructor.
+        /// </summary>
+        public BootstrapLogger()
+        {
+            UpdateLevel(LogLevel.Info);
+        }
 
         /// <summary>
         /// Implemented from interface
         /// <see cref="Limitless.Runtime.Interfaces.ILogger.UpdateLevel(string)"/>
         /// </summary>
-        public void UpdateLevel(string level)
+        public void UpdateLevel(LogLevel level)
         {
-            // Not supported
+            _logLevel = level;
         }
 
         /// <summary>
@@ -38,7 +51,10 @@ namespace Limitless.Builtin
         /// </summary>
         public void Trace(string format, params object[] args)
         {
-            Console.WriteLine($"[Bootstrap] Trace | {format}", args);
+            if (_logLevel == LogLevel.Trace)
+            {
+                Console.WriteLine($"[Bootstrap] Trace | {format}", args);
+            }
         }
 
         /// <summary>
@@ -47,7 +63,11 @@ namespace Limitless.Builtin
         /// </summary>
         public void Debug(string format, params object[] args)
         {
-            Console.WriteLine($"[Bootstrap] Debug | {format}", args);
+            if (_logLevel == LogLevel.Trace ||
+                _logLevel == LogLevel.Debug)
+            {
+                Console.WriteLine($"[Bootstrap] Debug | {format}", args);
+            }
         }
 
         /// <summary>
@@ -56,7 +76,12 @@ namespace Limitless.Builtin
         /// </summary>
         public void Info(string format, params object[] args)
         {
-            Console.WriteLine($"[Bootstrap] Info | {format}", args);
+            if (_logLevel == LogLevel.Trace ||
+                _logLevel == LogLevel.Debug ||
+                _logLevel == LogLevel.Info)
+            {
+                Console.WriteLine($"[Bootstrap] Info | {format}", args);
+            }
         }
 
         /// <summary>
@@ -65,7 +90,13 @@ namespace Limitless.Builtin
         /// </summary>
         public void Warning(string format, params object[] args)
         {
-            Console.WriteLine($"[Bootstrap] Warning | {format}", args);
+            if (_logLevel == LogLevel.Trace ||
+                _logLevel == LogLevel.Debug ||
+                _logLevel == LogLevel.Info ||
+                _logLevel == LogLevel.Warning)
+            {
+                Console.WriteLine($"[Bootstrap] Warning | {format}", args);
+            }
         }
 
         /// <summary>
@@ -74,7 +105,14 @@ namespace Limitless.Builtin
         /// </summary>
         public void Error(string format, params object[] args)
         {
-            Console.WriteLine($"[Bootstrap] Error | {format}", args);
+            if (_logLevel == LogLevel.Trace ||
+                _logLevel == LogLevel.Debug ||
+                _logLevel == LogLevel.Info ||
+                _logLevel == LogLevel.Warning ||
+                _logLevel == LogLevel.Error)
+            {
+                Console.WriteLine($"[Bootstrap] Error | {format}", args);
+            }
         }
 
         /// <summary>
@@ -83,7 +121,15 @@ namespace Limitless.Builtin
         /// </summary>
         public void Critical(string format, params object[] args)
         {
-            Console.WriteLine($"[Bootstrap] Critical | {format}", args);
+            if (_logLevel == LogLevel.Trace ||
+                _logLevel == LogLevel.Debug ||
+                _logLevel == LogLevel.Info ||
+                _logLevel == LogLevel.Warning ||
+                _logLevel == LogLevel.Error ||
+                _logLevel == LogLevel.Critical)
+            {
+                Console.WriteLine($"[Bootstrap] Critical | {format}", args);
+            }
         }
     }
 }

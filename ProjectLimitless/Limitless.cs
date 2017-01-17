@@ -62,33 +62,11 @@ namespace Limitless
             _log = log;
             _analysis = new AnalysisModule(_log);
 
-            // TODO: Maybe make IOManager just an instance variable?
             CoreContainer.Instance.ModuleManager = new ModuleManager(_settings.FullConfiguration, _log);
             
+            // TODO: Maybe make IOManager just an instance variable?
             CoreContainer.Instance.IOManager = new IOManager(_log);
-
-            // TODO: Rethink inputs
-            // Might be audio, text, video, image, gesture, etc
-            // Will be from a client app, probably not a user directly
-            // Audio might output text but can output intent as well
-            // Intent needs to be executed and response needs to be
-            // negotiated based on the input
-            // maybe a ll-accept header / ll-content-type?
-
-            // Inputs can be sent as raw mime byte data or
-            // as part of JSON as base64 encoded fields. 
-            // Here I sent up the processing of the input
-            // API route that handles the data sent by the client
-            // application
-            
-            // Define the input route
-            var inputRoute = new APIRoute();
-            inputRoute.Path = "/input";
-            inputRoute.Description = "Process the input";
-            inputRoute.Method = HttpMethod.Post;
-            inputRoute.Handler = CoreContainer.Instance.IOManager.Handle;
-            inputRoute.RequiresAuthentication = true;
-            CoreContainer.Instance.RouteManager.AddRoute(inputRoute);
+            CoreContainer.Instance.RouteManager.AddRoutes(CoreContainer.Instance.IOManager.GetRequiredRoutes());
             
             Configure();
         }
@@ -147,7 +125,7 @@ namespace Limitless
                 _log.Warning($"The Nancy dashboard is enabled at '/{_settings.Core.API.Nancy.DashboardPath}'. It should only be enabled for debugging of the API.");
             }
 
-            // TODO: Remove this? Only debug output?
+            // When debug output is enabled, print the loaded routes
             foreach (var route in CoreContainer.Instance.RouteManager.GetRoutes())
             {
                 _log.Debug($"Added route '{route.Path}'");
@@ -227,47 +205,8 @@ namespace Limitless
             if (module is IIdentityProvider)
             {
                 var identityProvider = module as IIdentityProvider;
-                // For the IIdentityProvider interface we need to add routes to the API
-                var userRoute = new APIRoute();
-                userRoute.Path = "/login";
-                userRoute.Description = "Log a user in";
-                userRoute.Method = HttpMethod.Post;
-                // TODO: Relook where this handler should be defined, possibly IIdentityProvider.LoginHandler?
-                userRoute.Handler = (dynamic parameters, dynamic postData, dynamic user) =>
-                {
-                    // RequiredFields property is only implemented on the APIRouteAttribute
-                    // so I have to manually do the checks for required interface routes
-                    if (postData.username == null || postData.password == null)
-                    {
-                        throw new MissingFieldException("Username and password must not be null");
-                    }
 
-                    // Try..Catch as I'm calling user code here
-                    var apiResponse = new APIResponse();
-                    try
-                    {
-                        var loginResult = identityProvider.Login((string)postData.username, (string)postData.password);
-                        
-                        if (loginResult.IsAuthenticated == false)
-                        {
-                            apiResponse.StatusCode = (int)HttpStatusCode.Unauthorized;
-                            apiResponse.StatusMessage = "Authentication required";
-                            apiResponse.Data = loginResult.ErrorResponse;
-                        }
-                        else
-                        {
-                            apiResponse.Data = loginResult.User;
-                        }
-                    }
-                    catch (Exception)
-                    {
-                        // Rethrow as we don't want to handle it
-                        throw;
-                    }
-                    
-                    return apiResponse;
-                };
-                CoreContainer.Instance.RouteManager.AddRoute(userRoute);
+                CoreContainer.Instance.RouteManager.AddRoutes(identityProvider.GetRequiredAPIRoutes(_analysis.Record));
                 CoreContainer.Instance.IdentityProvider = identityProvider;
             }
 
@@ -287,10 +226,11 @@ namespace Limitless
             
             if (module is IInteractionEngine)
             {
-                var engine = module as IInteractionEngine;
+                var interactionEngine = module as IInteractionEngine;
                 // TODO: Better replacement. See Issue #3
                 // https://github.com/ProjectLimitless/ProjectLimitless/issues/3
-                CoreContainer.Instance.IOManager.SetEngine(engine);
+                CoreContainer.Instance.IOManager.SetEngine(interactionEngine);
+                CoreContainer.Instance.RouteManager.AddRoutes(interactionEngine.GetRequiredAPIRoutes(_analysis.Record));
             }
 
 

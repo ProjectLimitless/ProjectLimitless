@@ -17,11 +17,11 @@ using System.Linq;
 using System.Reflection;
 using System.Collections.Generic;
 
-using Limitless.Runtime.Interfaces;
-using Limitless.Runtime.Types;
-using System.Dynamic;
-using Limitless.Runtime.Enums;
+using Limitless.Builtin;
 using Limitless.Containers;
+using Limitless.Runtime.Enums;
+using Limitless.Runtime.Types;
+using Limitless.Runtime.Interfaces;
 
 namespace Limitless.Managers
 {
@@ -194,6 +194,39 @@ namespace Limitless.Managers
             //  If the output is null, we return
             // TODO: Refactor this method
             return null;
+        }
+
+        /// <summary>
+        /// Creates the required routes for the IOManager.
+        /// </summary>
+        /// <param name="handler">A handler to wrap around the call. Takes the output and API input parameters as input.</param>
+        /// <returns>The list of API routes</returns>
+        internal List<APIRoute> GetRequiredRoutes(Func<dynamic, object[], dynamic> handler = null)
+        {
+            // TODO: Rethink inputs
+            // Might be audio, text, video, image, gesture, etc
+            // Will be from a client app, probably not a user directly
+            // Audio might output text but can output intent as well
+            // Intent needs to be executed and response needs to be
+            // negotiated based on the input
+            // maybe a ll-accept header / ll-content-type?
+
+            // Inputs can be sent as raw mime byte data or
+            // as part of JSON as base64 encoded fields. 
+            // Here I sent up the processing of the input
+            // API route that handles the data sent by the client
+            // application
+            var routes = new List<APIRoute>();
+
+            var route = new APIRoute();
+            route.Path = "/input";
+            route.Description = "Process the input";
+            route.Method = HttpMethod.Post;
+            route.Handler = Handle;
+            route.RequiresAuthentication = true;
+            routes.Add(route);
+
+            return routes;
         }
     }
 }
