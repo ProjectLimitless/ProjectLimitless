@@ -67,6 +67,10 @@ namespace Limitless
             // TODO: Maybe make IOManager just an instance variable?
             CoreContainer.Instance.IOManager = new IOManager(_log);
             CoreContainer.Instance.RouteManager.AddRoutes(CoreContainer.Instance.IOManager.GetRequiredRoutes());
+
+#if DEBUG
+            _log.Debug($"Added {CoreContainer.Instance.IOManager.GetRequiredRoutes().Count} required API routes for 'IOManager'");
+#endif
             
             Configure();
         }
@@ -208,6 +212,10 @@ namespace Limitless
 
                 CoreContainer.Instance.RouteManager.AddRoutes(identityProvider.GetRequiredAPIRoutes(_analysis.Record));
                 CoreContainer.Instance.IdentityProvider = identityProvider;
+#if DEBUG
+                _log.Debug($"Added {identityProvider.GetRequiredAPIRoutes(_analysis.Record).Count} required API routes for 'IdentityProvider'");
+#endif
+
             }
 
             // Add this provider to the input pipeline
@@ -231,6 +239,10 @@ namespace Limitless
                 // https://github.com/ProjectLimitless/ProjectLimitless/issues/3
                 CoreContainer.Instance.IOManager.SetEngine(interactionEngine);
                 CoreContainer.Instance.RouteManager.AddRoutes(interactionEngine.GetRequiredAPIRoutes(_analysis.Record));
+
+#if DEBUG
+                _log.Debug($"Added {interactionEngine.GetRequiredAPIRoutes(_analysis.Record).Count} required API routes for 'InteractionEngine'");
+#endif
             }
 
 

@@ -22,7 +22,11 @@ namespace Limitless
         static void Main(string[] args)
         {
             var log = new BootstrapLogger();
+#if DEBUG
             log.UpdateLevel(LogLevel.Trace);
+#else 
+            log.UpdateLevel(LogLevel.Info);
+#endif
             log.Info("Loading Project Limitless...");
 
             log.Debug("Loading configuration...");

@@ -79,11 +79,7 @@ namespace Limitless.Extensions
                 return apiResponse;
             };
             routes.Add(route);
-
-
-
-
-
+            
 
 
             // TODO: Figure out how to bind this handler correctly!

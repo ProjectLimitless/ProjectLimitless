@@ -48,7 +48,17 @@ namespace Limitless.Extensions
             };
             routes.Add(route);
 
-
+            route = new APIRoute();
+            route.Path = "/skills";
+            route.Description = "Register a new skill";
+            route.Method = HttpMethod.Post;
+            route.RequiresAuthentication = true;
+            route.Handler = (dynamic parameters, dynamic postData, dynamic user) =>
+            {
+                //return new APIResponse(interactionEngine.RegisterSkill());
+                return "";
+            };
+            routes.Add(route);
 
 
 
