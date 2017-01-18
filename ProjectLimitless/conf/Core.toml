@@ -20,7 +20,7 @@ EnabledModules = [
 	"Limitless.LocalIdentityProvider",
 	"TestModule",
 	"TestInputModule",
-	"TestInteractionEngine"
+	"Limitless.BasicInteractionEngine"
 ]
 
 MaxResolveAttempts = 5

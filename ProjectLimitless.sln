@@ -24,9 +24,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Limitless.LocalIdentityProv
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestInputModule", "TestInputModule\TestInputModule.csproj", "{395A10EF-FF4A-4C2A-8FAC-6F1B4978A88E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestInteractionEngine", "TestInteractionEngine\TestInteractionEngine.csproj", "{B9718509-E165-43EF-B1C9-278E04E4D0AF}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Limitless.LocalInteractionEngine", "..\Limitless.LocalInteractionEngine\LocalInteractionEngine\Limitless.LocalInteractionEngine.csproj", "{1F8D8D30-284D-4045-9B42-2185C2DD44EF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Limitless.BasicInteractionEngine", "..\Limitless.BasicInteractionEngine\BasicInteractionEngine\Limitless.BasicInteractionEngine.csproj", "{1F8D8D30-284D-4045-9B42-2185C2DD44EF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -62,10 +60,6 @@ Global
 		{395A10EF-FF4A-4C2A-8FAC-6F1B4978A88E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{395A10EF-FF4A-4C2A-8FAC-6F1B4978A88E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{395A10EF-FF4A-4C2A-8FAC-6F1B4978A88E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B9718509-E165-43EF-B1C9-278E04E4D0AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B9718509-E165-43EF-B1C9-278E04E4D0AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B9718509-E165-43EF-B1C9-278E04E4D0AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B9718509-E165-43EF-B1C9-278E04E4D0AF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1F8D8D30-284D-4045-9B42-2185C2DD44EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{1F8D8D30-284D-4045-9B42-2185C2DD44EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1F8D8D30-284D-4045-9B42-2185C2DD44EF}.Release|Any CPU.ActiveCfg = Release|Any CPU

@@ -23,9 +23,10 @@ using Limitless.Builtin;
 using Limitless.Managers;
 using Limitless.Containers;
 using Limitless.Extensions;
+using Limitless.Runtime.Interfaces;
+using Limitless.Runtime.Interactions;
 using Limitless.Runtime.Enums;
 using Limitless.Runtime.Types;
-using Limitless.Runtime.Interfaces;
 
 namespace Limitless
 {
@@ -132,7 +133,7 @@ namespace Limitless
             // When debug output is enabled, print the loaded routes
             foreach (var route in CoreContainer.Instance.RouteManager.GetRoutes())
             {
-                _log.Debug($"Added route '{route.Path}'");
+                _log.Debug($"Added route '{route.Method.ToString().ToUpper()} {route.Path}'");
             }
 
             //TODO: Setup the diagnostics

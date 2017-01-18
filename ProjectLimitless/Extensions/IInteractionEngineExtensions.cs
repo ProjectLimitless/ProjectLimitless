@@ -14,10 +14,14 @@
 using System;
 using System.Collections.Generic;
 
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+
 using Limitless.Builtin;
 using Limitless.Runtime.Enums;
 using Limitless.Runtime.Types;
 using Limitless.Runtime.Interfaces;
+using Limitless.Runtime.Interactions;
 
 namespace Limitless.Extensions
 {
@@ -55,8 +59,42 @@ namespace Limitless.Extensions
             route.RequiresAuthentication = true;
             route.Handler = (dynamic parameters, dynamic postData, dynamic user) =>
             {
-                //return new APIResponse(interactionEngine.RegisterSkill());
-                return "";
+                Skill skill = ((JObject)postData).ToObject<Skill>();
+                switch (skill.Binding)
+                {
+                    case SkillExecutorBinding.Builtin:
+                    case SkillExecutorBinding.Module:
+                        skill.Executor = ((JObject)skill.Executor).ToObject<BinaryExecutor>();
+                        break;
+                    case SkillExecutorBinding.Network:
+                        skill.Executor = ((JObject)skill.Executor).ToObject<NetworkExecutor>();
+                        break;
+                    default:
+                        throw new NotImplementedException($"The given skill binding '{skill.Binding}' is not implemented");
+                }
+
+                bool registered = interactionEngine.RegisterSkill(skill);
+                return new APIResponse(new
+                {
+                    Success = registered
+                });
+
+
+                /*Skill skill = new Skill();
+                skill.Name = "Testinged";
+                skill.Intent = new Intent();
+                skill.Intent.Action = "acction";
+                skill.Intent.Target = "tarrget";
+                skill.Intent.Date = new DateRange(DateTime.Now);
+                skill.Binding = SkillExecutorBinding.Network;
+                var executor = new NetworkExecutor();
+                executor.Url = "https://www.google.com";
+                skill.Executor = executor;
+
+                string ser = Newtonsoft.Json.JsonConvert.SerializeObject(skill);
+                Console.WriteLine(ser);
+                */
+
             };
             routes.Add(route);
 
