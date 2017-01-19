@@ -22,6 +22,7 @@ using Limitless.Runtime.Enums;
 using Limitless.Runtime.Types;
 using Limitless.Runtime.Interfaces;
 using Limitless.Runtime.Interactions;
+using System.Net;
 
 namespace Limitless.Extensions
 {
@@ -73,32 +74,29 @@ namespace Limitless.Extensions
                         throw new NotImplementedException($"The given skill binding '{skill.Binding}' is not implemented");
                 }
 
-                bool registered = interactionEngine.RegisterSkill(skill);
-                return new APIResponse(new
+                APIResponse response = new APIResponse();
+                if (interactionEngine.RegisterSkill(skill))
                 {
-                    Success = registered
-                });
-
-
-                /*Skill skill = new Skill();
-                skill.Name = "Testinged";
-                skill.Intent = new Intent();
-                skill.Intent.Action = "acction";
-                skill.Intent.Target = "tarrget";
-                skill.Intent.Date = new DateRange(DateTime.Now);
-                skill.Binding = SkillExecutorBinding.Network;
-                var executor = new NetworkExecutor();
-                executor.Url = "https://www.google.com";
-                skill.Executor = executor;
-
-                string ser = Newtonsoft.Json.JsonConvert.SerializeObject(skill);
-                Console.WriteLine(ser);
-                */
-
+                    response.StatusCode = (int)HttpStatusCode.Created;
+                    response.Data = new
+                    {
+                        UUID = skill.UUID,
+                        Registered = true
+                    };
+                }
+                else
+                {
+                    response.StatusCode = (int)HttpStatusCode.Conflict;
+                    response.Data = new
+                    {
+                        Registered = false,
+                        Reason = $"The skill '{skill.UUID}' has already been registered"
+                    };
+                }
+                return response;
             };
             routes.Add(route);
-
-
+            
 
 
 

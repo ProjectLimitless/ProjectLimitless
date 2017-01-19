@@ -59,6 +59,32 @@ namespace Limitless
         /// <param name="settings">The configuration to be used</param>
         public Limitless(LimitlessSettings settings, ILogger log)
         {
+            /*
+            Skill skill = new Skill();
+            skill.Name = "Coffee Brewer";
+            skill.Author = "Sample Skill Maker";
+            skill.ShortDescription = "A skill to make coffee using a standard kettle";
+            skill.Intent = new Intent();
+            skill.Intent.Actions.Add("brew");
+            skill.Intent.Actions.Add("make");
+            skill.Intent.Targets.Add("coffee");
+            skill.Intent.Targets.Add("cuppa");
+            skill.Binding = SkillExecutorBinding.Network;
+            var executor = new NetworkExecutor();
+            executor.Url = "https://www.google.com";
+            executor.ValidateCertificate = false;
+            skill.Executor = executor;
+            skill.Locations.Add("kitchen");
+            skill.Locations.Add("downstairs");
+            skill.Help.Phrase = "make coffee";
+            skill.Help.ExamplePhrase = "Make me a cup of coffee";
+            skill.RequiredParameters.Add(new SkillRequiredParameter() { Parameter = "sugar", Type = SkillParameterType.Integer });
+
+            Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(skill));
+
+            Console.ReadLine();
+            */
+
             _settings = settings;
             _log = log;
             _analysis = new AnalysisModule(_log);
