@@ -96,7 +96,28 @@ namespace Limitless.Extensions
                 return response;
             };
             routes.Add(route);
-            
+
+            route = new APIRoute();
+            route.Path = "/skills/{skillUUID}";
+            route.Description = "Deregister a new skill";
+            route.Method = HttpMethod.Delete;
+            route.RequiresAuthentication = true;
+            route.Handler = (dynamic parameters, dynamic postData, dynamic user) =>
+            {
+                APIResponse response = new APIResponse();
+                if (interactionEngine.DeregisterSkill(parameters.skillUUID))
+                {
+                    response.StatusCode = (int)HttpStatusCode.OK;
+                }
+                else
+                {
+                    response.StatusCode = (int)HttpStatusCode.NotFound;
+                    response.StatusMessage = $"The skill '{parameters.skillUUID}' was not found or has already been deregistered";
+                }
+                return response;
+            };
+            routes.Add(route);
+
 
 
 
