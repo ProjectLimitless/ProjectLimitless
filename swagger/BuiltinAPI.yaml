@@ -11,7 +11,7 @@ info:
 schemes:
   - http
   - https
-
+  
 consumes:
   - application/json
 
@@ -140,7 +140,187 @@ paths:
                 "target": "ProjectLimitless..."
               }
 
-
+  /admin/users:
+    get:
+      summary: Returns a list of users for the installation.
+      security:
+        - Bearer: []
+      responses:
+        200:
+          description: The list of users
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/BaseUser"
+          examples:
+            application/json:
+              [
+                {
+                  "iD": 1,
+                  "username": "username@example.com",
+                  "password": "",
+                  "firstName": "John",
+                  "lastName": "Doe",
+                  "dateCreated": "2016-12-28T00:01:31.0000000+02:00",
+                  "isDeleted": false
+                }
+              ]
+        401:
+          description: Invalid or expired access token
+        500:
+          description: Internal Server Error
+          schema:
+            $ref: "#/definitions/Exception"
+          examples:
+            application/json:
+              {
+                "type": "System.MissingFie...",
+                "message": "Username and password...",
+                "stackTrace": "  at Limitless.Limitless...",
+                "target": "ProjectLimitless..."
+              }
+              
+  /skills:
+    get:
+      summary: Returns a list of registered skills for the installation
+      security:
+        - Bearer: []
+      responses:
+        200:
+          description: The list of registered skills
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Skill"
+          examples:
+            application/json:
+              [
+                {
+                  "uUID": "io.ll.sample-basic",
+                  "name": "Sample Skill",
+                  "shortDescription": "A skill to show off as sample",
+                  "author": "Sample Skill Maker",
+                  "help": {
+                    "phrase": "show sample",
+                    "examplePhrase": "Show me a sample of a basic skill"
+                  },
+                  "locations": [
+                    "lounge"
+                  ],
+                  "intent": {
+                    "actions": [
+                      "show"
+                    ],
+                    "targets": [
+                      "sample",
+                      "skill"
+                    ]
+                  },
+                  "requiredParameters": [
+                    {
+                      "parameter": "type",
+                      "type": "string"
+                    }
+                  ],
+                  "binding": "Network",
+                  "executor": {
+                    "url": "https://localhost",
+                    "validateCertificate": false
+                  }
+                }
+              ]
+        401:
+          description: Invalid or expired access token
+        500:
+          description: Internal Server Error
+          schema:
+            $ref: "#/definitions/Exception"
+          examples:
+            application/json:
+              {
+                "type": "System.MissingFie...",
+                "message": "Username and password...",
+                "stackTrace": "  at Limitless.Limitless...",
+                "target": "ProjectLimitless..."
+              }
+              
+    post:
+      summary: Registers a new skill
+      security:
+        - Bearer: []
+      parameters:
+        - name: skill
+          in: body
+          description: The skill to register
+          required: true
+          schema:
+            $ref: "#/definitions/Skill"
+      responses:
+        200:
+          description: Skill registered
+          schema:
+              $ref: "#/definitions/Skill.Response.Success"
+          examples:
+            application/json:
+              {
+                  "uUID": "io.ll.sample-basic",
+                  "registered": true
+              }
+        401:
+          description: Invalid or expired access token
+        409:
+          description: Skill failed to register
+          schema:
+            $ref: "#/definitions/Skill.Response.Failure"
+          examples:
+            application/json":
+              {
+                "registered": false,
+                "reason": "The skill 'io.ll.sample-basic' has already been registered" 
+              }
+        500:
+          description: Internal Server Error
+          schema:
+            $ref: "#/definitions/Exception"
+          examples:
+            application/json:
+              {
+                "type": "System.MissingFie...",
+                "message": "Username and password...",
+                "stackTrace": "  at Limitless.Limitless...",
+                "target": "ProjectLimitless..."
+              }
+  /skills/{id}:
+    delete:
+      summary: Deregister a previously registered skill
+      security:
+        - Bearer: []
+      parameters:
+        - name: id  
+          in: path
+          type: integer
+          description: The Skill's registered UUID
+          required: true
+      responses:
+        200:
+          description: Skill Deregistered
+        401:
+          description: Invalid or expired access token
+        404:
+          description: The skill was not found or has already been deregistered
+        500:
+          description: Internal Server Error
+          schema:
+            $ref: "#/definitions/Exception"
+          examples:
+            application/json:
+              {
+                "type": "System.MissingFie...",
+                "message": "Username and password...",
+                "stackTrace": "  at Limitless.Limitless...",
+                "target": "ProjectLimitless..."
+              }
+        
 definitions:
   Exception:
     properties:
@@ -204,3 +384,100 @@ definitions:
       description:
         type: string
         
+        
+  BaseUser:
+    properties:
+      iD: 
+        type: integer
+      username:
+        type: string
+      password: 
+        type: string
+      firstName:
+        type: string
+      lastName: 
+        type: string
+      dateCreated:
+        type: string
+        format: date-time
+      isDeleted:
+        type: boolean
+        
+  NetworkExecutor:
+    properties:
+      url:
+        type: string
+      validateCertificate:
+        type: boolean
+
+  Intent:
+    properties:
+      actions:
+        type: array
+        items:
+          type: string
+      targets:
+        type: array
+        items:
+          type: string
+        
+  SkillParameter:
+    properties:
+      parameter:
+        type: string
+      type:
+        type: string
+        enum: 
+          - int
+          
+  SkillHelp:
+    properties:
+      phrase:
+        type: string
+      examplePhrase:
+        type: string
+        
+  Skill:
+    properties:
+      uUID: 
+        type: string
+      name:
+        type: string
+      shortDescription:
+        type: string
+      author:
+        type: string
+      help:
+        $ref: '#/definitions/SkillHelp'
+      locations:
+        type: array
+        items:
+          type: string
+      intent:
+        $ref: '#/definitions/Intent'
+      requiredParameters:
+        type: array
+        items:
+          $ref: '#/definitions/SkillParameter'
+      binding:
+        type: string
+        enum: 
+          - Network
+          - Builtin
+          - Module
+      executor:
+        $ref: '#/definitions/NetworkExecutor'
+          
+  Skill.Response.Success:
+    properties:
+      uUID:
+        type: string
+      registered:
+        type: boolean
+  
+  Skill.Response.Failure:
+    properties:
+      registered:
+        type: boolean
+      reason:
+        type: string
