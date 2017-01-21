@@ -49,7 +49,14 @@ namespace Limitless.Extensions
             route.RequiresAuthentication = true;
             route.Handler = (dynamic parameters, dynamic postData, dynamic user) =>
             {
-                return new APIResponse(interactionEngine.ListSkills());
+                var response = new APIResponse(interactionEngine.ListSkills());
+
+                // TODO: the analysis module hook needs to be implemented in a better way
+                if (handler != null)
+                {
+                    return handler(response, new object[] { parameters, postData, user });
+                }
+                return response;
             };
             routes.Add(route);
 
@@ -93,6 +100,12 @@ namespace Limitless.Extensions
                         Reason = $"The skill '{skill.UUID}' has already been registered"
                     };
                 }
+
+                // TODO: the analysis module hook needs to be implemented in a better way
+                if (handler != null)
+                {
+                    return handler(response, new object[] { parameters, postData, user });
+                }
                 return response;
             };
             routes.Add(route);
@@ -114,26 +127,16 @@ namespace Limitless.Extensions
                     response.StatusCode = (int)HttpStatusCode.NotFound;
                     response.StatusMessage = $"The skill '{parameters.skillUUID}' was not found or has already been deregistered";
                 }
+
+                // TODO: the analysis module hook needs to be implemented in a better way
+                if (handler != null)
+                {
+                    return handler(response, new object[] { parameters, postData, user });
+                }
                 return response;
             };
             routes.Add(route);
-
-
-
-
-            // TODO: Figure out how to bind this handler correctly!
-            if (handler != null)
-            {
-                // Attach the specified handler to the routes. I'm doing
-                // it here to keep the route.Handler code simple.
-                foreach (APIRoute apiRoute in routes)
-                {
-                    //apiRoute.Handler = handler(apiRoute.Handler);
-                }
-            }
-
-
-
+            
             return routes;
         }
     }

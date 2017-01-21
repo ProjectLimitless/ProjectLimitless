@@ -76,25 +76,17 @@ namespace Limitless.Extensions
                     throw;
                 }
 
+                // TODO: the analysis module hook needs to be implemented in a better way
+                if (handler != null)
+                {
+                    // Hiding the password
+                    postData.password = "*******";
+                    return handler(apiResponse, new object[] { parameters, postData, user });
+                }
                 return apiResponse;
             };
             routes.Add(route);
             
-
-
-            // TODO: Figure out how to bind this handler correctly!
-            if (handler != null)
-            {
-                // Attach the specified handler to the routes. I'm doing
-                // it here to keep the route.Handler code simple.
-                foreach (APIRoute apiRoute in routes)
-                {
-                    //apiRoute.Handler = handler(apiRoute.Handler);
-                }
-            }
-
-
-
             return routes;
         }
     }

@@ -87,6 +87,7 @@ namespace Limitless
 
             _settings = settings;
             _log = log;
+            // TODO: the analysis module hook needs to be implemented in a better way
             _analysis = new AnalysisModule(_log);
 
             CoreContainer.Instance.ModuleManager = new ModuleManager(_settings.FullConfiguration, _log);

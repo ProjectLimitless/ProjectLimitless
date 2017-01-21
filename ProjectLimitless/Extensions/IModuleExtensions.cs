@@ -92,6 +92,7 @@ namespace Limitless.Extensions
                     }
 
                     dynamic result;
+                    // TODO: the analysis module hook needs to be implemented in a better way
                     if (handler != null)
                     {
                         // TODO: Ensure we can chain multiple methods

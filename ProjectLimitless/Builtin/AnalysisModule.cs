@@ -18,8 +18,9 @@ using System.Collections.Generic;
 
 using Limitless.Containers;
 using Limitless.Runtime.Enums;
-using Limitless.Runtime.Interfaces;
+using Limitless.Runtime.Types;
 using Limitless.Runtime.Attributes;
+using Limitless.Runtime.Interfaces;
 
 namespace Limitless.Builtin
 {
@@ -101,7 +102,16 @@ namespace Limitless.Builtin
         public dynamic Record(dynamic output, object[] parameters)
         {
             _log.Debug($"Parameter count {parameters.Length}");
-            _log.Debug($"Output: {Convert.ToString(output)}");
+
+            if (output is APIResponse)
+            {
+                var apiResponse = output as APIResponse;
+                _log.Debug($"Output: {Convert.ToString(apiResponse.Data)}");
+            }
+            else
+            {
+                _log.Debug($"Output: {Convert.ToString(output)}");
+            }
             return output;
         }
     }
