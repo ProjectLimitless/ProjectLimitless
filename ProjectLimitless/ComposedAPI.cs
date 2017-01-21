@@ -104,6 +104,23 @@ namespace Limitless
             {
                 throw new NullReferenceException("Error is null");
             };*/
+            
+            /*
+            // TODO: This should be hooked in the analysis
+            this.Before += (NancyContext ctx) =>
+            {
+                Nancy.Routing.Route r = (Nancy.Routing.Route)ctx.ResolvedRoute;
+                Console.WriteLine(r.Action);
+                Console.WriteLine("This is before API");
+                return null;
+            };
+
+            this.Before += (NancyContext ctx) =>
+            {
+                Console.WriteLine("This is after API");
+                return null;
+            };
+            */
         }
 
         /// <summary>

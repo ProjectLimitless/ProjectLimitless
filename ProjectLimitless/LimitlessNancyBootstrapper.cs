@@ -11,6 +11,8 @@
 * Project Limitless. If not, see http://www.apache.org/licenses/LICENSE-2.0.
 */
 
+using System;
+
 using Nancy;
 using Nancy.TinyIoc;
 using Nancy.Conventions;
@@ -49,6 +51,20 @@ namespace Limitless
             }
 
             StaticConfiguration.EnableRequestTracing = CoreContainer.Instance.Settings.Core.API.Nancy.EnableRequestTracing;
+            
+            /*
+            // TODO: For analysis - add these hooks
+            pipelines.BeforeRequest += (NancyContext ctx) =>
+            {
+                Console.WriteLine("before app");
+                return null;
+            };
+            
+            pipelines.AfterRequest += (NancyContext ctx) =>
+            {
+                Console.WriteLine("after app");
+            };
+            */
         }
 
         /// <summary>
