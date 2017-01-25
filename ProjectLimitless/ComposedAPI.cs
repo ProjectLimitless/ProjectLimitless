@@ -139,6 +139,8 @@ namespace Limitless
                     internalUser = (InternalUserIdentity)Context.CurrentUser;
                 }
                 dynamic postData;
+
+                // TODO: Add all the request headers to parameters with a generic type (for external use)
                 if (Request.Headers.ContentType == MimeType.Json)
                 {
                     postData = JsonConvert.DeserializeObject(Request.Body.AsString());

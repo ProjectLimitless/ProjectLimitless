@@ -22,6 +22,7 @@ using Limitless.Containers;
 using Limitless.Runtime.Enums;
 using Limitless.Runtime.Types;
 using Limitless.Runtime.Interfaces;
+using System.Net.Http.Headers;
 
 namespace Limitless.Managers
 {
@@ -42,7 +43,11 @@ namespace Limitless.Managers
         /// The collection of available input providers arranged by Content-Type.
         /// </summary>
         private Dictionary<string, IInputProvider> _inputProviders;
-
+        /// <summary>
+        /// The collection of available output providers arranged by Content-Type.
+        /// </summary>
+        private Dictionary<string, IInputProvider> _outputProviders;
+        
         /// <summary>
         /// Standard constructor with logger.
         /// </summary>
@@ -51,6 +56,8 @@ namespace Limitless.Managers
         {
             _log = log;
             _inputProviders = new Dictionary<string, IInputProvider>();
+            // TODO: Define output providers
+            _outputProviders = new Dictionary<string, IInputProvider>();
         }
 
         /// <summary>
@@ -90,6 +97,16 @@ namespace Limitless.Managers
             // TODO: Resolve multi-request parallel - ie. speech recognition + voice recognition id
             IOData processedData = ResolveInput(new IOData(parameters.contentType, postData));
             processedData = _engine.ProcessInput(processedData);
+            
+            // TODO: ResolveOutput should negotiate the output type based on
+            // the Accept header
+            /*var accept = (string)parameters.Headers.Accept;
+            var acceptedContentTypes = accept.Split(',')
+                .Select(StringWithQualityHeaderValue.Parse)
+                .OrderByDescending(s => s.Quality.GetValueOrDefault(1));
+                */
+
+            processedData = ResolveOutput(processedData);
             
             response.Data = processedData.Data;
             var header = new
@@ -152,12 +169,58 @@ namespace Limitless.Managers
 
         /// <summary>
         /// Recursively processes the input until a usable data type is extracted
-        /// or LimitlessSettings
+        /// or LimitlessSettings MaxResolveAttempts is reached
         /// </summary>
         /// <param name="input"></param>
         /// <param name="resolveAttempts"></param>
         /// <returns>The recognised intent</returns>
-        private IOData ResolveInput(IOData input, int resolveAttempts = 0)
+        private IOData ResolveInput(IOData output, int resolveAttempts = 0)
+        {
+            if (resolveAttempts >= CoreContainer.Instance.Settings.Core.MaxResolveAttempts)
+            {
+                throw new NotSupportedException("Maximum attempts reached for providing output in the preferred format");
+            }
+
+            if (_outputProviders.ContainsKey(output.Mime) == false)
+            {
+                _log.Trace($"MIME type '{output.Mime}' has no supported output providers loaded - return the current output");
+                return output;
+            }
+
+            // Try...Catch... I'm calling user code here
+            try
+            {
+                output = _inputProviders[output.Mime].Process(output);
+                if (output == null)
+                {
+                    throw new NullReferenceException($"Input Provider '{_inputProviders[output.Mime].GetType().Name}' returned a null result for MIME type '{output.Mime}'");
+                }
+
+                resolveAttempts++;
+                ResolveInput((IOData)output, resolveAttempts);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            
+            // In theory this will never be reached, it is only added here
+            // to avoid compile issues of 'not all code paths return a value.
+            // Why? 
+            //  If the mime type is not supported, we return
+            //  If the output is null, we return
+            // TODO: Refactor this method
+            return null;
+        }
+
+        /// <summary>
+        /// Recursively processes the output until a usable data type is extracted
+        /// or LimitlessSettings MaxResolveAttempts is reached.
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="resolveAttempts"></param>
+        /// <returns>The recognised intent</returns>
+        private IOData ResolveOutput(IOData input, int resolveAttempts = 0)
         {
             if (resolveAttempts >= CoreContainer.Instance.Settings.Core.MaxResolveAttempts)
             {
@@ -186,7 +249,7 @@ namespace Limitless.Managers
             {
                 throw;
             }
-            
+
             // In theory this will never be reached, it is only added here
             // to avoid compile issues of 'not all code paths return a value.
             // Why? 

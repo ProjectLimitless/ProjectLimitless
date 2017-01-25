@@ -70,10 +70,14 @@ namespace Limitless.Extensions
                 Skill skill = ((JObject)postData).ToObject<Skill>();
                 switch (skill.Binding)
                 {
+                    /*
+                    // TODO: Binary executors can't be loaded over the network using the API
+                    // since they need a method handler
                     case SkillExecutorBinding.Builtin:
                     case SkillExecutorBinding.Module:
                         skill.Executor = ((JObject)skill.Executor).ToObject<BinaryExecutor>();
                         break;
+                    */
                     case SkillExecutorBinding.Network:
                         skill.Executor = ((JObject)skill.Executor).ToObject<NetworkExecutor>();
                         break;
