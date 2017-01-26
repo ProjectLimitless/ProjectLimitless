@@ -4,6 +4,7 @@
 using System;
 using System.Reflection;
 
+using Limitless.Runtime.Types;
 using Limitless.Runtime.Enums;
 using Limitless.Runtime.Attributes;
 using Limitless.Runtime.Interfaces;
@@ -116,33 +117,27 @@ namespace TestModule
         }
 
         [APIRoute(Path = "/demo/ping/{name}", Method = HttpMethod.Get, RequiresAuthentication = true)]
-        public dynamic PersonalPong(dynamic parameters, dynamic user)
+        public dynamic PersonalPong(APIRequest request)
         {
             // With Expando type
             dynamic obj = new System.Dynamic.ExpandoObject();
             obj.Action = "Pong";
-            obj.Name = parameters.name;
-            obj.User = user.UserName;
+            obj.Name = request.Parameters.name;
+            obj.User = request.AuthenticatedUser.UserName;
             return obj;
         }
 
         [APIRoute(Path = "/test/post", Method = HttpMethod.Post, RequiredFields = new string[] { "name" }, RequiresAuthentication = true)]
-        public dynamic PersonalPost(dynamic parameters, dynamic postData, dynamic user)
+        public dynamic PersonalPost(APIRequest request)
         {
             // With anonymous types
             return new
             {
                 Action = "PostPong",
-                Name = (string)postData.name
+                Name = (string)request.Data.name
             };
         }
-
-        [APIRoute(Path = "/demo/{version}", Method = HttpMethod.Get, Description = "Sample Route containing a version parameter")]
-        public dynamic Ass(dynamic parameters)
-        {
-            return "Yes my demo! " + parameters.version + " (" + _instanceValue + ")";
-        }
-
+        
         public string GetContentPath()
         {
             return "ui-demo";

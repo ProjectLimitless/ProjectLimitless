@@ -20,6 +20,7 @@ using Newtonsoft.Json.Linq;
 
 using Limitless.Builtin;
 using Limitless.Runtime.Enums;
+using Limitless.Runtime.Types;
 using Limitless.Runtime.Attributes;
 using Limitless.Runtime.Interfaces;
 
@@ -54,26 +55,26 @@ namespace Limitless.Extensions
                 route.Method = attributes.Method;
                 route.Description = attributes.Description;
                 route.RequiresAuthentication = attributes.RequiresAuthentication;
-                route.Handler = (dynamic parameters, dynamic postData, dynamic user) =>
+                route.Handler = (APIRequest request) =>
                 {
                     // For Get and Delete I'll only send the parameters
                     // For Post and Put I'll send parameters and postData to the method
                     // For authenticated routes I'll add the user object to the method
                     var invokeParameters = new List<object>();
-                    invokeParameters.Add(parameters);
+                    invokeParameters.Add(request);
                     if (route.Method == HttpMethod.Post || route.Method == HttpMethod.Put)
                     {
                         // Check if postData contains required fields
                         if (attributes.RequiredFields.Length > 0)
                         {
                             // There are required fields, but postData is null
-                            if (postData == null)
+                            if (request.Data == null)
                             {
                                 throw new NullReferenceException("POST data is required for this route");
                             }
-                            if (parameters.contentType == MimeType.Json)
+                            if (request.Headers.ContentType == MimeType.Json)
                             {
-                                IDictionary<string, JToken> lookup = postData;
+                                IDictionary<string, JToken> lookup = request.Data;
                                 foreach (string requiredField in attributes.RequiredFields)
                                 {
                                     if (lookup.ContainsKey(requiredField) == false)
@@ -83,14 +84,8 @@ namespace Limitless.Extensions
                                 }
                             }
                         }
-                        invokeParameters.Add(postData);
                     }
-                    if (user != null && route.RequiresAuthentication)
-                    {
-                        var internalUser = (InternalUserIdentity)user;
-                        invokeParameters.Add((dynamic)internalUser.Meta);
-                    }
-
+                    
                     dynamic result;
                     // TODO: the analysis module hook needs to be implemented in a better way
                     if (handler != null)

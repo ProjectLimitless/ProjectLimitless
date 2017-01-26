@@ -12,9 +12,7 @@
 */
 
 using System;
-using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Collections.Generic;
 
 using Limitless.Builtin;
@@ -22,7 +20,6 @@ using Limitless.Containers;
 using Limitless.Runtime.Enums;
 using Limitless.Runtime.Types;
 using Limitless.Runtime.Interfaces;
-using System.Net.Http.Headers;
 
 namespace Limitless.Managers
 {
@@ -74,13 +71,12 @@ namespace Limitless.Managers
         /// <summary>
         /// Handle the input API call.
         /// </summary>
-        /// <param name="parameters">The parameters for the API call</param>
-        /// <param name="postData">The POSTed data</param>
+        /// <param name="request">The request object for the API call</param>
         /// <param name="user">The authenticated user or client</param>
         /// <returns>The input response</returns>
-        public APIResponse Handle(dynamic parameters, dynamic postData, dynamic user)
+        public APIResponse Handle(APIRequest request)
         {
-            _log.Trace($"Handle input from client. Content-Type is '{parameters.contentType}'");
+            _log.Trace($"Handle input from client. Content-Type is '{request.Headers.ContentType}'");
             var response = new APIResponse();
 
             // TODO: Define custom JSON? application/vnd.limitless.input+json?
@@ -89,17 +85,18 @@ namespace Limitless.Managers
             // If it is application/json
             // if will be parsed into IOInput that may contain multiple
             // inputs.
-            if (parameters.contentType == MimeType.Json)
+            if (request.Headers.ContentType == MimeType.Json)
             {
                 _log.Debug("Received JSON, parse into usable type");
             }
 
+            // TODO: input providers should take language to be able to translate
             // TODO: Resolve multi-request parallel - ie. speech recognition + voice recognition id
-            IOData processedData = ResolveInput(new IOData(parameters.contentType, postData));
+            IOData processedData = ResolveInput(new IOData(request.Headers.ContentType, request.Data));
             processedData = _engine.ProcessInput(processedData);
             
+            // the Accept header and Accept-Language
             // TODO: ResolveOutput should negotiate the output type based on
-            // the Accept header
             /*var accept = (string)parameters.Headers.Accept;
             var acceptedContentTypes = accept.Split(',')
                 .Select(StringWithQualityHeaderValue.Parse)

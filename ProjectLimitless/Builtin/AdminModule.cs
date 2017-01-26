@@ -18,6 +18,7 @@ using System.Collections.Generic;
 
 using Limitless.Containers;
 using Limitless.Runtime.Enums;
+using Limitless.Runtime.Types;
 using Limitless.Runtime.Interfaces;
 using Limitless.Runtime.Attributes;
 
@@ -42,8 +43,7 @@ namespace Limitless.Builtin
         /// <summary>
         /// Returns a list of available API routes.
         /// </summary>
-        /// <param name="parameters">API route parameters</param>
-        /// <param name="user">The authenticated user</param>
+        /// <param name="request">The API request</param>
         /// <returns>The list of routes and their descriptions</returns>
         [APIRoute(
             Path = "/admin/routes", 
@@ -51,7 +51,7 @@ namespace Limitless.Builtin
             Description = "Returns a list of all the available routes of the API",
             RequiresAuthentication = true
         )]
-        public dynamic RoutesList(dynamic parameters, dynamic user)
+        public dynamic RoutesList(APIRequest request)
         {
             List<dynamic> routes = new List<dynamic>();
             foreach (APIRoute route in CoreContainer.Instance.RouteManager.GetRoutes())
@@ -73,8 +73,7 @@ namespace Limitless.Builtin
         /// <summary>
         /// Returns a list of loaded modules.
         /// </summary>
-        /// <param name="parameters">API route parameters</param>
-        /// <param name="user">The authenticated user</param>
+        /// <param name="request">The API request</param>
         /// <returns>The list of loaded modules and their descriptions</returns>
         [APIRoute(
             Path = "/admin/modules",
@@ -82,7 +81,7 @@ namespace Limitless.Builtin
             Description = "Returns a list of all the loaded modules for the installation",
             RequiresAuthentication = true
         )]
-        public dynamic ModulesList(dynamic parameters, dynamic user)
+        public dynamic ModulesList(APIRequest request)
         {
             var modules = new List<dynamic>();
             foreach (var kvp in CoreContainer.Instance.ModuleManager.Modules)
@@ -104,8 +103,7 @@ namespace Limitless.Builtin
         /// <summary>
         /// Returns a list of users.
         /// </summary>
-        /// <param name="parameters">API route parameters</param>
-        /// <param name="user">The authenticated user</param>
+        /// <param name="request">The API request</param>
         /// <returns>The list of users</returns>
         [APIRoute(
             Path = "/admin/users",
@@ -113,7 +111,7 @@ namespace Limitless.Builtin
             Description = "Returns a list of users for the installation",
             RequiresAuthentication = true
         )]
-        public dynamic UsersList(dynamic parameters, dynamic user)
+        public dynamic UsersList(APIRequest request)
         {
             return CoreContainer.Instance.IdentityProvider.List();
         }

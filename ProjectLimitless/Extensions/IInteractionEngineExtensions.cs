@@ -12,9 +12,9 @@
 */
 
 using System;
+using System.Net;
 using System.Collections.Generic;
 
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 using Limitless.Builtin;
@@ -22,7 +22,6 @@ using Limitless.Runtime.Enums;
 using Limitless.Runtime.Types;
 using Limitless.Runtime.Interfaces;
 using Limitless.Runtime.Interactions;
-using System.Net;
 
 namespace Limitless.Extensions
 {
@@ -47,14 +46,14 @@ namespace Limitless.Extensions
             route.Description = "List available skills";
             route.Method = HttpMethod.Get;
             route.RequiresAuthentication = true;
-            route.Handler = (dynamic parameters, dynamic postData, dynamic user) =>
+            route.Handler = (APIRequest request) =>
             {
                 var response = new APIResponse(interactionEngine.ListSkills());
 
                 // TODO: the analysis module hook needs to be implemented in a better way
                 if (handler != null)
                 {
-                    return handler(response, new object[] { parameters, postData, user });
+                    return handler(response, new object[] { request });
                 }
                 return response;
             };
@@ -65,9 +64,9 @@ namespace Limitless.Extensions
             route.Description = "Register a new skill";
             route.Method = HttpMethod.Post;
             route.RequiresAuthentication = true;
-            route.Handler = (dynamic parameters, dynamic postData, dynamic user) =>
+            route.Handler = (APIRequest request) =>
             {
-                Skill skill = ((JObject)postData).ToObject<Skill>();
+                Skill skill = ((JObject)request.Data).ToObject<Skill>();
                 switch (skill.Binding)
                 {
                     /*
@@ -108,7 +107,7 @@ namespace Limitless.Extensions
                 // TODO: the analysis module hook needs to be implemented in a better way
                 if (handler != null)
                 {
-                    return handler(response, new object[] { parameters, postData, user });
+                    return handler(response, new object[] { request });
                 }
                 return response;
             };
@@ -119,23 +118,23 @@ namespace Limitless.Extensions
             route.Description = "Deregister a new skill";
             route.Method = HttpMethod.Delete;
             route.RequiresAuthentication = true;
-            route.Handler = (dynamic parameters, dynamic postData, dynamic user) =>
+            route.Handler = (APIRequest request) =>
             {
                 APIResponse response = new APIResponse();
-                if (interactionEngine.DeregisterSkill(parameters.skillUUID))
+                if (interactionEngine.DeregisterSkill(request.Parameters.skillUUID))
                 {
                     response.StatusCode = (int)HttpStatusCode.OK;
                 }
                 else
                 {
                     response.StatusCode = (int)HttpStatusCode.NotFound;
-                    response.StatusMessage = $"The skill '{parameters.skillUUID}' was not found or has already been deregistered";
+                    response.StatusMessage = $"The skill '{request.Parameters.skillUUID}' was not found or has already been deregistered";
                 }
 
                 // TODO: the analysis module hook needs to be implemented in a better way
                 if (handler != null)
                 {
-                    return handler(response, new object[] { parameters, postData, user });
+                    return handler(response, new object[] { request });
                 }
                 return response;
             };

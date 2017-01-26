@@ -14,6 +14,7 @@
 using System;
 
 using Limitless.Runtime.Enums;
+using Limitless.Runtime.Types;
 
 namespace Limitless.Builtin
 {
@@ -40,10 +41,10 @@ namespace Limitless.Builtin
         /// </summary>
         public string Description { get; set; } = "Extended API Route";
         /// <summary>
-        /// The handler function. Takes a dynamic object as input and
-        /// returns a dynamic object.
+        /// The handler function. Takes a request as input and
+        /// returns a dynamic response.
         /// More on parameters available at https://docs.projectlimitless.io/ProjectLimitless/api-routes
         /// </summary>
-        public Func<dynamic, dynamic, dynamic, dynamic> Handler { get; set; } = (dynamic parameters, dynamic postData, dynamic user) => { return $"Missing Handler"; };
+        public Func<APIRequest, dynamic> Handler { get; set; } = (APIRequest request) => { return $"Missing Handler"; };
     }
 }

@@ -13,13 +13,13 @@
 
 using System;
 using System.Dynamic;
+using System.Reflection;
 
 using Newtonsoft.Json;
 
 using Nancy;
 using Nancy.Security;
 using Nancy.Extensions;
-using Nancy.Responses.Negotiation;
 using Nancy.Authentication.Stateless;
 
 using Limitless.Builtin;
@@ -132,28 +132,31 @@ namespace Limitless
         {
             return (dynamic parameters) =>
             {
-                InternalUserIdentity internalUser = null;
+                var request = new APIRequest(); 
                 if (route.RequiresAuthentication)
                 {
                     this.RequiresAuthentication();
-                    internalUser = (InternalUserIdentity)Context.CurrentUser;
+                    request.AuthenticatedUser = ((InternalUserIdentity)Context.CurrentUser).Meta;
                 }
-                dynamic postData;
 
-                // TODO: Add all the request headers to parameters with a generic type (for external use)
+                // Parse the post data, if it's JSON, deserialize into a dynamic
+                dynamic postData;
                 if (Request.Headers.ContentType == MimeType.Json)
                 {
                     postData = JsonConvert.DeserializeObject(Request.Body.AsString());
                 }
                 else postData = Request.Body.AsString();
-                // Add the content type to the parameters passed to handlers
-                parameters.contentType = Request.Headers.ContentType;
+
+                // Build the request for API use
+                request.Parameters = parameters;
+                request.Headers = CloneHeaders(Request.Headers);
+                request.Data = postData;
                 
                 var negotiator = Negotiate.WithStatusCode(200);
 
                 try
                 {
-                    var handlerResponse = route.Handler(parameters, postData, internalUser);
+                    var handlerResponse = route.Handler(request);
                     if (handlerResponse is APIResponse)
                     {
                         var apiResponse = handlerResponse as APIResponse;
@@ -198,6 +201,39 @@ namespace Limitless
 
                 return negotiator;
             };
+        }
+
+        /// <summary>
+        /// Copies Nancy headers into Runtime headers to
+        /// avoid creating dependencies for modules. 
+        /// 
+        /// TODO: Headers are hardcoded, rather read from object.
+        /// </summary>
+        /// <param name="headers">The original NancyFx headers</param>
+        /// <returns>The Runtime headers</returns>
+        private NancyRequestHeaders CloneHeaders(RequestHeaders headers)
+        {
+            var newHeaders = new NancyRequestHeaders();
+            newHeaders.Accept = headers.Accept;
+            newHeaders.AcceptCharset = headers.AcceptCharset;
+            newHeaders.AcceptEncoding = headers.AcceptEncoding;
+            newHeaders.AcceptLanguage = headers.AcceptLanguage;
+            newHeaders.Authorization = headers.Authorization;
+            newHeaders.CacheControl = headers.CacheControl;
+            newHeaders.Connection = headers.Connection;
+            newHeaders.ContentLength = headers.ContentLength;
+            newHeaders.ContentType = headers.ContentType;
+            newHeaders.Date = headers.Date;
+            newHeaders.Host = headers.Host;
+            newHeaders.IfMatch = headers.IfMatch;
+            newHeaders.IfModifiedSince = headers.IfModifiedSince;
+            newHeaders.IfNoneMatch = headers.IfNoneMatch;
+            newHeaders.IfRange = headers.IfRange;
+            newHeaders.IfUnmodifiedSince = headers.IfUnmodifiedSince;
+            newHeaders.MaxForwards = headers.MaxForwards;
+            newHeaders.Referrer = headers.Referrer;
+            newHeaders.UserAgent = headers.UserAgent;
+            return newHeaders;
         }
     }
 }

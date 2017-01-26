@@ -44,11 +44,11 @@ namespace Limitless.Extensions
             route.Method = HttpMethod.Post;
             // I create this handler to keep things really simple for whoever
             // is implementing the interface in their code
-            route.Handler = (dynamic parameters, dynamic postData, dynamic user) =>
+            route.Handler = (APIRequest request) =>
             {
                 // RequiredFields property is only implemented on the APIRouteAttribute
                 // so I have to manually do the checks for required interface routes
-                if (postData.username == null || postData.password == null)
+                if (request.Data.username == null || request.Data.password == null)
                 {
                     throw new MissingFieldException("Username and password must not be null");
                 }
@@ -57,7 +57,7 @@ namespace Limitless.Extensions
                 var apiResponse = new APIResponse();
                 try
                 {
-                    var loginResult = identityProvider.Login((string)postData.username, (string)postData.password);
+                    var loginResult = identityProvider.Login((string)request.Data.username, (string)request.Data.password);
 
                     if (loginResult.IsAuthenticated == false)
                     {
@@ -80,8 +80,8 @@ namespace Limitless.Extensions
                 if (handler != null)
                 {
                     // Hiding the password
-                    postData.password = "*******";
-                    return handler(apiResponse, new object[] { parameters, postData, user });
+                    request.Data.password = "*******";
+                    return handler(apiResponse, new object[] { request });
                 }
                 return apiResponse;
             };
