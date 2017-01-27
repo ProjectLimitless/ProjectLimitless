@@ -15,7 +15,7 @@ namespace TestInputModule
         public string TestName { get; set; }
     }
 
-    public class TestInputModule : IModule, IInputProvider
+    public class TestInputModule : IModule, IIOProvider
     {
         ILogger _log;
 
@@ -23,6 +23,8 @@ namespace TestInputModule
         {
             _log = log;
         }
+
+        public IODirection Direction { get; set; } = IODirection.In;
 
         public void Configure(dynamic settings)
         {
@@ -44,14 +46,14 @@ namespace TestInputModule
             return "Testing input provider";
         }
 
-        public IEnumerable<string> GetInputMimeTypes()
+        public IEnumerable<MimeLanguageCombination> GetSupportedMimeLanguages()
         {
-            return new List<string>
+            return new List<MimeLanguageCombination>
             {
-                MimeType.Wav
+                new MimeLanguageCombination("text/plain", "en")
             };
         }
-
+        
         public string GetTitle()
         {
             return "TestInputModule";

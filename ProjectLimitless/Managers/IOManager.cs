@@ -25,6 +25,8 @@ namespace Limitless.Managers
 {
     /// <summary>
     /// Manages inputs and outputs from and to the Project Limitless API.
+    /// 
+    /// //TODO: Rename to IORouter? InputRouter?
     /// </summary>
     public class IOManager
     {
@@ -37,13 +39,13 @@ namespace Limitless.Managers
         /// </summary>
         private IInteractionEngine _engine;
         /// <summary>
-        /// The collection of available input providers arranged by Content-Type.
+        /// The collection of available input providers.
         /// </summary>
-        private Dictionary<string, IInputProvider> _inputProviders;
+        private List<IIOProvider> _inputProviders;
         /// <summary>
-        /// The collection of available output providers arranged by Content-Type.
+        /// The collection of available output providers.
         /// </summary>
-        private Dictionary<string, IInputProvider> _outputProviders;
+        private List<IIOProvider> _outputProviders;
         
         /// <summary>
         /// Standard constructor with logger.
@@ -52,9 +54,8 @@ namespace Limitless.Managers
         public IOManager(ILogger log)
         {
             _log = log;
-            _inputProviders = new Dictionary<string, IInputProvider>();
-            // TODO: Define output providers
-            _outputProviders = new Dictionary<string, IInputProvider>();
+            _inputProviders = new List<IIOProvider>();
+            _outputProviders = new List<IIOProvider>();
         }
 
         /// <summary>
@@ -83,7 +84,7 @@ namespace Limitless.Managers
 
             // Check the Content-Type
             // If it is application/json
-            // if will be parsed into IOInput that may contain multiple
+            // TODO: if will be parsed into IOData that may contain multiple
             // inputs.
             if (request.Headers.ContentType == MimeType.Json)
             {
@@ -92,8 +93,13 @@ namespace Limitless.Managers
 
             // TODO: input providers should take language to be able to translate
             // TODO: Resolve multi-request parallel - ie. speech recognition + voice recognition id
-            IOData processedData = ResolveInput(new IOData(request.Headers.ContentType, request.Data));
-            processedData = _engine.ProcessInput(processedData);
+            
+            // TODO: Continue here - find the best way to pass content-type and request / accept languages to the resolver
+            IOData processedData = ResolveInput(new IOData(request.Headers.ContentType, request.Headers.RequestLanguage, request.Data));
+
+            Console.WriteLine($"Resolved input: {processedData.Mime}");
+            
+            //processedData = _engine.ProcessInput(processedData);
             
             // the Accept header and Accept-Language
             // TODO: ResolveOutput should negotiate the output type based on
@@ -103,7 +109,7 @@ namespace Limitless.Managers
                 .OrderByDescending(s => s.Quality.GetValueOrDefault(1));
                 */
 
-            processedData = ResolveOutput(processedData);
+            //processedData = ResolveOutput(processedData);
             
             response.Data = processedData.Data;
             var header = new
@@ -122,19 +128,15 @@ namespace Limitless.Managers
         /// </summary>
         /// <param name="provider">The input provider to register</param>
         /// <exception cref="NotSupportedException">Thrown if a MIME type is already registered. No MIME types are loaded after the exception.</exception>
-        public void RegisterProvider(IInputProvider provider)
+        public void RegisterProvider(IIOProvider provider)
         {
-            List<string> mimes = provider.GetInputMimeTypes().ToList<string>();
-            foreach (string mime in mimes)
+            if (provider.Direction == IODirection.In)
             {
-                if (_inputProviders.ContainsKey(mime))
-                {
-                    throw new NotSupportedException($"MIME Type '{mime}' already has an input provider registered '{_inputProviders[mime].GetType().Name}'");
-                }
-                else
-                {
-                    _inputProviders.Add(mime, provider);
-                }
+                _inputProviders.Add(provider);
+            }
+            else
+            {
+                _outputProviders.Add(provider);
             }
         }
 
@@ -143,15 +145,15 @@ namespace Limitless.Managers
         /// returned by the provider.
         /// </summary>
         /// <param name="provider">The input provider to deregister</param>
-        public void DeregisterProvider(IInputProvider provider)
+        public void DeregisterProvider(IIOProvider provider)
         {
-            List<string> mimes = provider.GetInputMimeTypes().ToList<string>();
-            foreach (string mime in mimes)
+            if (provider.Direction == IODirection.In)
             {
-                if (_inputProviders.ContainsKey(mime))
-                {
-                    _inputProviders.Remove(mime);
-                }
+                _inputProviders.Remove(provider);
+            }
+            else
+            {
+                _outputProviders.Remove(provider);
             }
         }
 
@@ -173,6 +175,17 @@ namespace Limitless.Managers
         /// <returns>The recognised intent</returns>
         private IOData ResolveInput(IOData output, int resolveAttempts = 0)
         {
+            // Attempt to find the best matching processor
+            // for the given input
+
+
+
+
+
+
+
+
+            /*
             if (resolveAttempts >= CoreContainer.Instance.Settings.Core.MaxResolveAttempts)
             {
                 throw new NotSupportedException("Maximum attempts reached for providing output in the preferred format");
@@ -187,6 +200,7 @@ namespace Limitless.Managers
             // Try...Catch... I'm calling user code here
             try
             {
+                // TODO: Only process a single MIME + language + accept once
                 output = _inputProviders[output.Mime].Process(output);
                 if (output == null)
                 {
@@ -200,52 +214,7 @@ namespace Limitless.Managers
             {
                 throw;
             }
-            
-            // In theory this will never be reached, it is only added here
-            // to avoid compile issues of 'not all code paths return a value.
-            // Why? 
-            //  If the mime type is not supported, we return
-            //  If the output is null, we return
-            // TODO: Refactor this method
-            return null;
-        }
-
-        /// <summary>
-        /// Recursively processes the output until a usable data type is extracted
-        /// or LimitlessSettings MaxResolveAttempts is reached.
-        /// </summary>
-        /// <param name="input"></param>
-        /// <param name="resolveAttempts"></param>
-        /// <returns>The recognised intent</returns>
-        private IOData ResolveOutput(IOData input, int resolveAttempts = 0)
-        {
-            if (resolveAttempts >= CoreContainer.Instance.Settings.Core.MaxResolveAttempts)
-            {
-                throw new NotSupportedException("Maximum attempts reached for extracting intent from input");
-            }
-
-            if (_inputProviders.ContainsKey(input.Mime) == false)
-            {
-                _log.Trace($"MIME type '{input.Mime}' has no supported input providers loaded - continue to InteractionEngine");
-                return input;
-            }
-
-            // Try...Catch... I'm calling user code here
-            try
-            {
-                var output = _inputProviders[input.Mime].Process(input);
-                if (output == null)
-                {
-                    throw new NullReferenceException($"Input Provider '{_inputProviders[input.Mime].GetType().Name}' returned a null result for MIME type '{input.Mime}'");
-                }
-
-                resolveAttempts++;
-                ResolveInput((IOData)output, resolveAttempts);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            */
 
             // In theory this will never be reached, it is only added here
             // to avoid compile issues of 'not all code paths return a value.
@@ -255,7 +224,7 @@ namespace Limitless.Managers
             // TODO: Refactor this method
             return null;
         }
-
+        
         /// <summary>
         /// Creates the required routes for the IOManager.
         /// </summary>

@@ -244,9 +244,9 @@ namespace Limitless
             }
 
             // Add this provider to the input pipeline
-            if (module is IInputProvider)
+            if (module is IIOProvider)
             {
-                var inputProvider = module as IInputProvider;
+                var inputProvider = module as IIOProvider;
                 try
                 {
                     CoreContainer.Instance.IOManager.RegisterProvider(inputProvider);
