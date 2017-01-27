@@ -13,7 +13,7 @@
 
 using System;
 using System.Dynamic;
-using System.Reflection;
+using System.Collections.Generic;
 
 using Newtonsoft.Json;
 
@@ -148,12 +148,11 @@ namespace Limitless
                 else postData = Request.Body.AsString();
 
                 // Build the request for API use
+                request.Data = postData;
                 request.Parameters = parameters;
                 request.Headers = CloneHeaders(Request.Headers);
-                request.Data = postData;
                 
                 var negotiator = Negotiate.WithStatusCode(200);
-
                 try
                 {
                     var handlerResponse = route.Handler(request);
@@ -206,34 +205,17 @@ namespace Limitless
         /// <summary>
         /// Copies Nancy headers into Runtime headers to
         /// avoid creating dependencies for modules. 
-        /// 
-        /// TODO: Headers are hardcoded, rather read from object.
         /// </summary>
         /// <param name="headers">The original NancyFx headers</param>
         /// <returns>The Runtime headers</returns>
         private NancyRequestHeaders CloneHeaders(RequestHeaders headers)
         {
-            var newHeaders = new NancyRequestHeaders();
-            newHeaders.Accept = headers.Accept;
-            newHeaders.AcceptCharset = headers.AcceptCharset;
-            newHeaders.AcceptEncoding = headers.AcceptEncoding;
-            newHeaders.AcceptLanguage = headers.AcceptLanguage;
-            newHeaders.Authorization = headers.Authorization;
-            newHeaders.CacheControl = headers.CacheControl;
-            newHeaders.Connection = headers.Connection;
-            newHeaders.ContentLength = headers.ContentLength;
-            newHeaders.ContentType = headers.ContentType;
-            newHeaders.Date = headers.Date;
-            newHeaders.Host = headers.Host;
-            newHeaders.IfMatch = headers.IfMatch;
-            newHeaders.IfModifiedSince = headers.IfModifiedSince;
-            newHeaders.IfNoneMatch = headers.IfNoneMatch;
-            newHeaders.IfRange = headers.IfRange;
-            newHeaders.IfUnmodifiedSince = headers.IfUnmodifiedSince;
-            newHeaders.MaxForwards = headers.MaxForwards;
-            newHeaders.Referrer = headers.Referrer;
-            newHeaders.UserAgent = headers.UserAgent;
-            return newHeaders;
+            Dictionary<string, IEnumerable<string>> newHeaders = new Dictionary<string, IEnumerable<string>>();
+            foreach (string header in headers.Keys)
+            {
+                newHeaders.Add(header, headers[header]);
+            }
+            return new NancyRequestHeaders(newHeaders);
         }
     }
 }

@@ -8,6 +8,7 @@ using Limitless.Runtime.Types;
 using Limitless.Runtime.Enums;
 using Limitless.Runtime.Attributes;
 using Limitless.Runtime.Interfaces;
+using System.Linq;
 
 namespace TestModule
 {
@@ -124,6 +125,8 @@ namespace TestModule
             obj.Action = "Pong";
             obj.Name = request.Parameters.name;
             obj.User = request.AuthenticatedUser.UserName;
+            obj.LimitlessLang = request.Headers["Limitless-Language"].First();
+            obj.Auth = request.Headers.Authorization;
             return obj;
         }
 
