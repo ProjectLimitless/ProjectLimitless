@@ -80,6 +80,7 @@
     <Compile Include="Builtin\DatabaseProviders\MySQLDatabaseProvider.cs" />
     <Compile Include="Builtin\InternalUserIdentity.cs" />
     <Compile Include="Builtin\AdminModule.cs" />
+    <Compile Include="Config\CoreAPICORSSettings.cs" />
     <Compile Include="Config\CoreAPINancySettings.cs" />
     <Compile Include="Config\CoreAPISettings.cs" />
     <Compile Include="Config\CoreSettings.cs" />

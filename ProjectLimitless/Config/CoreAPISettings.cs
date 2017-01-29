@@ -30,6 +30,10 @@ namespace Limitless.Config
         /// Settings for the Nancy diagnostics dashboard.
         /// </summary>
         public CoreAPINancySettings Nancy { get; set; }
+        /// <summary>
+        /// Settings for the CORS headers.
+        /// </summary>
+        public CoreAPICORSSettings CORS { get; set; }
 
         /// <summary>
         /// Default constructor.
@@ -39,6 +43,7 @@ namespace Limitless.Config
             Host = "0.0.0.0";
             Port = 8080;
             Nancy = new CoreAPINancySettings();
+            CORS = new CoreAPICORSSettings();
         }
     }
 }

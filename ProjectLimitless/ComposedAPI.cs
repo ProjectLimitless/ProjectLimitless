@@ -12,6 +12,7 @@
 */
 
 using System;
+using System.Linq;
 using System.Dynamic;
 using System.Collections.Generic;
 
@@ -24,6 +25,7 @@ using Nancy.Authentication.Stateless;
 
 using Limitless.Builtin;
 using Limitless.Managers;
+using Limitless.Containers;
 using Limitless.Runtime.Enums;
 using Limitless.Runtime.Types;
 using Limitless.Runtime.Interfaces;
@@ -89,11 +91,10 @@ namespace Limitless
                     case HttpMethod.Head:
                         Head[route.Path] = BuildComposedFunction(route);
                         break;
-                    case HttpMethod.Options:
-                        Options[route.Path] = BuildComposedFunction(route);
-                        break;
                 }
+                Options[route.Path] = BuildRouteOptions(route);
             }
+
             /*
             TODO: Testing routes for error pages
             Get["/"] = _ =>
@@ -123,6 +124,49 @@ namespace Limitless
             */
         }
 
+        /// <summary>
+        /// Constructs the handler function for the route options.
+        /// </summary>
+        /// <param name="route">The route to build the OPTIONS for</param>
+        /// <returns>the OPTIONS response</returns>
+        private Func<dynamic, dynamic> BuildRouteOptions(APIRoute route)
+        {
+            return (dynamic parameters) =>
+            {
+                var negotiator = Negotiate.WithStatusCode(200);
+                negotiator.WithHeader("Access-Control-Allow-Origin", CoreContainer.Instance.Settings.Core.API.CORS.AllowedOrigin);
+
+                // This fetches all the HTTP methods available to the routes 
+                // that match route.Path and adds it to the response headers
+                var methods = string.Join(",", CoreContainer.Instance.RouteManager.GetRoutes()
+                                    .Where(x => x.Path == route.Path)
+                                    .Select(x => Enum.GetName(typeof(HttpMethod), x.Method).ToUpper()));
+                negotiator.WithHeader("Access", methods);
+                negotiator.WithHeader("Access-Control-Allow-Methods", methods);
+
+                // Let's allow all the request headers for now
+                var headers = new List<string>(Request.Headers.Keys);
+                if (Request.Headers.Keys.Contains("Access-Control-Request-Headers"))
+                {
+                    var acrh = Request.Headers["Access-Control-Request-Headers"].First();
+                    headers.AddRange(acrh.Split(','));
+                }
+                // and add some ones we know we need
+                headers.Add("Accept-Language");
+                headers.Add("Request-Language");
+                headers.Add("Content-Type");
+                negotiator.WithHeader("Access-Control-Allow-Headers", string.Join(",", headers));
+
+                // If the route requires auth, then OPTIONS 
+                // should require it to
+                if (route.RequiresAuthentication)
+                {
+                    this.RequiresAuthentication();
+                }
+                return negotiator;
+            };
+        }
+        
         /// <summary>
         /// Constructs the handler function including authentication.
         /// </summary>

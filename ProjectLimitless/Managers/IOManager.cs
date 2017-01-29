@@ -93,11 +93,11 @@ namespace Limitless.Managers
 
             // TODO: input providers should take language to be able to translate
             // TODO: Resolve multi-request parallel - ie. speech recognition + voice recognition id
-            
-            // TODO: Continue here - find the best way to pass content-type and request / accept languages to the resolver
-            IOData processedData = ResolveInput(new IOData(request.Headers.ContentType, request.Headers.RequestLanguage, request.Data));
 
-            Console.WriteLine($"Resolved input: {processedData.Mime}");
+            // TODO: Continue here - find the best way to pass content-type and request / accept languages to the resolver
+            //IOData processedData = ResolveInput(new IOData(request.Headers.ContentType, request.Headers.RequestLanguage, request.Data));
+            IOData processedData = new IOData("text/plain", "Woohooo");
+            //Console.WriteLine($"Resolved input: {processedData.Mime}");
             
             //processedData = _engine.ProcessInput(processedData);
             

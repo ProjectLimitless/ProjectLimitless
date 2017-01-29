@@ -38,3 +38,6 @@ DashboardPath = "_nancy"
 
 EnableRequestTracing = true
 
+[Core.API.CORS]
+AllowedOrigin = "*"
+
