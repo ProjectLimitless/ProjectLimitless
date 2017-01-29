@@ -91,16 +91,15 @@ namespace Limitless.Managers
                 _log.Debug("Received JSON, parse into usable type");
             }
 
-            // TODO: input providers should take language to be able to translate
             // TODO: Resolve multi-request parallel - ie. speech recognition + voice recognition id
+            
+            IOData processedData = Resolve(new IOData(request.Headers.ContentType, request.Data, request.Headers.RequestLanguage), _inputProviders);
+            Console.WriteLine($"Resolved input: {processedData.Mime}");
+            // TODO Find solution to multiple accepted languages
+            //processedData = Resolve(new IOData(request.Headers.ContentType, request.Data, request.Headers.AcceptLanguage), _outputProviders);
 
-            // TODO: Continue here - find the best way to pass content-type and request / accept languages to the resolver
-            //IOData processedData = ResolveInput(new IOData(request.Headers.ContentType, request.Headers.RequestLanguage, request.Data));
-            IOData processedData = new IOData("text/plain", "Woohooo");
-            //Console.WriteLine($"Resolved input: {processedData.Mime}");
-            
             //processedData = _engine.ProcessInput(processedData);
-            
+
             // the Accept header and Accept-Language
             // TODO: ResolveOutput should negotiate the output type based on
             /*var accept = (string)parameters.Headers.Accept;
@@ -110,7 +109,7 @@ namespace Limitless.Managers
                 */
 
             //processedData = ResolveOutput(processedData);
-            
+
             response.Data = processedData.Data;
             var header = new
             {
@@ -171,32 +170,42 @@ namespace Limitless.Managers
         /// or LimitlessSettings MaxResolveAttempts is reached
         /// </summary>
         /// <param name="input"></param>
-        /// <param name="resolveAttempts"></param>
-        /// <returns>The recognised intent</returns>
-        private IOData ResolveInput(IOData output, int resolveAttempts = 0)
+        /// <param name="providers">The providers available to process input</param>
+        /// <param name="resolveAttempts">The maximum attempts to extract usable data from input</param>
+        /// <returns>The processed data from the pipeline</returns>
+        private IOData Resolve(IOData input, IEnumerable<IIOProvider> providers, int resolveAttempts = 0)
         {
-            // Attempt to find the best matching processor
-            // for the given input
-
-
-
-
-
-
-
-
-            /*
             if (resolveAttempts >= CoreContainer.Instance.Settings.Core.MaxResolveAttempts)
             {
-                throw new NotSupportedException("Maximum attempts reached for providing output in the preferred format");
+                throw new NotSupportedException("Maximum attempts reached for providing data in the preferred format");
             }
 
-            if (_outputProviders.ContainsKey(output.Mime) == false)
+            // Find a provider that matches Mime and Language
+            var availableProviders = providers.Where(x => x.GetSupportedMimeLanguages().Count(y => y.Mime == input.Mime && y.Language == input.Language) > 0);
+            // Find a provider that matches Mime and primary part of the Language
+            if (availableProviders.Count<IIOProvider>() == 0)
             {
-                _log.Trace($"MIME type '{output.Mime}' has no supported output providers loaded - return the current output");
-                return output;
+                availableProviders = providers.Where(x => x.GetSupportedMimeLanguages().Count(y => y.Mime == input.Mime && y.Language == input.Language.Substring(0, 2)) > 0);
+            }
+            // Find a provider that matches Mime
+            if (availableProviders.Count<IIOProvider>() == 0)
+            {
+                availableProviders = providers.Where(x => x.GetSupportedMimeLanguages().Count(y => y.Mime == input.Mime) > 0);
+            }
+            // Nothing matched
+            if (availableProviders.Count<IIOProvider>() == 0)
+            {
+                _log.Trace($"No provider available for Mime '{input.Mime}' with language '{input.Language}'. Returning current");
+                return input;
             }
 
+            _log.Trace($"Found {availableProviders.Count<IIOProvider>()} provider(s) for Mime '{input.Mime}' with language '{input.Language}'");
+
+
+            
+
+            /*
+            
             // Try...Catch... I'm calling user code here
             try
             {
