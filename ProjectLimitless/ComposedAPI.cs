@@ -157,6 +157,9 @@ namespace Limitless
                 headers.Add("Content-Type");
                 negotiator.WithHeader("Access-Control-Allow-Headers", string.Join(",", headers));
 
+                // Always allow credentials
+                negotiator.WithHeader("Access-Control-Allow-Credentials", "true");
+
                 // If the route requires auth, then OPTIONS 
                 // should require it to
                 if (route.RequiresAuthentication)
