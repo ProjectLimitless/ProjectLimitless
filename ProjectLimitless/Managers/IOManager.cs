@@ -92,24 +92,19 @@ namespace Limitless.Managers
             }
 
             // TODO: Resolve multi-request parallel - ie. speech recognition + voice recognition id
-            
             IOData processedData = Resolve(new IOData(request.Headers.ContentType, request.Data, request.Headers.RequestLanguage), _inputProviders);
-            Console.WriteLine($"Resolved input: {processedData.Mime}");
+
+            processedData = _engine.ProcessInput(processedData);
+
             // TODO Find solution to multiple accepted languages
-            //processedData = Resolve(new IOData(request.Headers.ContentType, request.Data, request.Headers.AcceptLanguage), _outputProviders);
-
-            //processedData = _engine.ProcessInput(processedData);
-
-            // the Accept header and Accept-Language
-            // TODO: ResolveOutput should negotiate the output type based on
-            /*var accept = (string)parameters.Headers.Accept;
-            var acceptedContentTypes = accept.Split(',')
-                .Select(StringWithQualityHeaderValue.Parse)
-                .OrderByDescending(s => s.Quality.GetValueOrDefault(1));
-                */
-
-            //processedData = ResolveOutput(processedData);
-
+            // Multiple languages could be present, this selects the language with the highest weighted value
+            // More on languages and weighted values: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept-Language
+            // The tuple contains <language,weight>
+            Tuple<string, decimal> preferredLanguage = request.Headers.AcceptLanguage.OrderByDescending(x => x.Item2).First();
+            // TODO: How to resolve to the correct output language?
+            processedData = Resolve(processedData, _outputProviders);
+            
+            
             response.Data = processedData.Data;
             var header = new
             {
@@ -173,8 +168,10 @@ namespace Limitless.Managers
         /// <param name="providers">The providers available to process input</param>
         /// <param name="resolveAttempts">The maximum attempts to extract usable data from input</param>
         /// <returns>The processed data from the pipeline</returns>
-        private IOData Resolve(IOData input, IEnumerable<IIOProvider> providers, int resolveAttempts = 0)
+        private IOData Resolve(IOData input, List<IIOProvider> providers, int resolveAttempts = 0)
         {
+            // Get a copy of the list so that we don't change the instance list
+            providers = new List<IIOProvider>(providers);
             if (resolveAttempts >= CoreContainer.Instance.Settings.Core.MaxResolveAttempts)
             {
                 throw new NotSupportedException("Maximum attempts reached for providing data in the preferred format");
@@ -201,37 +198,39 @@ namespace Limitless.Managers
 
             _log.Trace($"Found {availableProviders.Count<IIOProvider>()} provider(s) for Mime '{input.Mime}' with language '{input.Language}'");
 
+            var provider = availableProviders.First();
 
-            
-
-            /*
-            
             // Try...Catch... I'm calling user code here
             try
             {
-                // TODO: Only process a single MIME + language + accept once
-                output = _inputProviders[output.Mime].Process(output);
-                if (output == null)
+                // After process is done the output becomes the
+                // input for the next provider
+                input = provider.Process(input);
+                if (input == null)
                 {
-                    throw new NullReferenceException($"Input Provider '{_inputProviders[output.Mime].GetType().Name}' returned a null result for MIME type '{output.Mime}'");
+                    throw new NullReferenceException($"Provider '{provider.GetType().Name}' returned a null result for MIME type '{input.Mime}'");
                 }
 
                 resolveAttempts++;
-                ResolveInput((IOData)output, resolveAttempts);
+                if (providers.Remove(provider))
+                {
+                    Resolve(input, providers, resolveAttempts);
+                }
+                else
+                {
+                    throw new InvalidOperationException($"The provider '{provider.GetType().Name}' could not be removed from the available list");
+                }
             }
             catch (Exception)
             {
                 throw;
             }
-            */
 
-            // In theory this will never be reached, it is only added here
-            // to avoid compile issues of 'not all code paths return a value.
+            // In theory this will never be reached
             // Why? 
             //  If the mime type is not supported, we return
             //  If the output is null, we return
-            // TODO: Refactor this method
-            return null;
+            return input;
         }
         
         /// <summary>

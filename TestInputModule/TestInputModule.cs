@@ -68,7 +68,7 @@ namespace TestInputModule
         {
             _log.Debug("Processing Input...");
             //return new IOData("application/vnd.limitless.intent+json", "asdsad");
-            return new IOData("text/plain", "Well hello");
+            return new IOData("text/plain", input.Data);
         }
     }
 }
