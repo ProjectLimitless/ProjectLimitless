@@ -46,11 +46,13 @@ namespace TestInputModule
             return "Testing input provider";
         }
 
-        public IEnumerable<MimeLanguageCombination> GetSupportedMimeLanguages()
+        public IEnumerable<IOCombination> GetSupportedIOCombinations()
         {
-            return new List<MimeLanguageCombination>
+            return new List<IOCombination>
             {
-                new MimeLanguageCombination("text/plain", "en")
+                new IOCombination("text/plain", "en", "text/plain", "en"),
+                new IOCombination("text/plain", "en", "text/plain", "en-ZA"),
+                new IOCombination("text/plain", "en-GB", "text/plain", "en-US")
             };
         }
         

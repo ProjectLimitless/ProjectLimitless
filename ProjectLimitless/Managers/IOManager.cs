@@ -170,6 +170,7 @@ namespace Limitless.Managers
         /// <returns>The processed data from the pipeline</returns>
         private IOData Resolve(IOData input, List<IIOProvider> providers, int resolveAttempts = 0)
         {
+            /*
             // Get a copy of the list so that we don't change the instance list
             providers = new List<IIOProvider>(providers);
             if (resolveAttempts >= CoreContainer.Instance.Settings.Core.MaxResolveAttempts)
@@ -230,6 +231,8 @@ namespace Limitless.Managers
             // Why? 
             //  If the mime type is not supported, we return
             //  If the output is null, we return
+            return input;
+            */
             return input;
         }
         
