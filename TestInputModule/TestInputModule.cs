@@ -46,13 +46,12 @@ namespace TestInputModule
             return "Testing input provider";
         }
 
-        public IEnumerable<IOCombination> GetSupportedIOCombinations()
+        public IEnumerable<SupportedIOCombination> GetSupportedIOCombinations()
         {
-            return new List<IOCombination>
+            return new List<SupportedIOCombination>
             {
-                new IOCombination("text/plain", "en", "text/plain", "en"),
-                new IOCombination("text/plain", "en", "text/plain", "en-ZA"),
-                new IOCombination("text/plain", "en-GB", "text/plain", "en-US")
+                new SupportedIOCombination(new MimeLanguage("text/plain", "en"), new MimeLanguage("text/plain", "en-ZA")),
+                new SupportedIOCombination(new MimeLanguage("text/plain", "en-GB"), new MimeLanguage("text/plain", "en-US")),
             };
         }
         
@@ -70,7 +69,12 @@ namespace TestInputModule
         {
             _log.Debug("Processing Input...");
             //return new IOData("application/vnd.limitless.intent+json", "asdsad");
-            return new IOData("text/plain", input.Data);
+            if (input.MimeLanguage.Language == "en")
+                return new IOData(new MimeLanguage("text/plain", "en-ZA"), input.Data + " ZA");
+            if (input.MimeLanguage.Language == "en-GB")
+                return new IOData(new MimeLanguage("text/plain", "en-US"), input.Data + " US");
+
+            return new IOData(new MimeLanguage("text/plain", "en"), input.Data + " EN");
         }
     }
 }

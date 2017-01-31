@@ -91,25 +91,39 @@ namespace Limitless.Managers
                 _log.Debug("Received JSON, parse into usable type");
             }
 
-            // TODO: Resolve multi-request parallel - ie. speech recognition + voice recognition id
-            IOData processedData = Resolve(new IOData(request.Headers.ContentType, request.Data, request.Headers.RequestLanguage), _inputProviders);
+            // Find out what Mime/Language input combinations are supported by the interaction engine
+            // This will determine what the input pipeline should attempt to produce
+            // TODO: Support multiple IO combinations for more advanced engines
+            SupportedIOCombination engineCombinations = _engine.GetSupportedIOCombinations().First();
 
-            processedData = _engine.ProcessInput(processedData);
+            // TODO: Resolve multi-request parallel - ie. speech recognition + voice recognition id
+            // Attempt to process input to reach the engineCombinations
+            var ioData = new IOData(new MimeLanguage(request.Headers.ContentType, request.Headers.RequestLanguage), request.Data);
+            ioData = Resolve(ioData, engineCombinations.SupportedInput, _inputProviders);
+
+            ioData = _engine.ProcessInput(ioData);
 
             // TODO Find solution to multiple accepted languages
+            // What is the client expecting in return
+            Tuple<string, decimal> preferredMime = request.Headers.Accept.OrderByDescending(x => x.Item2).First();
             // Multiple languages could be present, this selects the language with the highest weighted value
             // More on languages and weighted values: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept-Language
             // The tuple contains <language,weight>
             Tuple<string, decimal> preferredLanguage = request.Headers.AcceptLanguage.OrderByDescending(x => x.Item2).First();
-            // TODO: How to resolve to the correct output language?
-            processedData = Resolve(processedData, _outputProviders);
+            ioData = Resolve(ioData, new MimeLanguage(preferredMime.Item1, preferredLanguage.Item1), _outputProviders);
             
             
-            response.Data = processedData.Data;
+            response.Data = ioData.Data;
             var header = new
             {
                 Header = "Content-Type",
-                Value = processedData.Mime
+                Value = ioData.MimeLanguage.Mime
+            };
+            response.Headers.Add(header);
+            header = new
+            {
+                Header = "Language",
+                Value = ioData.MimeLanguage.Language
             };
             response.Headers.Add(header);
 
@@ -164,13 +178,21 @@ namespace Limitless.Managers
         /// Recursively processes the input until a usable data type is extracted
         /// or LimitlessSettings MaxResolveAttempts is reached
         /// </summary>
-        /// <param name="input"></param>
+        /// <param name="input">The input data</param>
+        /// <param name="preferredOutput">The preferred output Mime and Language</param>
         /// <param name="providers">The providers available to process input</param>
         /// <param name="resolveAttempts">The maximum attempts to extract usable data from input</param>
         /// <returns>The processed data from the pipeline</returns>
-        private IOData Resolve(IOData input, List<IIOProvider> providers, int resolveAttempts = 0)
+        private IOData Resolve(IOData input, MimeLanguage preferredOutput, List<IIOProvider> providers, int resolveAttempts = 0)
         {
-            /*
+            /* Resolving the input provider to use happens in the following order
+             * 1. Use the first provider that matches both input and preferredOutput
+             * 2. Use the first provider that matches input and preferredOutput.Language[0,2]
+             * 3. Use the first provider that matches input.Language[0,2] and preferredOutput.Language[0,2]
+             * 4. Use the first provider that matched input and output Mimes
+             * 5. Fail
+             */
+
             // Get a copy of the list so that we don't change the instance list
             providers = new List<IIOProvider>(providers);
             if (resolveAttempts >= CoreContainer.Instance.Settings.Core.MaxResolveAttempts)
@@ -178,26 +200,47 @@ namespace Limitless.Managers
                 throw new NotSupportedException("Maximum attempts reached for providing data in the preferred format");
             }
 
-            // Find a provider that matches Mime and Language
-            var availableProviders = providers.Where(x => x.GetSupportedMimeLanguages().Count(y => y.Mime == input.Mime && y.Language == input.Language) > 0);
-            // Find a provider that matches Mime and primary part of the Language
+            //Use the first provider that matches both input and preferredOutput
+            var availableProviders = providers.Where(
+                                        x => x.GetSupportedIOCombinations().Count
+                                        (
+                                            y => y.SupportedInput.Mime == input.MimeLanguage.Mime && y.SupportedInput.Language == input.MimeLanguage.Language &&
+                                                y.SupportedOutput.Mime == preferredOutput.Mime && y.SupportedOutput.Language == preferredOutput.Language
+                                        ) > 0);
             if (availableProviders.Count<IIOProvider>() == 0)
             {
-                availableProviders = providers.Where(x => x.GetSupportedMimeLanguages().Count(y => y.Mime == input.Mime && y.Language == input.Language.Substring(0, 2)) > 0);
+                availableProviders = providers.Where(
+                                            x => x.GetSupportedIOCombinations().Count
+                                            (
+                                                y => y.SupportedInput.Mime == input.MimeLanguage.Mime && y.SupportedInput.Language == input.MimeLanguage.Language &&
+                                                    y.SupportedOutput.Mime == preferredOutput.Mime && y.SupportedOutput.Language == preferredOutput.Language.Substring(0,2)
+                                            ) > 0);
             }
-            // Find a provider that matches Mime
             if (availableProviders.Count<IIOProvider>() == 0)
             {
-                availableProviders = providers.Where(x => x.GetSupportedMimeLanguages().Count(y => y.Mime == input.Mime) > 0);
+                availableProviders = providers.Where(
+                                            x => x.GetSupportedIOCombinations().Count
+                                            (
+                                                y => y.SupportedInput.Mime == input.MimeLanguage.Mime && y.SupportedInput.Language == input.MimeLanguage.Language.Substring(0, 2) &&
+                                                    y.SupportedOutput.Mime == preferredOutput.Mime && y.SupportedOutput.Language == preferredOutput.Language.Substring(0, 2)
+                                            ) > 0);
+            }
+            if (availableProviders.Count<IIOProvider>() == 0)
+            {
+                availableProviders = providers.Where(
+                                            x => x.GetSupportedIOCombinations().Count
+                                            (
+                                                y => y.SupportedInput.Mime == input.MimeLanguage.Mime && y.SupportedOutput.Mime == preferredOutput.Mime
+                                            ) > 0);
             }
             // Nothing matched
             if (availableProviders.Count<IIOProvider>() == 0)
             {
-                _log.Trace($"No provider available for Mime '{input.Mime}' with language '{input.Language}'. Returning current");
+                _log.Trace($"No provider available for input types '{input.MimeLanguage}' providing output types '{preferredOutput}'. Returning current");
                 return input;
             }
 
-            _log.Trace($"Found {availableProviders.Count<IIOProvider>()} provider(s) for Mime '{input.Mime}' with language '{input.Language}'");
+            _log.Trace($"Found {availableProviders.Count<IIOProvider>()} provider(s) for input {input.MimeLanguage} and output {preferredOutput}");
 
             var provider = availableProviders.First();
 
@@ -209,13 +252,13 @@ namespace Limitless.Managers
                 input = provider.Process(input);
                 if (input == null)
                 {
-                    throw new NullReferenceException($"Provider '{provider.GetType().Name}' returned a null result for MIME type '{input.Mime}'");
+                    throw new NullReferenceException($"Provider '{provider.GetType().Name}' returned a null result for input '{input.MimeLanguage}'");
                 }
 
                 resolveAttempts++;
                 if (providers.Remove(provider))
                 {
-                    Resolve(input, providers, resolveAttempts);
+                    Resolve(input, preferredOutput, providers, resolveAttempts);
                 }
                 else
                 {
@@ -227,12 +270,11 @@ namespace Limitless.Managers
                 throw;
             }
 
+
             // In theory this will never be reached
             // Why? 
             //  If the mime type is not supported, we return
             //  If the output is null, we return
-            return input;
-            */
             return input;
         }
         
