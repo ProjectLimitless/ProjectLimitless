@@ -5,23 +5,23 @@ using Limitless.Runtime.Enums;
 using Limitless.Runtime.Types;
 using Limitless.Runtime.Interfaces;
 
-namespace TestInputModule
+namespace TestOutputModule
 {
-    public class TestInputConfig
+    public class TestOutputConfig
     {
         public string TestName { get; set; }
     }
 
-    public class TestInputModule : IModule, IIOProvider
+    public class TestOutputModule : IModule, IIOProvider
     {
         ILogger _log;
 
-        public TestInputModule(ILogger log)
+        public TestOutputModule(ILogger log)
         {
             _log = log;
         }
 
-        public IODirection Direction { get; set; } = IODirection.In;
+        public IODirection Direction { get; set; } = IODirection.Out;
 
         public void Configure(dynamic settings)
         {
@@ -35,26 +35,26 @@ namespace TestInputModule
 
         public Type GetConfigurationType()
         {
-            return typeof(TestInputConfig);
+            return typeof(TestOutputConfig);
         }
 
         public string GetDescription()
         {
-            return "Testing input provider";
+            return "Testing output provider";
         }
 
         public IEnumerable<SupportedIOCombination> GetSupportedIOCombinations()
         {
             return new List<SupportedIOCombination>
             {
-                new SupportedIOCombination(new MimeLanguage("text/plain", "en-ZA"), new MimeLanguage("text/plain", "en-US")),
-                new SupportedIOCombination(new MimeLanguage("text/plain", "en-GB"), new MimeLanguage("text/plain", "en-US")),
+                new SupportedIOCombination(new MimeLanguage("text/plain", "en-US"), new MimeLanguage("text/plain", "en-ZA")),
+                new SupportedIOCombination(new MimeLanguage("text/plain", "en-US"), new MimeLanguage("text/plain", "en-GB")),
             };
         }
 
         public string GetTitle()
         {
-            return "TestInputModule";
+            return "TestOutputModule";
         }
 
         public string GetVersion()
@@ -64,12 +64,12 @@ namespace TestInputModule
 
         public IOData Process(IOData input, MimeLanguage preferredOutput)
         {
-            _log.Debug("Processing Input...");
+            _log.Debug("Processing Output...");
             //return new IOData("application/vnd.limitless.intent+json", "asdsad");
-            if (input.MimeLanguage.Language == "en-ZA")
-                return new IOData(new MimeLanguage("text/plain", "en-US"), input.Data + ". ZA, US");
-            if (input.MimeLanguage.Language == "en-GB")
-                return new IOData(new MimeLanguage("text/plain", "en-US"), input.Data + ". GB, US");
+            if (preferredOutput.Language == "en-ZA")
+                return new IOData(new MimeLanguage("text/plain", "en-ZA"), input.Data + " to ZA");
+            if (preferredOutput.Language == "en-GB")
+                return new IOData(new MimeLanguage("text/plain", "en-GB"), input.Data + " to GB");
 
             return new IOData(new MimeLanguage("text/plain", "en"), input.Data + " EN");
         }

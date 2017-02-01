@@ -80,15 +80,16 @@ namespace Limitless.Managers
             _log.Trace($"Handle input from client. Content-Type is '{request.Headers.ContentType}'");
             var response = new APIResponse();
 
-            // TODO: Define custom JSON? application/vnd.limitless.input+json?
 
             // Check the Content-Type
             // If it is application/json
             // TODO: if will be parsed into IOData that may contain multiple
+            // TODO: Define custom JSON? application/vnd.limitless.input+json?
             // inputs.
             if (request.Headers.ContentType == MimeType.Json)
             {
                 _log.Debug("Received JSON, parse into usable type");
+                throw new NotImplementedException("JSON received. Needs to be parsed into usable type");
             }
 
             // Find out what Mime/Language input combinations are supported by the interaction engine
@@ -101,6 +102,7 @@ namespace Limitless.Managers
             var ioData = new IOData(new MimeLanguage(request.Headers.ContentType, request.Headers.RequestLanguage), request.Data);
             ioData = Resolve(ioData, engineCombinations.SupportedInput, _inputProviders);
 
+            // Let the engine do its thing
             ioData = _engine.ProcessInput(ioData);
 
             // TODO Find solution to multiple accepted languages
@@ -112,7 +114,9 @@ namespace Limitless.Managers
             Tuple<string, decimal> preferredLanguage = request.Headers.AcceptLanguage.OrderByDescending(x => x.Item2).First();
             ioData = Resolve(ioData, new MimeLanguage(preferredMime.Item1, preferredLanguage.Item1), _outputProviders);
             
-            
+            // Set the headers for the data.
+            // TODO: In future this will be part of the response
+            // not just a list.
             response.Data = ioData.Data;
             var header = new
             {
@@ -193,6 +197,7 @@ namespace Limitless.Managers
              * 5. Fail
              */
 
+            // TODO: Add support for wildcard mime and language */*
             // Get a copy of the list so that we don't change the instance list
             providers = new List<IIOProvider>(providers);
             if (resolveAttempts >= CoreContainer.Instance.Settings.Core.MaxResolveAttempts)
@@ -249,7 +254,7 @@ namespace Limitless.Managers
             {
                 // After process is done the output becomes the
                 // input for the next provider
-                input = provider.Process(input);
+                input = provider.Process(input, preferredOutput);
                 if (input == null)
                 {
                     throw new NullReferenceException($"Provider '{provider.GetType().Name}' returned a null result for input '{input.MimeLanguage}'");

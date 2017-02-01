@@ -200,6 +200,7 @@ namespace Limitless
                 request.Headers = CloneHeaders(Request.Headers);
                 
                 var negotiator = Negotiate.WithStatusCode(200);
+                
                 try
                 {
                     var handlerResponse = route.Handler(request);
@@ -207,10 +208,18 @@ namespace Limitless
                     {
                         var apiResponse = handlerResponse as APIResponse;
                         negotiator.WithStatusCode(apiResponse.StatusCode);
-
                         if (apiResponse.Data != null)
                         {
-                            negotiator.WithModel((object)apiResponse.Data);
+                            // TODO: Figure out how to have the negotiator work with
+                            // any content type returned by the input/output pipelines
+                            if (apiResponse.Data is string)
+                            {
+                                negotiator.WithModel(new Nancy.Responses.TextResponse((string)apiResponse.Data));
+                            }
+                            else
+                            {
+                                negotiator.WithModel((object)apiResponse.Data);
+                            }
                         }
                         if (apiResponse.StatusMessage != null)
                         {
@@ -219,7 +228,7 @@ namespace Limitless
                         if (apiResponse.Headers.Count > 0)
                         {
                             negotiator.WithHeaders(apiResponse.Headers.ToArray());
-                        }       
+                        }
                     }
                     else
                     {

@@ -20,6 +20,7 @@ EnabledModules = [
 	"Limitless.LocalIdentityProvider",
 	"TestModule",
 	"TestInputModule",
+	"TestOutputModule",
 	"Limitless.BasicInteractionEngine"
 ]
 
