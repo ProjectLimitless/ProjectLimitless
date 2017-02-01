@@ -41,11 +41,11 @@ namespace Limitless.Managers
         /// <summary>
         /// The collection of available input providers.
         /// </summary>
-        private List<IIOProvider> _inputProviders;
+        private List<IIOProcessor> _inputProviders;
         /// <summary>
         /// The collection of available output providers.
         /// </summary>
-        private List<IIOProvider> _outputProviders;
+        private List<IIOProcessor> _outputProviders;
         
         /// <summary>
         /// Standard constructor with logger.
@@ -54,8 +54,8 @@ namespace Limitless.Managers
         public IOManager(ILogger log)
         {
             _log = log;
-            _inputProviders = new List<IIOProvider>();
-            _outputProviders = new List<IIOProvider>();
+            _inputProviders = new List<IIOProcessor>();
+            _outputProviders = new List<IIOProcessor>();
         }
 
         /// <summary>
@@ -138,17 +138,16 @@ namespace Limitless.Managers
         /// Registers an input provider for the MIME types as 
         /// returned by the provider.
         /// </summary>
-        /// <param name="provider">The input provider to register</param>
-        /// <exception cref="NotSupportedException">Thrown if a MIME type is already registered. No MIME types are loaded after the exception.</exception>
-        public void RegisterProvider(IIOProvider provider)
+        /// <param name="processor">The processor to register</param>
+        public void RegisterProvider(IIOProcessor processor)
         {
-            if (provider.Direction == IODirection.In)
+            if (processor.Stage == IOStage.PreProcessor)
             {
-                _inputProviders.Add(provider);
+                _inputProviders.Add(processor);
             }
             else
             {
-                _outputProviders.Add(provider);
+                _outputProviders.Add(processor);
             }
         }
 
@@ -156,16 +155,16 @@ namespace Limitless.Managers
         /// Deregisters an input provider for the MIME types as 
         /// returned by the provider.
         /// </summary>
-        /// <param name="provider">The input provider to deregister</param>
-        public void DeregisterProvider(IIOProvider provider)
+        /// <param name="processor">The processor to deregister</param>
+        public void DeregisterProvider(IIOProcessor processor)
         {
-            if (provider.Direction == IODirection.In)
+            if (processor.Stage == IOStage.PreProcessor)
             {
-                _inputProviders.Remove(provider);
+                _inputProviders.Remove(processor);
             }
             else
             {
-                _outputProviders.Remove(provider);
+                _outputProviders.Remove(processor);
             }
         }
 
@@ -187,7 +186,7 @@ namespace Limitless.Managers
         /// <param name="providers">The providers available to process input</param>
         /// <param name="resolveAttempts">The maximum attempts to extract usable data from input</param>
         /// <returns>The processed data from the pipeline</returns>
-        private IOData Resolve(IOData input, MimeLanguage preferredOutput, List<IIOProvider> providers, int resolveAttempts = 0)
+        private IOData Resolve(IOData input, MimeLanguage preferredOutput, List<IIOProcessor> providers, int resolveAttempts = 0)
         {
             /* Resolving the input provider to use happens in the following order
              * 1. Use the first provider that matches both input and preferredOutput
@@ -199,7 +198,7 @@ namespace Limitless.Managers
 
             // TODO: Add support for wildcard mime and language */*
             // Get a copy of the list so that we don't change the instance list
-            providers = new List<IIOProvider>(providers);
+            providers = new List<IIOProcessor>(providers);
             if (resolveAttempts >= CoreContainer.Instance.Settings.Core.MaxResolveAttempts)
             {
                 throw new NotSupportedException("Maximum attempts reached for providing data in the preferred format");
@@ -212,7 +211,7 @@ namespace Limitless.Managers
                                             y => y.SupportedInput.Mime == input.MimeLanguage.Mime && y.SupportedInput.Language == input.MimeLanguage.Language &&
                                                 y.SupportedOutput.Mime == preferredOutput.Mime && y.SupportedOutput.Language == preferredOutput.Language
                                         ) > 0);
-            if (availableProviders.Count<IIOProvider>() == 0)
+            if (availableProviders.Count<IIOProcessor>() == 0)
             {
                 availableProviders = providers.Where(
                                             x => x.GetSupportedIOCombinations().Count
@@ -221,7 +220,7 @@ namespace Limitless.Managers
                                                     y.SupportedOutput.Mime == preferredOutput.Mime && y.SupportedOutput.Language == preferredOutput.Language.Substring(0,2)
                                             ) > 0);
             }
-            if (availableProviders.Count<IIOProvider>() == 0)
+            if (availableProviders.Count<IIOProcessor>() == 0)
             {
                 availableProviders = providers.Where(
                                             x => x.GetSupportedIOCombinations().Count
@@ -230,7 +229,7 @@ namespace Limitless.Managers
                                                     y.SupportedOutput.Mime == preferredOutput.Mime && y.SupportedOutput.Language == preferredOutput.Language.Substring(0, 2)
                                             ) > 0);
             }
-            if (availableProviders.Count<IIOProvider>() == 0)
+            if (availableProviders.Count<IIOProcessor>() == 0)
             {
                 availableProviders = providers.Where(
                                             x => x.GetSupportedIOCombinations().Count
@@ -239,13 +238,13 @@ namespace Limitless.Managers
                                             ) > 0);
             }
             // Nothing matched
-            if (availableProviders.Count<IIOProvider>() == 0)
+            if (availableProviders.Count<IIOProcessor>() == 0)
             {
                 _log.Trace($"No provider available for input types '{input.MimeLanguage}' providing output types '{preferredOutput}'. Returning current");
                 return input;
             }
 
-            _log.Trace($"Found {availableProviders.Count<IIOProvider>()} provider(s) for input {input.MimeLanguage} and output {preferredOutput}");
+            _log.Trace($"Found {availableProviders.Count<IIOProcessor>()} provider(s) for input {input.MimeLanguage} and output {preferredOutput}");
 
             var provider = availableProviders.First();
 

@@ -12,7 +12,7 @@ namespace TestInputModule
         public string TestName { get; set; }
     }
 
-    public class TestInputModule : IModule, IIOProvider
+    public class TestInputModule : IModule, IIOProcessor
     {
         ILogger _log;
 
@@ -21,7 +21,7 @@ namespace TestInputModule
             _log = log;
         }
 
-        public IODirection Direction { get; set; } = IODirection.In;
+        public IOStage Stage { get; set; } = IOStage.PreProcessor;
 
         public void Configure(dynamic settings)
         {
