@@ -39,19 +39,20 @@ namespace Limitless.Managers
         /// <summary>
         /// The original parsed configurations for all the modules.
         /// </summary>
-        private TomlTable _moduleConfigurations;
+        private readonly TomlTable _moduleConfigurations;
         /// <summary>
         /// Path the to modules directory.
         /// </summary>
-        private string _modulesPath;
+        private readonly string _modulesPath;
         /// <summary>
         /// A list containing interfaces that may only have
         /// one implementation module loaded.
         /// </summary>
-        private List<Type> _singularModules;
+        private readonly List<Type> _singularModules;
             
         /// <summary>
-        /// Handles loading, unloading and verifying.
+        /// Creates a new instance of <see cref="ModuleManager"/>
+        /// with the <see cref="TomlTable"/> settings and <see cref="ILogger"/>.
         /// </summary>
         /// <param name="moduleConfigurations">The configuration of modules</param>
         /// <param name="log">The logger to use</param>
@@ -168,28 +169,28 @@ namespace Limitless.Managers
             foreach (ConstructorInfo constructor in allConstructors)
             {                
                 // Check if we have enough loaded modules to satisfy this constructor
-                bool canSatisfy = true;
+                bool satisfied = true;
                 var parameters = constructor.GetParameters();
                 foreach (ParameterInfo parameter in parameters)
                 {
-                    if (Modules.ContainsKey(parameter.ParameterType) == false)
-                    {
-                        _log.Trace($" Constructor parameter {parameter.Name}({parameter.ParameterType.Name}) can not be satisfied");
-                        canSatisfy = false;
-                        break;
-                    }
+                    if (Modules.ContainsKey(parameter.ParameterType))
+                        continue;
+
+                    _log.Trace($" Constructor parameter {parameter.Name}({parameter.ParameterType.Name}) can not be satisfied");
+                    satisfied = false;
+                    break;
                 }
                 // Set the best constructor
-                if (canSatisfy)
+                if (!satisfied)
+                    continue;
+
+                if (selectedConstructor == null)
                 {
-                    if (selectedConstructor == null)
-                    {
-                        selectedConstructor = constructor;
-                    }
-                    else if (parameters.Count() > selectedConstructor.GetParameters().Count())
-                    {
-                        selectedConstructor = constructor;
-                    }
+                    selectedConstructor = constructor;
+                }
+                else if (parameters.Count() > selectedConstructor.GetParameters().Count())
+                {
+                    selectedConstructor = constructor;
                 }
             }
 
@@ -197,13 +198,13 @@ namespace Limitless.Managers
             var constructorParameters = new List<object>();
             foreach (var parameter in selectedConstructor.GetParameters())
             {
-                if (Modules.ContainsKey(parameter.ParameterType))
+                if (!Modules.ContainsKey(parameter.ParameterType))
+                    continue;
+
+                if (Modules[parameter.ParameterType].Count >= 1)
                 {
-                    if (Modules[parameter.ParameterType].Count >= 1)
-                    {
-                        // Only the first loaded module will be injected
-                        constructorParameters.Add(Modules[parameter.ParameterType][0]);
-                    }
+                    // Only the first loaded module will be injected
+                    constructorParameters.Add(Modules[parameter.ParameterType][0]);
                 }
             }
 
@@ -252,20 +253,22 @@ namespace Limitless.Managers
                             t => t.IsInterface && 
                             t.Namespace == "Limitless.Runtime.Interfaces" &&
                             // Exclude the base module interface, we're not interested in it
-                            t.Name != "IModule");
-            if (interfaces == null)
+                            t.Name != "IModule").ToList();
+            if (!interfaces.Any())
             {
                 _log.Warning("No interfaces implemented from Runtime");
                 return false;
             }
             bool added = false;
-            foreach (var type in interfaces.ToArray())
-            {       
+            foreach (var type in interfaces)
+            {
                 // A module can implement multiple interfaces
+                //TODO: Check this if (type.IsInstanceOfType(module))
                 if (type.IsAssignableFrom(module.GetType()))
                 {
                     if (Modules.ContainsKey(type) == false)
                     {
+                        _log.Error("Adding type " + type);
                         Modules.Add(type, new List<IModule>());
                     }
                     if (_singularModules.Contains(type))

@@ -37,7 +37,7 @@ namespace Limitless.Loaders
         /// <summary>
         /// The renderer.
         /// </summary>
-        private IViewRenderer _viewRenderer;
+        private readonly IViewRenderer _viewRenderer;
         /// <summary>
         /// The list of error codes we process.
         /// </summary>
@@ -45,7 +45,7 @@ namespace Limitless.Loaders
         /// <summary>
         /// Response negotiator for the error codes.
         /// </summary>
-        private IResponseNegotiator _responseNegotiator;
+        private readonly IResponseNegotiator _responseNegotiator;
 
         /// <summary>
         /// Constructor with IViewRenderer injected.
@@ -109,7 +109,7 @@ namespace Limitless.Loaders
         /// <param name="context">The current context</param>
         public void Handle(HttpStatusCode statusCode, NancyContext context)
         {
-            if (context.Response != null && context.Response.Contents != null && !ReferenceEquals(context.Response.Contents, Response.NoBody))
+            if (context.Response?.Contents != null && !ReferenceEquals(context.Response.Contents, Response.NoBody))
             {
                 return;
             }
@@ -148,7 +148,7 @@ namespace Limitless.Loaders
             }
             // Wrap the exception in an HTML <pre> tag
             result.StackTrace = string.Concat("<pre>", context.GetExceptionDetails().Replace("<", "&gt;").Replace(">", "&lt;"), "</pre>");
-            result.StatusCode = (int)statusCode;
+            result.StatusCode = statusCode;
             var response = _viewRenderer.RenderView(context, "views/errors/" + (int)statusCode + ".html", result);
             response.StatusCode = statusCode;
             context.Response = response;

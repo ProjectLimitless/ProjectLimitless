@@ -11,8 +11,6 @@
 * Project Limitless. If not, see http://www.apache.org/licenses/LICENSE-2.0.
 */
 
-using System;
-
 using Nancy;
 using Nancy.TinyIoc;
 using Nancy.Conventions;
@@ -94,16 +92,10 @@ namespace Limitless
         /// <summary>
         /// Overrides the diagnostics configuration to provide a password for access.
         /// </summary>
-        protected override DiagnosticsConfiguration DiagnosticsConfiguration
+        protected override DiagnosticsConfiguration DiagnosticsConfiguration => new DiagnosticsConfiguration
         {
-            get
-            {
-                return new DiagnosticsConfiguration
-                {
-                    Password = CoreContainer.Instance.Settings.Core.API.Nancy.DashboardPassword,
-                    Path = CoreContainer.Instance.Settings.Core.API.Nancy.DashboardPath
-                };
-            }
-        }
+            Password = CoreContainer.Instance.Settings.Core.API.Nancy.DashboardPassword,
+            Path = CoreContainer.Instance.Settings.Core.API.Nancy.DashboardPath
+        };
     }
 }

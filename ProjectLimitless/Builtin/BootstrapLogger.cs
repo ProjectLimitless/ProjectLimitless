@@ -29,7 +29,8 @@ namespace Limitless.Builtin
         private LogLevel _logLevel;
 
         /// <summary>
-        /// Standard constructor.
+        /// Creates a new instance of <see cref="BootstrapLogger"/>
+        /// setting the <see cref="LogLevel"/> to Info.
         /// </summary>
         public BootstrapLogger()
         {

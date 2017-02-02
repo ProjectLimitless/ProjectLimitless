@@ -25,7 +25,8 @@ namespace Limitless.Config
         public string AllowedOrigin { get; set; }
 
         /// <summary>
-        /// Default constructor.
+        /// Creates a new <see cref="CoreAPICORSSettings"/>
+        /// with the <see cref="AllowedOrigin"/> set to '*'.
         /// </summary>
         public CoreAPICORSSettings()
         {

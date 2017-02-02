@@ -36,7 +36,8 @@ namespace Limitless.Config
         public CoreAPICORSSettings CORS { get; set; }
 
         /// <summary>
-        /// Default constructor.
+        /// Creates new <see cref="CoreAPISettings"/> using
+        /// 0.0.0.0 as <see cref="Host"/> and 8080 as the <see cref="Port"/>.
         /// </summary>
         public CoreAPISettings()
         {

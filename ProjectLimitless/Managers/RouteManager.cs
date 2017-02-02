@@ -12,7 +12,7 @@
 */
 
 using System.Collections.Generic;
-
+using System.Linq;
 using Limitless.Builtin;
 
 namespace Limitless.Managers
@@ -24,19 +24,15 @@ namespace Limitless.Managers
     {
         /// <summary>
         /// The collection of routes to load.
-        /// 
-        /// Private to add checks to adding routes.
         /// </summary>
-        private List<APIRoute> _routes;
+        private readonly List<APIRoute> _routes;
         /// <summary>
         /// The collection of content routes to load.
-        ///
-        /// Private to add checks to adding content routes.
         /// </summary>
-        private List<string> _contentRoutes;
+        private readonly List<string> _contentRoutes;
        
         /// <summary>
-        /// Standard constructor
+        /// Creates a new <see cref="RouteManager"/> instance.
         /// </summary>
         public RouteManager()
         {
@@ -63,12 +59,9 @@ namespace Limitless.Managers
             // Prepending '/api' to the path to ensure API routes
             // don't clash with static routes
             route.Path = $"/api{route.Path}";
-            foreach (var loadedRoute in _routes)
+            if (_routes.Any(loadedRoute => loadedRoute.Path == route.Path && loadedRoute.Method == route.Method))
             {
-                if ((loadedRoute.Path == route.Path) && (loadedRoute.Method == route.Method))
-                {
-                    return false;
-                }
+                return false;
             }
             _routes.Add(route);
             return true;
@@ -82,12 +75,9 @@ namespace Limitless.Managers
         /// <returns>true if everything was added, false otherwise</returns>
         public bool AddRoutes(List<APIRoute> routes)
         {
-            foreach (var route in routes)
+            if (routes.Any(route => AddRoute(route) == false))
             {
-                if (AddRoute(route) == false)
-                {
-                    return false;
-                }
+                return false;
             }
             return true;
         }

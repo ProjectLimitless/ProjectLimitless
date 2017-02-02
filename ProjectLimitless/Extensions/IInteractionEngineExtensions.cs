@@ -33,7 +33,7 @@ namespace Limitless.Extensions
         /// <summary>
         /// Creates the required routes for all IInteractionEngine implementations.
         /// </summary>
-        /// <param name="type">The module to get routes from</param>
+        /// <param name="interactionEngine">The <see cref="IInteractionEngine"/> being extended</param>
         /// <param name="handler">A handler to wrap around the call. Takes the output and API input parameters as input.</param>
         /// <returns>The list of API routes</returns>
         public static List<APIRoute> GetRequiredAPIRoutes(this IInteractionEngine interactionEngine, Func<dynamic, object[], dynamic> handler = null)
@@ -41,35 +41,34 @@ namespace Limitless.Extensions
             var routes = new List<APIRoute>();
 
             // Create the Skills endpoints
-            var route = new APIRoute();
-            route.Path = "/skills";
-            route.Description = "List available skills";
-            route.Method = HttpMethod.Get;
-            route.RequiresAuthentication = true;
-            route.Handler = (APIRequest request) =>
+            var route = new APIRoute
             {
-                var response = new APIResponse(interactionEngine.ListSkills());
-
-                // TODO: the analysis module hook needs to be implemented in a better way
-                if (handler != null)
+                Path = "/skills",
+                Description = "List available skills",
+                Method = HttpMethod.Get,
+                RequiresAuthentication = true,
+                Handler = (APIRequest request) =>
                 {
-                    return handler(response, new object[] { request });
+                    var response = new APIResponse(interactionEngine.ListSkills());
+
+                    // TODO: the analysis module hook needs to be implemented in a better way
+                    return handler != null ? handler(response, new object[] {request}) : response;
                 }
-                return response;
             };
             routes.Add(route);
 
-            route = new APIRoute();
-            route.Path = "/skills";
-            route.Description = "Register a new skill";
-            route.Method = HttpMethod.Post;
-            route.RequiresAuthentication = true;
-            route.Handler = (APIRequest request) =>
+            route = new APIRoute
             {
-                Skill skill = ((JObject)request.Data).ToObject<Skill>();
-                switch (skill.Binding)
+                Path = "/skills",
+                Description = "Register a new skill",
+                Method = HttpMethod.Post,
+                RequiresAuthentication = true,
+                Handler = (APIRequest request) =>
                 {
-                    /*
+                    Skill skill = ((JObject) request.Data).ToObject<Skill>();
+                    switch (skill.Binding)
+                    {
+                        /*
                     // TODO: Binary executors can't be loaded over the network using the API
                     // since they need a method handler
                     case SkillExecutorBinding.Builtin:
@@ -77,66 +76,63 @@ namespace Limitless.Extensions
                         skill.Executor = ((JObject)skill.Executor).ToObject<BinaryExecutor>();
                         break;
                     */
-                    case SkillExecutorBinding.Network:
-                        skill.Executor = ((JObject)skill.Executor).ToObject<NetworkExecutor>();
-                        break;
-                    default:
-                        throw new NotImplementedException($"The given skill binding '{skill.Binding}' is not implemented");
-                }
+                        case SkillExecutorBinding.Network:
+                            skill.Executor = ((JObject) skill.Executor).ToObject<NetworkExecutor>();
+                            break;
+                        default:
+                            throw new NotImplementedException(
+                                $"The given skill binding '{skill.Binding}' is not implemented");
+                    }
 
-                APIResponse response = new APIResponse();
-                if (interactionEngine.RegisterSkill(skill))
-                {
-                    response.StatusCode = (int)HttpStatusCode.Created;
-                    response.Data = new
+                    APIResponse response = new APIResponse();
+                    if (interactionEngine.RegisterSkill(skill))
                     {
-                        UUID = skill.UUID,
-                        Registered = true
-                    };
-                }
-                else
-                {
-                    response.StatusCode = (int)HttpStatusCode.Conflict;
-                    response.Data = new
+                        response.StatusCode = (int) HttpStatusCode.Created;
+                        response.Data = new
+                        {
+                            UUID = skill.UUID,
+                            Registered = true
+                        };
+                    }
+                    else
                     {
-                        Registered = false,
-                        Reason = $"The skill '{skill.UUID}' has already been registered"
-                    };
-                }
+                        response.StatusCode = (int) HttpStatusCode.Conflict;
+                        response.Data = new
+                        {
+                            Registered = false,
+                            Reason = $"The skill '{skill.UUID}' has already been registered"
+                        };
+                    }
 
-                // TODO: the analysis module hook needs to be implemented in a better way
-                if (handler != null)
-                {
-                    return handler(response, new object[] { request });
+                    // TODO: the analysis module hook needs to be implemented in a better way
+                    return handler != null ? handler(response, new object[] {request}) : response;
                 }
-                return response;
             };
             routes.Add(route);
 
-            route = new APIRoute();
-            route.Path = "/skills/{skillUUID}";
-            route.Description = "Deregister a new skill";
-            route.Method = HttpMethod.Delete;
-            route.RequiresAuthentication = true;
-            route.Handler = (APIRequest request) =>
+            route = new APIRoute
             {
-                APIResponse response = new APIResponse();
-                if (interactionEngine.DeregisterSkill(request.Parameters.skillUUID))
+                Path = "/skills/{skillUUID}",
+                Description = "Deregister a new skill",
+                Method = HttpMethod.Delete,
+                RequiresAuthentication = true,
+                Handler = (APIRequest request) =>
                 {
-                    response.StatusCode = (int)HttpStatusCode.OK;
-                }
-                else
-                {
-                    response.StatusCode = (int)HttpStatusCode.NotFound;
-                    response.StatusMessage = $"The skill '{request.Parameters.skillUUID}' was not found or has already been deregistered";
-                }
+                    APIResponse response = new APIResponse();
+                    if (interactionEngine.DeregisterSkill(request.Parameters.skillUUID))
+                    {
+                        response.StatusCode = (int) HttpStatusCode.OK;
+                    }
+                    else
+                    {
+                        response.StatusCode = (int) HttpStatusCode.NotFound;
+                        response.StatusMessage =
+                            $"The skill '{request.Parameters.skillUUID}' was not found or has already been deregistered";
+                    }
 
-                // TODO: the analysis module hook needs to be implemented in a better way
-                if (handler != null)
-                {
-                    return handler(response, new object[] { request });
+                    // TODO: the analysis module hook needs to be implemented in a better way
+                    return handler != null ? handler(response, new object[] {request}) : response;
                 }
-                return response;
             };
             routes.Add(route);
             

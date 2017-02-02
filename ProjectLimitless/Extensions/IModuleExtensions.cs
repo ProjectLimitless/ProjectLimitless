@@ -35,7 +35,7 @@ namespace Limitless.Extensions
         /// Gets all the methods marked with <see cref="APIRouteAttribute"/> in the given module
         /// and returns the usable API routes for the module.
         /// </summary>
-        /// <param name="type">The module to get routes from</param>
+        /// <param name="module">The module being extended</param>
         /// <param name="handler">A handler to wrap around the module invoke. Takes the output and API input parameters as input.</param>
         /// <returns>The list of API routes</returns>
         public static List<APIRoute> GetAPIRoutes(this IModule module, Func<dynamic, object[], dynamic> handler = null)
@@ -50,18 +50,19 @@ namespace Limitless.Extensions
             foreach (MethodInfo methodInfo in methods)
             {
                 var attributes = Attribute.GetCustomAttribute(methodInfo, typeof(APIRouteAttribute)) as APIRouteAttribute;
-                var route = new APIRoute();
-                route.Path = attributes.Path;
-                route.Method = attributes.Method;
-                route.Description = attributes.Description;
-                route.RequiresAuthentication = attributes.RequiresAuthentication;
+                var route = new APIRoute
+                {
+                    Path = attributes.Path,
+                    Method = attributes.Method,
+                    Description = attributes.Description,
+                    RequiresAuthentication = attributes.RequiresAuthentication
+                };
                 route.Handler = (APIRequest request) =>
                 {
                     // For Get and Delete I'll only send the parameters
                     // For Post and Put I'll send parameters and postData to the method
                     // For authenticated routes I'll add the user object to the method
-                    var invokeParameters = new List<object>();
-                    invokeParameters.Add(request);
+                    var invokeParameters = new List<object> {request};
                     if (route.Method == HttpMethod.Post || route.Method == HttpMethod.Put)
                     {
                         // Check if postData contains required fields

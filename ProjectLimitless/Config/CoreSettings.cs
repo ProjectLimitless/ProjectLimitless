@@ -36,7 +36,7 @@ namespace Limitless.Config
         public CoreAPISettings API { get; set; }
 
         /// <summary>
-        /// Standard constructor.
+        /// Creates a new instance of <see cref="CoreSettings"/>.
         /// </summary>
         public CoreSettings()
         {

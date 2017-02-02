@@ -47,11 +47,11 @@ namespace Limitless.Containers
         /// <summary>
         /// Holds the instance.
         /// </summary>
-        private static CoreContainer instance = null;
+        private static CoreContainer _instance = null;
         /// <summary>
         /// Lock for singleton.
         /// </summary>
-        private static readonly object padlock = new object();
+        private static readonly object _padlock = new object();
         
         /// <summary>
         /// Gets the Singleton instance of the manager.
@@ -60,19 +60,19 @@ namespace Limitless.Containers
         {
             get
             {
-                lock (padlock)
+                lock (_padlock)
                 {
-                    if (instance == null)
+                    if (_instance == null)
                     {
-                        instance = new CoreContainer();
+                        _instance = new CoreContainer();
                     }
-                    return instance;
+                    return _instance;
                 }
             }
         }
 
         /// <summary>
-        /// Private constructor for Singleton pattern;
+        /// Private constructor for Singleton pattern.
         /// </summary>
         private CoreContainer()
         {

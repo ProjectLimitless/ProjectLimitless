@@ -39,7 +39,7 @@ namespace Limitless
         /// <summary>
         /// The loaded settings.
         /// </summary>
-        private LimitlessSettings _settings;
+        private readonly LimitlessSettings _settings;
 
         /// <summary>
         /// Provides administration functions.
@@ -51,9 +51,11 @@ namespace Limitless
         private AnalysisModule _analysis;
 
         /// <summary>
-        /// Constructor taking the configuration to be used.
+        /// Creates a new instance of <see cref="Limitless"/> with
+        /// the loaded <see cref="LimitlessSettings"/> and <see cref="ILogger"/>.
         /// </summary>
-        /// <param name="settings">The configuration to be used</param>
+        /// <param name="settings">The <see cref="LimitlessSettings"/> to be used</param>
+        /// <param name="log">The <see cref="ILogger"/> to use</param>
         public Limitless(LimitlessSettings settings, ILogger log)
         {
             /*
@@ -123,7 +125,7 @@ namespace Limitless
                 {
                     _log.Warning($"Unable to load module '{ex.Message}', attempting to load as builtin module");
                     // Create a type from the builtin module name
-                    Type builtinType = Type.GetType(moduleName, true, false);
+                    var builtinType = Type.GetType(moduleName, true, false);
                     module = CoreContainer.Instance.ModuleManager.LoadBuiltin(moduleName, builtinType);
                 }
 
@@ -139,7 +141,7 @@ namespace Limitless
 
             //TODO: Setup the admin API - move to own module
             _adminModule = new AdminModule(_log);
-            var routes = ((IModule)_adminModule).GetAPIRoutes();
+            var routes = _adminModule.GetAPIRoutes();
             if (CoreContainer.Instance.RouteManager.AddRoutes(routes))
             {
                 _log.Info($"Added {routes.Count} new API routes for module 'AdminModule'");
@@ -170,8 +172,13 @@ namespace Limitless
         /// </summary>
         public void Run()
         {
-            var config = new HostConfiguration();
-            config.UrlReservations.CreateAutomatically = true;
+            var config = new HostConfiguration
+            {
+                UrlReservations =
+                {
+                    CreateAutomatically = true
+                }
+            };
 
             var bindingAddresses = new List<Uri>();
             // If the host is set to 0.0.0.0, we bind to all the available IP addresses
@@ -298,7 +305,7 @@ namespace Limitless
             string hostName = Dns.GetHostName();
 
             // Host name URI
-            string hostNameUri = string.Format("http://{0}:{1}", Dns.GetHostName(), port);
+            string hostNameUri = $"http://{Dns.GetHostName()}:{port}";
             availableIPs.Add(new Uri(hostNameUri));
 
             // Host address URI(s)
@@ -308,14 +315,13 @@ namespace Limitless
                 if (ipAddress.AddressFamily == AddressFamily.InterNetwork)  // IPv4 addresses only
                 {
                     var addrBytes = ipAddress.GetAddressBytes();
-                    string hostAddressUri = string.Format("http://{0}.{1}.{2}.{3}:{4}",
-                    addrBytes[0], addrBytes[1], addrBytes[2], addrBytes[3], port);
+                    string hostAddressUri = $"http://{addrBytes[0]}.{addrBytes[1]}.{addrBytes[2]}.{addrBytes[3]}:{port}";
                     availableIPs.Add(new Uri(hostAddressUri));
                 }
             }
 
             // Localhost URI
-            availableIPs.Add(new Uri(string.Format("http://localhost:{0}", port)));
+            availableIPs.Add(new Uri($"http://localhost:{port}"));
             return availableIPs;
         }
     }

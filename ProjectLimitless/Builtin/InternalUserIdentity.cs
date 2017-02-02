@@ -11,7 +11,6 @@
 * Project Limitless. If not, see http://www.apache.org/licenses/LICENSE-2.0.
 */
 
-using System;
 using System.Collections.Generic;
 
 using Nancy.Security;
@@ -50,15 +49,17 @@ namespace Limitless.Builtin
         /// <returns>The wrapped internal user</returns>
         public static InternalUserIdentity Wrap(BaseUser baseUser)
         {
-            var internalUser = new InternalUserIdentity();
             if (baseUser == null)
             {
                 return null;
             }
 
-            internalUser.UserName = baseUser.UserName;
-            internalUser.Claims = baseUser.Claims;
-            internalUser.Meta = baseUser;
+            var internalUser = new InternalUserIdentity
+            {
+                UserName = baseUser.UserName,
+                Claims = baseUser.Claims,
+                Meta = baseUser
+            };
             return internalUser;
         }
     }

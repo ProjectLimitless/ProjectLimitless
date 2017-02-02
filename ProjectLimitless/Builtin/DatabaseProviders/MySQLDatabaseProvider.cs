@@ -32,14 +32,15 @@ namespace Limitless.Builtin.DatabaseProviders
         /// <summary>
         /// The logger.
         /// </summary>
-        private ILogger _log;
+        private readonly ILogger _log;
         /// <summary>
         /// FluentData context.
         /// </summary>
         private IDbContext _dbContext;
 
         /// <summary>
-        /// Constructor with log.
+        /// Creates a new <see cref="MySQLDatabaseProvider"/>
+        /// instance setting the <see cref="ILogger"/>.
         /// </summary>
         /// <param name="log">The logger</param>
         public MySQLDatabaseProvider(ILogger log)
@@ -95,11 +96,7 @@ namespace Limitless.Builtin.DatabaseProviders
         {
             var assembly = typeof(MySQLDatabaseProvider).Assembly;
             var attribute = assembly.GetCustomAttribute<AssemblyCompanyAttribute>();
-            if (attribute != null)
-            {
-                return attribute.Company;
-            }
-            return "Unknown";
+            return attribute != null ? attribute.Company : "Unknown";
         }
 
         /// <summary>

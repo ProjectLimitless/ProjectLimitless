@@ -29,10 +29,11 @@ namespace Limitless.Builtin
         /// <summary>
         /// The logger.
         /// </summary>
-        private ILogger _log;
+        private readonly ILogger _log;
 
         /// <summary>
-        /// Standard constructor with log.
+        /// Creates a new instance of <see cref="AdminModule"/>
+        /// and sets the <see cref="ILogger"/>.
         /// </summary>
         /// <param name="log">The logger to use</param>
         public AdminModule(ILogger log)
@@ -84,7 +85,7 @@ namespace Limitless.Builtin
         public dynamic ModulesList(APIRequest request)
         {
             var modules = new List<dynamic>();
-            foreach (var kvp in CoreContainer.Instance.ModuleManager.Modules)
+            foreach (KeyValuePair<Type, List<IModule>> kvp in CoreContainer.Instance.ModuleManager.Modules)
             {
                 foreach (IModule module in kvp.Value)
                 {
@@ -135,11 +136,7 @@ namespace Limitless.Builtin
         {
             var assembly = typeof(AdminModule).Assembly;
             var attribute = assembly.GetCustomAttribute<AssemblyTitleAttribute>();
-            if (attribute != null)
-            {
-                return attribute.Title;
-            }
-            return "Unknown";
+            return attribute != null ? attribute.Title : "Unknown";
         }
 
         /// <summary>
@@ -150,11 +147,7 @@ namespace Limitless.Builtin
         {
             var assembly = typeof(AdminModule).Assembly;
             var attribute = assembly.GetCustomAttribute<AssemblyCompanyAttribute>();
-            if (attribute != null)
-            {
-                return attribute.Company;
-            }
-            return "Unknown";
+            return attribute != null ? attribute.Company : "Unknown";
         }
 
         /// <summary>
@@ -175,11 +168,7 @@ namespace Limitless.Builtin
         {
             var assembly = typeof(AdminModule).Assembly;
             var attribute = assembly.GetCustomAttribute<AssemblyDescriptionAttribute>();
-            if (attribute != null)
-            {
-                return attribute.Description;
-            }
-            return "Unknown";
+            return attribute != null ? attribute.Description : "Unknown";
         }
     }
 }

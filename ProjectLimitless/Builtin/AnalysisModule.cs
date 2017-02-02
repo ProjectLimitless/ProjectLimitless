@@ -12,14 +12,8 @@
 */
 
 using System;
-using System.Dynamic;
-using System.Reflection;
-using System.Collections.Generic;
 
-using Limitless.Containers;
-using Limitless.Runtime.Enums;
 using Limitless.Runtime.Types;
-using Limitless.Runtime.Attributes;
 using Limitless.Runtime.Interfaces;
 
 namespace Limitless.Builtin
@@ -32,7 +26,8 @@ namespace Limitless.Builtin
         private ILogger _log;
 
         /// <summary>
-        /// Standard constructor with log.
+        /// Creates a new instance of <see cref="AnalysisModule"/>
+        /// setting the <see cref="ILogger"/>.
         /// </summary>
         /// <param name="log">The logger to use</param>
         public AnalysisModule(ILogger log)

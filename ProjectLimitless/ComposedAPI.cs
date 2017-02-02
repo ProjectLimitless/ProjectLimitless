@@ -49,7 +49,7 @@ namespace Limitless
                 // Try..Catch as I am calling user code here
                 try
                 { 
-                    var jwtToken = ctx.Request.Headers.Authorization;
+                    string jwtToken = ctx.Request.Headers.Authorization;
                     if (string.IsNullOrEmpty(jwtToken))
                     {
                         return null;
@@ -60,9 +60,11 @@ namespace Limitless
                     {
                         return InternalUserIdentity.Wrap(loginResult.User);
                     }
-                    ctx.Response = new Nancy.Response();
-                    ctx.Response.StatusCode = HttpStatusCode.Unauthorized;
-                    ctx.Response.ReasonPhrase = loginResult.ErrorResponse;
+                    ctx.Response = new Nancy.Response
+                    {
+                        StatusCode = HttpStatusCode.Unauthorized,
+                        ReasonPhrase = loginResult.ErrorResponse
+                    };
                     return null;
                 }
                 catch (Exception)
@@ -138,7 +140,7 @@ namespace Limitless
 
                 // This fetches all the HTTP methods available to the routes 
                 // that match route.Path and adds it to the response headers
-                var methods = string.Join(",", CoreContainer.Instance.RouteManager.GetRoutes()
+                string methods = string.Join(",", CoreContainer.Instance.RouteManager.GetRoutes()
                                     .Where(x => x.Path == route.Path)
                                     .Select(x => Enum.GetName(typeof(HttpMethod), x.Method).ToUpper()));
                 negotiator.WithHeader("Access", methods);
@@ -148,7 +150,7 @@ namespace Limitless
                 var headers = new List<string>(Request.Headers.Keys);
                 if (Request.Headers.Keys.Contains("Access-Control-Request-Headers"))
                 {
-                    var acrh = Request.Headers["Access-Control-Request-Headers"].First();
+                    string acrh = Request.Headers["Access-Control-Request-Headers"].First();
                     headers.AddRange(acrh.Split(','));
                 }
                 // and add some ones we know we need
@@ -266,11 +268,7 @@ namespace Limitless
         /// <returns>The Runtime headers</returns>
         private NancyRequestHeaders CloneHeaders(RequestHeaders headers)
         {
-            Dictionary<string, IEnumerable<string>> newHeaders = new Dictionary<string, IEnumerable<string>>();
-            foreach (string header in headers.Keys)
-            {
-                newHeaders.Add(header, headers[header]);
-            }
+            Dictionary<string, IEnumerable<string>> newHeaders = headers.Keys.ToDictionary(header => header, header => headers[header]);
             return new NancyRequestHeaders(newHeaders);
         }
     }

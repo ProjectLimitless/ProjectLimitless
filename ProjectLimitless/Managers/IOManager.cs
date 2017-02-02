@@ -41,14 +41,15 @@ namespace Limitless.Managers
         /// <summary>
         /// The collection of available input providers.
         /// </summary>
-        private List<IIOProcessor> _inputProviders;
+        private readonly List<IIOProcessor> _inputProviders;
         /// <summary>
         /// The collection of available output providers.
         /// </summary>
-        private List<IIOProcessor> _outputProviders;
+        private readonly List<IIOProcessor> _outputProviders;
         
         /// <summary>
-        /// Standard constructor with logger.
+        /// Creates a new instance of <see cref="IOManager"/>
+        /// and sets the <see cref="ILogger"/>.
         /// </summary>
         /// <param name="log">The </param>
         public IOManager(ILogger log)
@@ -73,7 +74,6 @@ namespace Limitless.Managers
         /// Handle the input API call.
         /// </summary>
         /// <param name="request">The request object for the API call</param>
-        /// <param name="user">The authenticated user or client</param>
         /// <returns>The input response</returns>
         public APIResponse Handle(APIRequest request)
         {
@@ -248,33 +248,24 @@ namespace Limitless.Managers
 
             var provider = availableProviders.First();
 
-            // Try...Catch... I'm calling user code here
-            try
+            // After process is done the output becomes the
+            // input for the next provider
+            input = provider.Process(input, preferredOutput);
+            if (input == null)
             {
-                // After process is done the output becomes the
-                // input for the next provider
-                input = provider.Process(input, preferredOutput);
-                if (input == null)
-                {
-                    throw new NullReferenceException($"Provider '{provider.GetType().Name}' returned a null result for input '{input.MimeLanguage}'");
-                }
-
-                resolveAttempts++;
-                if (providers.Remove(provider))
-                {
-                    Resolve(input, preferredOutput, providers, resolveAttempts);
-                }
-                else
-                {
-                    throw new InvalidOperationException($"The provider '{provider.GetType().Name}' could not be removed from the available list");
-                }
-            }
-            catch (Exception)
-            {
-                throw;
+                throw new NullReferenceException($"Provider '{provider.GetType().Name}' returned a null result for input '{input.MimeLanguage}'");
             }
 
-
+            resolveAttempts++;
+            if (providers.Remove(provider))
+            {
+                Resolve(input, preferredOutput, providers, resolveAttempts);
+            }
+            else
+            {
+                throw new InvalidOperationException($"The provider '{provider.GetType().Name}' could not be removed from the available list");
+            }
+            
             // In theory this will never be reached
             // Why? 
             //  If the mime type is not supported, we return
@@ -304,12 +295,14 @@ namespace Limitless.Managers
             // application
             var routes = new List<APIRoute>();
 
-            var route = new APIRoute();
-            route.Path = "/input";
-            route.Description = "Process the input";
-            route.Method = HttpMethod.Post;
-            route.Handler = Handle;
-            route.RequiresAuthentication = true;
+            var route = new APIRoute
+            {
+                Path = "/input",
+                Description = "Process the input",
+                Method = HttpMethod.Post,
+                Handler = Handle,
+                RequiresAuthentication = true
+            };
             routes.Add(route);
 
             return routes;

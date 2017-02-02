@@ -36,7 +36,8 @@ namespace Limitless.Config
         public bool EnableRequestTracing { get; set; }
 
         /// <summary>
-        /// Default constructor.
+        /// Creates a new instance of <see cref="CoreAPINancySettings"/>
+        /// with defaults.
         /// </summary>
         public CoreAPINancySettings()
         {
