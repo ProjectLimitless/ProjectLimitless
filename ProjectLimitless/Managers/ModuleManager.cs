@@ -263,19 +263,17 @@ namespace Limitless.Managers
             foreach (var type in interfaces)
             {
                 // A module can implement multiple interfaces
-                //TODO: Check this if (type.IsInstanceOfType(module))
-                if (type.IsAssignableFrom(module.GetType()))
+                if (type.IsInstanceOfType(module))
                 {
                     if (Modules.ContainsKey(type) == false)
                     {
-                        _log.Error("Adding type " + type);
                         Modules.Add(type, new List<IModule>());
                     }
                     if (_singularModules.Contains(type))
                     {
                         if (Modules[type].Count == 1)
                         {
-                            _log.Warning($"Module type '{type.ToString()}' already has a module loaded. '{module.ToString()}' will not be loaded");
+                            _log.Warning($"Module type '{type}' already has a module loaded. '{module}' will not be loaded");
                             continue;
                         }
                     }
