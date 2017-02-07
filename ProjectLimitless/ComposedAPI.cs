@@ -251,9 +251,14 @@ namespace Limitless
                     {
                         exceptionResponse.InnerException = ex.InnerException.Message;
                     }
+                    // TODO: Fix this part - it breaks the whole point of negotiation. 
+                    // However, dynamic doesn't work in XML anyway
+                    // Perhaps drop negiotiator and just use JSON
+                    string exception = JsonConvert.SerializeObject((object) exceptionResponse);
                     negotiator
-                        .WithModel((object)exceptionResponse)
-                        .WithStatusCode(500);
+                        .WithModel(new Nancy.Responses.TextResponse(exception))
+                        .WithStatusCode(500)
+                        .WithContentType(MimeType.Json);
                 }
 
                 return negotiator;
