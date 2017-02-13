@@ -24,6 +24,8 @@ using Limitless.Managers;
 using Limitless.Containers;
 using Limitless.Extensions;
 using Limitless.Runtime.Interfaces;
+using Limitless.Runtime.Interactions;
+using Limitless.Runtime.Enums;
 
 namespace Limitless
 {
@@ -58,7 +60,7 @@ namespace Limitless
         /// <param name="log">The <see cref="ILogger"/> to use</param>
         public Limitless(LimitlessSettings settings, ILogger log)
         {
-            /*
+            
             Skill skill = new Skill();
             skill.Name = "Coffee Brewer";
             skill.Author = "Sample Skill Maker";
@@ -77,12 +79,12 @@ namespace Limitless
             skill.Locations.Add("downstairs");
             skill.Help.Phrase = "make coffee";
             skill.Help.ExamplePhrase = "Make me a cup of coffee";
-            skill.RequiredParameters.Add(new SkillRequiredParameter() { Parameter = "sugar", Type = SkillParameterType.Integer });
+			skill.Parameters.Add(new SkillParameter("sugar", SkillParameterType.Integer, true));
 
             Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(skill));
 
             Console.ReadLine();
-            */
+
 
             _settings = settings;
             _log = log;
