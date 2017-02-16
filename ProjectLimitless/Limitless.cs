@@ -60,7 +60,7 @@ namespace Limitless
         /// <param name="log">The <see cref="ILogger"/> to use</param>
         public Limitless(LimitlessSettings settings, ILogger log)
         {
-            
+            /*
             Skill skill = new Skill();
             skill.Name = "Coffee Brewer";
             skill.Author = "Sample Skill Maker";
@@ -84,7 +84,7 @@ namespace Limitless
             Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(skill));
 
             Console.ReadLine();
-
+            */
 
             _settings = settings;
             _log = log;
