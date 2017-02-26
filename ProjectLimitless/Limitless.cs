@@ -24,8 +24,6 @@ using Limitless.Managers;
 using Limitless.Containers;
 using Limitless.Extensions;
 using Limitless.Runtime.Interfaces;
-using Limitless.Runtime.Interactions;
-using Limitless.Runtime.Enums;
 
 namespace Limitless
 {
@@ -75,8 +73,8 @@ namespace Limitless
             executor.Url = "https://www.google.com";
             executor.ValidateCertificate = false;
             skill.Executor = executor;
-            skill.Locations.Add("kitchen");
-            skill.Locations.Add("downstairs");
+            skill.InstalledLocations.Add("kitchen");
+            skill.InstalledLocations.Add("downstairs");
             skill.Help.Phrase = "make coffee";
             skill.Help.ExamplePhrase = "Make me a cup of coffee";
 			skill.Parameters.Add(new SkillParameter("sugar", SkillParameterType.Integer, true));
