@@ -24,6 +24,8 @@ using Limitless.Managers;
 using Limitless.Containers;
 using Limitless.Extensions;
 using Limitless.Runtime.Interfaces;
+using Limitless.Runtime.Interactions;
+using Limitless.Runtime.Enums;
 
 namespace Limitless
 {
@@ -58,31 +60,34 @@ namespace Limitless
         /// <param name="log">The <see cref="ILogger"/> to use</param>
         public Limitless(LimitlessSettings settings, ILogger log)
         {
-            /*
+            
             Skill skill = new Skill();
-            skill.Name = "Coffee Brewer";
-            skill.Author = "Sample Skill Maker";
-            skill.ShortDescription = "A skill to make coffee using a standard kettle";
-            skill.Intent = new Intent();
-            skill.Intent.Actions.Add("brew");
-            skill.Intent.Actions.Add("make");
-            skill.Intent.Targets.Add("coffee");
-            skill.Intent.Targets.Add("cuppa");
-            skill.Binding = SkillExecutorBinding.Network;
-            var executor = new NetworkExecutor();
-            executor.Url = "https://www.google.com";
-            executor.ValidateCertificate = false;
-            skill.Executor = executor;
-            skill.InstalledLocations.Add("kitchen");
-            skill.InstalledLocations.Add("downstairs");
-            skill.Help.Phrase = "make coffee";
-            skill.Help.ExamplePhrase = "Make me a cup of coffee";
-			skill.Parameters.Add(new SkillParameter("sugar", SkillParameterType.Integer, true));
+			skill.UUID = "sample-coffee";
+			skill.Name = "Coffee Brewer";
+			skill.Author = "Project Limitless";
+			skill.ShortDescription = "A skill to make coffee";
+			skill.Class = "actions/coffee";
+			skill.Intent = new Intent();
+			skill.Intent.Actions.Add("brew");
+			skill.Intent.Actions.Add("make");
+			skill.Intent.Targets.Add("coffee");
+			skill.Intent.Targets.Add("cuppa");
+			skill.InstalledLocations.Add("kitchen");
+			skill.InstalledLocations.Add("downstairs");
+			skill.Binding = SkillExecutorBinding.Network;
+			skill.Parameters.Add(new SkillParameter("sugar", SkillParameterClass.Quantity, true));
+			skill.Parameters.Add(new SkillParameter("day", SkillParameterClass.DateRange, true));
+			NetworkExecutor executor = new NetworkExecutor();
+			executor.Url = "https://www.postoffice.co.za";
+			executor.ValidateCertificate = false;
+			skill.Executor = executor;
+			skill.Help.Phrase = "make coffee";
+			skill.Help.ExamplePhrase = "Make me a cup of coffee";
 
-            Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(skill));
+            //Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(skill));
 
-            Console.ReadLine();
-            */
+            //Console.ReadLine();
+            
 
             _settings = settings;
             _log = log;

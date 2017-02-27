@@ -60,7 +60,7 @@ namespace Limitless
                     {
                         return InternalUserIdentity.Wrap(loginResult.User);
                     }
-                    ctx.Response = new Nancy.Response
+                    ctx.Response = new Response
                     {
                         StatusCode = HttpStatusCode.Unauthorized,
                         ReasonPhrase = loginResult.ErrorResponse
@@ -79,19 +79,19 @@ namespace Limitless
                 switch (route.Method)
                 {
                     case HttpMethod.Get:
-                        Get[route.Path] = BuildComposedFunction(route);
+                        Get[route.Path] = ComposeFunction(route);
                         break;
                     case HttpMethod.Post:
-                        Post[route.Path] = BuildComposedFunction(route);
+                        Post[route.Path] = ComposeFunction(route);
                         break;
                     case HttpMethod.Put:
-                        Put[route.Path] = BuildComposedFunction(route);
+                        Put[route.Path] = ComposeFunction(route);
                         break;
                     case HttpMethod.Delete:
-                        Delete[route.Path] = BuildComposedFunction(route);
+                        Delete[route.Path] = ComposeFunction(route);
                         break;
                     case HttpMethod.Head:
-                        Head[route.Path] = BuildComposedFunction(route);
+                        Head[route.Path] = ComposeFunction(route);
                         break;
                 }
                 Options[route.Path] = BuildRouteOptions(route);
@@ -151,7 +151,10 @@ namespace Limitless
                 if (Request.Headers.Keys.Contains("Access-Control-Request-Headers"))
                 {
                     string acrh = Request.Headers["Access-Control-Request-Headers"].First();
-                    headers.AddRange(acrh.Split(','));
+                    if (acrh != null)
+                    {
+                        headers.AddRange(acrh.Split(','));
+                    }
                 }
                 // and add some ones we know we need
                 headers.Add("Accept-Language");
@@ -177,7 +180,7 @@ namespace Limitless
         /// </summary>
         /// <param name="route">The route to build</param>
         /// <returns>The constructed function</returns>
-        private Func<dynamic, dynamic> BuildComposedFunction(APIRoute route)
+        private Func<dynamic, dynamic> ComposeFunction(APIRoute route)
         {
             return (dynamic parameters) =>
             {
@@ -189,12 +192,7 @@ namespace Limitless
                 }
 
                 // Parse the post data, if it's JSON, deserialize into a dynamic
-                dynamic postData;
-                if (Request.Headers.ContentType == MimeType.Json)
-                {
-                    postData = JsonConvert.DeserializeObject(Request.Body.AsString());
-                }
-                else postData = Request.Body.AsString();
+                dynamic postData = Request.Headers.ContentType == MimeType.Json ? JsonConvert.DeserializeObject(Request.Body.AsString()) : Request.Body.AsString();
 
                 // Build the request for API use
                 request.Data = postData;

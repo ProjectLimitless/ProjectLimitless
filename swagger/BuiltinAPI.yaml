@@ -11,7 +11,7 @@ info:
 schemes:
   - http
   - https
-  
+
 consumes:
   - application/json
 
@@ -101,7 +101,7 @@ paths:
                 "stackTrace": "  at Limitless.Limitless...",
                 "target": "ProjectLimitless..."
               }
-              
+
   /admin/modules:
     get:
       summary: Returns a list of loaded modules.
@@ -179,7 +179,7 @@ paths:
                 "stackTrace": "  at Limitless.Limitless...",
                 "target": "ProjectLimitless..."
               }
-              
+
   /skills:
     get:
       summary: Returns a list of registered skills for the installation
@@ -243,7 +243,7 @@ paths:
                 "stackTrace": "  at Limitless.Limitless...",
                 "target": "ProjectLimitless..."
               }
-              
+
     post:
       summary: Registers a new skill
       security:
@@ -276,7 +276,7 @@ paths:
             application/json":
               {
                 "registered": false,
-                "reason": "The skill 'io.ll.sample-basic' has already been registered" 
+                "reason": "The skill 'io.ll.sample-basic' has already been registered"
               }
         500:
           description: Internal Server Error
@@ -296,7 +296,7 @@ paths:
       security:
         - Bearer: []
       parameters:
-        - name: id  
+        - name: id
           in: path
           type: string
           description: The Skill's registered UUID
@@ -320,7 +320,7 @@ paths:
                 "stackTrace": "  at Limitless.Limitless...",
                 "target": "ProjectLimitless..."
               }
-        
+
 definitions:
   Exception:
     properties:
@@ -359,7 +359,7 @@ definitions:
         type: string
       isAuthenticated:
         type: boolean
-        
+
   APIRoute:
     properties:
       path:
@@ -370,39 +370,39 @@ definitions:
         type: string
       requiresAuthentication:
         type: boolean
-        
+
   IModule:
     properties:
       type:
         type: string
       title:
-        type: string 
+        type: string
       author:
         type: string
       version:
         type: string
       description:
         type: string
-        
-        
+
+
   BaseUser:
     properties:
-      iD: 
+      iD:
         type: integer
       username:
         type: string
-      password: 
+      password:
         type: string
       firstName:
         type: string
-      lastName: 
+      lastName:
         type: string
       dateCreated:
         type: string
         format: date-time
       isDeleted:
         type: boolean
-        
+
   NetworkExecutor:
     properties:
       url:
@@ -420,28 +420,32 @@ definitions:
         type: array
         items:
           type: string
-        
+
   SkillParameter:
     properties:
       parameter:
         type: string
-      type:
+      classType:
         type: string
-        enum: 
-          - int
+        enum:
+          - value-integer
+          - quantity
+          - date-range
+          - string-phrase
+          - installed-location
       isRequired:
         type: boolean
-          
+
   SkillHelp:
     properties:
       phrase:
         type: string
       examplePhrase:
         type: string
-        
+
   Skill:
     properties:
-      uUID: 
+      uUID:
         type: string
       name:
         type: string
@@ -449,41 +453,43 @@ definitions:
         type: string
       author:
         type: string
+      class:
+        type: string
       help:
         $ref: '#/definitions/SkillHelp'
-      locations:
+      installedLocations:
         type: array
         items:
           type: string
       intent:
         $ref: '#/definitions/Intent'
-      requiredParameters:
+      parameters:
         type: array
         items:
           $ref: '#/definitions/SkillParameter'
       binding:
         type: string
-        enum: 
+        enum:
           - Network
           - Builtin
           - Module
       executor:
         $ref: '#/definitions/NetworkExecutor'
-          
+
   Skill.Response.Success:
     properties:
       uUID:
         type: string
       registered:
         type: boolean
-  
+
   Skill.Response.Failure:
     properties:
       registered:
         type: boolean
       reason:
         type: string
-        
+
   Skill.NetworkExecutorPayload:
     properties:
       SkillUUID:
